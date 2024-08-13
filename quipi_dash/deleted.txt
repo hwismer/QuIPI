@@ -1,0 +1,47 @@
+'''
+
+with ui.layout_column_wrap(fill=False):
+
+    with ui.value_box(showcase=icon_svg("ruler-horizontal")):
+        "Average bill length"
+
+        @render.text
+        def bill_length():
+            return f"{filtered_df()['bill_length_mm'].mean():.1f} mm"
+
+    with ui.value_box(showcase=icon_svg("ruler-vertical")):
+        "Average bill depth"
+
+        @render.text
+        def bill_depth():
+            return f"{filtered_df()['bill_depth_mm'].mean():.1f} mm"
+
+
+with ui.layout_columns():
+    with ui.card(full_screen=True):
+        ui.card_header("Bill length and depth")
+
+        @render.plot
+        def length_depth():
+            return sns.scatterplot(
+                data=filtered_df(),
+                x="bill_length_mm",
+                y="bill_depth_mm",
+                hue="species",
+            )
+
+    with ui.card(full_screen=True):
+        ui.card_header("Penguin data")
+
+        @render.data_frame
+        def summary_statistics():
+            cols = [
+                "species",
+                "island",
+                "bill_length_mm",
+                "bill_depth_mm",
+                "body_mass_g",
+            ]
+            return render.DataGrid(filtered_df()[cols], filters=True)
+
+'''
