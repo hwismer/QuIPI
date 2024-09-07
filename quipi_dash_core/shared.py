@@ -8,6 +8,8 @@ quipi_raw = pd.read_pickle("./data/clean/quipi_raw_tpm.pi")
 quipi_log10 = pd.read_pickle("./data/clean/quipi_log10_tpm.pi")
 quipi_log2 = pd.read_pickle("./data/clean/quipi_log2_tpm.pi")
 
+pancan_only_raw = quipi_raw[quipi_raw["archetype"] != "Unclassified"]
+
 categoricals = ["patient", "sample_name",
              "indication", "sample_type","sample_type_cat",
              "compartment", "archetype"]
@@ -17,10 +19,9 @@ non_genes = ["patient", "sample_name",
              "compartment", "archetype", 
              "x_umap1", "x_umap2"]
 
-genes = list(set(quipi_raw.columns) - set(non_genes))
-#genes = ["NCAM1", "DLK1",]
+#genes = list(set(quipi_raw.columns) - set(non_genes))
 
-genes = ["DLK1", "NCAM1", "IGF2", "PLAG1","LY6H", "MDK", "NTRK3"]
+genes = ["DLK1", "NCAM1", "IGF2", "PLAG1","LY6H", "MDK", "NTRK3", "FGFR1", "NTRK3", "SLC7A3"]
 
 categoricals_dict = {"Patient" : "patient",
                      "Indication" : "indication", 

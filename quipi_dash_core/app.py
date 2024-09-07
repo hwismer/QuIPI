@@ -14,76 +14,64 @@ pd.options.plotting.backend = 'plotly'
 import matplotlib.pyplot as plt
 
 
+from scipy.stats import zscore
+from scipy.stats import mannwhitneyu
+from statsmodels.stats.multitest import multipletests
+from scipy.stats import ranksums
+
+
 # Define the UI
 app_ui = ui.page_fluid(
     ui.panel_title("QuIPI - Querying IPI"),
-
-    #ui.layout_columns(output_widget("pancan_archetypes"),output_widget("pancan_archetypes2"),
-    #                      width="300px", gap="20px",justify="center"), 
     
     ui.navset_tab(
 
-        ui.nav_panel("Home", ui.h2("Welcome to the Home Page"), ui.p("This is the home tab.")),
+        ui.nav_panel("Home", 
+                     ui.h2("Welcome to the Home Page"), 
+                     ui.p("This is the home tab.")),
 
-        ui.nav_panel("PanCan UMAP Expression Overlay",
+        ui.nav_panel("PanCan UMAP Gene Expression",
                      
-                     ui.page_sidebar(
+                    ui.page_sidebar(
                          ui.sidebar(
                     
                             ui.input_selectize("pancan_gene_input",
                                                 "Select Genes:",
                                                 sh.genes,
                                                 multiple = True),
+                            ui.input_selectize("pancan_compartment_input",
+                                               "Select Compartment:",
+                                               list(sh.quipi_raw["compartment"].unique())),
                             ui.input_selectize("pancan_umap_transformation",
                                             "Choose Transformation: ",
                                             ["Raw", "Log2", "Log10"],
                                             multiple= False,
-                                            selected= "Log2")),
-
-                        ui.layout_columns(ui.output_ui("plots_multiple"),
-                                                width = "300px", gap = "20px", justify="center"))),
-        ui.nav_panel("PanCan UMAP Testing",
-                     
-                    ui.page_sidebar(
-                         ui.sidebar(
-                    
-                            ui.input_selectize("pancan_gene_input_2",
-                                                "Select Genes:",
-                                                sh.genes,
-                                                multiple = True),
-                            ui.input_selectize("pancan_umap_transformation_2",
-                                            "Choose Transformation: ",
-                                            ["Raw", "Log2", "Log10"],
-                                            multiple= False,
-                                            selected= "Log2")),
+                                            selected= "Log2"),
+                            output_widget("pancan_archetypes")),
 
                         ui.layout_columns(output_widget("pancan_subplots")))),
-
-                  #output_widget("pancan_archetypes"),
-                  #output_widget("pancan_archetype2"),
-                  #ui.output_ui("plots_multiple",
-                  #             inline=True,
-                  #             fill = True,
-                  #             fillable=True)),
 
         ui.nav_panel("Boxplots / Violin Plots",
                     ui.page_sidebar(
                         ui.sidebar(
-                            ui.input_selectize("boxplot_gene_input",
+                            ui.input_selectize("box_viol_plot",
+                                               "Select Plot Type:",
+                                               ["Boxplot","Violin Plot"]),
+                            ui.input_selectize("box_viol_gene_input",
                                                 "Select Gene:",
                                                 sh.genes,),
-                            ui.input_selectize("boxplot_x_category",
+                            ui.input_selectize("box_viol_x_category",
                                                "Select X-Axis Category:",
                                                list(sh.categoricals_dict.keys())),
-                            ui.input_selectize("boxplot_groupby",
+                            ui.input_selectize("box_viol_groupby",
                                             "Group by:",
                                             list(sh.categoricals_dict.keys())),
-                            ui.input_selectize("boxplot_transformation",
+                            ui.input_selectize("box_viol_transformation",
                                             "Choose Transformation: ",
                                             ["Raw", "Log2", "Log10"],
                                             multiple= False,
                                             selected= "Log2")),             
-                        output_widget("expression_boxplot"))),
+                        output_widget("expression_box_viol"))),
 
         ui.nav_panel("Correlation Matrix Analysis",
             ui.page_sidebar(
@@ -120,8 +108,26 @@ app_ui = ui.page_fluid(
                                 "Select Method:",
                                 ["Pearson", "Spearman"],
                                 selected="Spearman")),
-            output_widget("gene_correlation_heatmap")))),
-            #ui.output_data_frame("gene_corr_df")))),
+            output_widget("gene_correlation_heatmap"))),
+            
+            ui.nav_panel("Gene Factor Analysis",
+                         ui.page_sidebar(
+                             ui.sidebar(
+                             ui.input_selectize("gene_factor_genes",
+                                                "Select Genes:",
+                                                sh.genes,
+                                                multiple=True),
+                             ui.input_selectize("gene_factor_compartment",
+                                                "Select Compartment:",
+                                                list(sh.quipi_raw["compartment"].unique())),
+                             ui.input_slider("gene_factor_slider",
+                                             "Choose Percentile:",
+                                             value = .2,
+                                             min = 0.05,
+                                             max = .5,
+                                             step = .05),
+                                             ),
+                             output_widget("gene_factor_analysis")))),
     title = "QuIPI - Querying IPI",
 )
 
@@ -131,117 +137,84 @@ def server(input, output, session):
     @render_widget
     def pancan_subplots():
         
-        transform = input.pancan_umap_transformation_2()
-        genes = input.pancan_gene_input_2()
+        transform = input.pancan_umap_transformation()
+        genes = input.pancan_gene_input()
+        compartment = input.pancan_compartment_input()
         input_arr = sh.transformations[transform]
+        input_arr = input_arr[input_arr["compartment"] == compartment]
 
-        n_col = 4
+        if len(genes) != 0:
 
-        n_rows = len(genes) % n_col
+            n_col = min(4,len(genes))
+            n_rows = (len(genes) + n_col - 1) // n_col
 
-        single_subplot = 400
+            fig = make_subplots(rows =  n_rows , cols = n_col, 
+                                subplot_titles=genes,
+                                vertical_spacing=.05,horizontal_spacing=.01,
+                                shared_xaxes=True,shared_yaxes=True)
 
 
-        fig = make_subplots(rows =  n_rows+1 , cols = n_col, subplot_titles=genes,
-                            column_widths=[.25,.25,.25,.25],
-                            row_heights=[1/(n_rows+1) for x in range(n_rows+1)],
-                            shared_xaxes=True,
-                            shared_yaxes=True)
-                            #shared_xaxes=True, shared_yaxes=True,)
-                            #column_widths=[1/n_col for x in range(n_col)],
-                            #row_heights = [1/(n_rows+1) for x in range(n_rows+1)])
+            for count, gene in enumerate(genes):
+                row = count // n_col
+                col = count % n_col
 
-        for count, gene in enumerate(genes):
-            row = count // n_col
-            col = count % n_col
-
-            scatter = go.Scatter(x = input_arr["x_umap1"], y = input_arr["x_umap2"],
-                                     mode = 'markers',
-                                     marker=dict(
-                                         size=10,  # Adjust marker size if needed
-                                         color=input_arr[gene],  # Color by the numerical value
-                                         colorscale='Viridis',  # Choose a colorscale (e.g., Viridis, Plasma, etc.)
-                                         showscale=True),
-                                         )
+                scatter = go.Scatter(x = input_arr["x_umap1"], y = input_arr["x_umap2"],
+                                        mode = 'markers',
+                                        marker=dict(
+                                            size=10,  # Adjust marker size if needed
+                                            color=input_arr[gene],  # Color by the numerical value
+                                            colorscale='Viridis',
+                                            colorbar=dict(title=gene,xanchor="right",yanchor="middle")  # Choose a colorscale (e.g., Viridis, Plasma, etc.)),
+                                            ))
+                
+                fig.add_trace(scatter, row= row+1, col= col+1)
             
-            fig.add_trace(scatter, row= row+1, col= col+1)
+            fig.update_layout(height=300*n_rows, width=300*n_col, showlegend=False)
+            fig.update_xaxes(scaleanchor="y", scaleratio=1, showticklabels=False)
+            fig.update_yaxes(scaleanchor="x", scaleratio=1, showticklabels=False)
 
-        #fig.update_layout(autosize=False, width = 1200, height = 300 * (n_rows+1),
-        #                  margin=dict(l=00, r=00, t=00, b=00))
-
-        return fig
-    
-    
-    @render_widget
-    def pancan_archetypes():
-        fig = sh.quipi_raw.plot.scatter(x="x_umap1", y="x_umap2",
-                                     color = "archetype",
-                                     color_discrete_map = colors_pancan)
-        fig.update_layout(template='simple_white')
-        fig.update_layout(title_text= "Archetype UMAP", title_x=0.5)
-        fig.update_layout(autosize=False, width=500, height=400)
-        return fig
-    
-    @render_widget
-    def pancan_archetypes2():
-        fig = sh.quipi_raw.plot.scatter(x="x_umap1", y="x_umap2",
-                                     color = "archetype",
-                                     color_discrete_map = colors_pancan)
-        #fig.update_layout(template='simple_white')
-        fig.update_layout(title_text= "Archetype UMAP", title_x=0.5)
-        fig.update_layout(autosize=False, width=500, height=400)
-        return fig
-
-    
-    def pancan_multiple_expression_plot(input_gene):
-        @render_widget
-        def pancan_single_gene_fig():
-            
-            transform = input.pancan_umap_transformation()
-            input_arr = sh.transformations[transform]
-
-            #logged = np.where(input_arr != 0, np.log2(input_arr), 0)
-
-            fig = input_arr.plot.scatter(x="x_umap1", y = "x_umap2", 
-                                color = input_gene,
-                                color_continuous_scale="Viridis",)
-                                #hover_data = "archetype")
-            fig.update_layout(template='simple_white')
-            fig.update_layout(title_text= input_gene + " " + transform + "(TPM)", title_x=0.5)
-            fig.update_layout(autosize=False, width=500, height=400)
             return fig
-            
-    
-        return pancan_single_gene_fig
-    
-    
-    
-    @render.ui
-    def plots_multiple():
-        plot_output = []
-        for gene in input.pancan_gene_input():
-            plotname = f"plot{gene.replace(".","_")}"
-            plot_output.append(output_widget(plotname))
-            output(pancan_multiple_expression_plot(gene), id = plotname)
+        
+        
+    def pancan_archetypes():
 
-        return ui.TagList(plot_output)
-    
-
-
+        
+        colors = [sh.colors_pancan[classification] for classification in sh.pancan_only_raw["archetype"]]
+        fig = go.Scatter(x = sh.pancan_only_raw["x_umap1"], y = sh.pancan_only_raw["x_umap2"],
+                         mode = 'markers',
+                         marker=dict(
+                               size=10,
+                               color=colors,
+                              ),
+                         hovertext=sh.pancan_only_raw["archetype"],
+                         showlegend=True
+                        )
+        #fig = sh.quipi_raw.plot.scatter(x="x_umap1", y="x_umap2",
+        #                            color = "archetype",
+        #                            color_discrete_map = sh.colors_pancan)
+        #fig.update_layout(template='simple_white')
+        #fig.update_layout(title_text= "Archetype UMAP", title_x=0.5)
+        #fig.update_layout(autosize=False, width=500, height=400)
+        return fig
 
     @render_widget
-    def expression_boxplot():
+    def expression_box_viol():
 
-        transform = input.boxplot_transformation()
-        x_cat = sh.categoricals_dict[input.boxplot_x_category()]
+        transform = input.box_viol_transformation()
+        x_cat = sh.categoricals_dict[input.box_viol_x_category()]
 
         input_arr = sh.transformations[transform]
 
-        gene = input.boxplot_gene_input()
-        group = sh.categoricals_dict[input.boxplot_groupby()]
+        gene = input.box_viol_gene_input()
+        group = sh.categoricals_dict[input.box_viol_groupby()]
 
-        fig = px.box(input_arr, x = x_cat, y = gene, color = group,
-                     color_discrete_sequence=px.colors.qualitative.D3)
+        if input.box_viol_plot() == "Boxplot":
+            fig = px.box(input_arr, x = x_cat, y = gene, color = group,
+                         color_discrete_sequence=px.colors.qualitative.D3)
+        else:
+            fig = px.violin(input_arr, x = x_cat, y = gene, color = group,
+                            color_discrete_sequence=px.colors.qualitative.D3)
+            
         fig.update_layout(title_text= gene + " " + transform + "(TPM)", title_x=0.5)
         return fig
     
@@ -308,13 +281,76 @@ def server(input, output, session):
         fig.update_yaxes(showgrid=False, showline=False)
 
         return fig
-
-
-
-
-
-
     
+    @render_widget
+    def gene_factor_analysis():
+        gene_set = list(input.gene_factor_genes())
+        compartment = input.gene_factor_compartment()
+        percentile = input.gene_factor_slider()
+
+        log2_subset = sh.quipi_log2[sh.quipi_log2["archetype"] != "Unclassified"][sh.quipi_log2["compartment"] == compartment][sh.non_genes+gene_set]
+        raw_subset = sh.quipi_raw[sh.quipi_raw["archetype"] != "Unclassified"][sh.quipi_raw["compartment"] == compartment][sh.non_genes+gene_set]
+
+        z_subset = log2_subset[gene_set].apply(zscore)
+        z_subset["factor_score"] = z_subset.mean(axis=1)
+        log2_subset_full = log2_subset[sh.non_genes].merge(z_subset,left_index=True,right_index=True)
+
+        fig = make_subplots(rows = 1 , cols = 2,
+                                vertical_spacing=.05,horizontal_spacing=.01,
+                                shared_xaxes=True,shared_yaxes=True,
+                                subplot_titles=[str(gene_set), "PanCan Archetypes"])
+        
+
+        test = go.Scatter(x = log2_subset_full["x_umap1"], y = log2_subset_full["x_umap2"],
+                          mode = 'markers',
+                          marker=dict(
+                              size=10,
+                              color=log2_subset_full["factor_score"],
+                              colorscale='Viridis', 
+                              ))
+        #gene_factors.update_layout(template='simple_white')
+        #gene_factors.update_layout(title_text= str(gene_set), title_x=0.5)
+
+        fig.add_trace(test, row=1,col=1)
+        fig.add_trace(pancan_archetypes(), row=1,col=2)
+        fig.update_xaxes(scaleratio=1, showticklabels=False)
+        fig.update_yaxes(scaleratio=1, showticklabels=False)
+        fig.update_layout(showlegend=False)
+
+        return fig
+
+
+        '''
+        n_total = len(log2_subset_full)
+        num_tailed = int(n_total * percentile)
+
+        log2_sorted = log2_subset_full.sort_values("factor_score",ascending=False)
+        top = log2_sorted.head(num_tailed)
+        bot = log2_sorted.tail(num_tailed)
+
+        top_data = top[gene_set]
+        bot_data = bot[gene_set]
+
+        p_vals = ranksums(top_data,bot_data)[1]
+        p_adj = multipletests(p_vals, method = "fdr_bh")[1]
+
+        raw_top = raw_subset.loc[top.index][gene_set]
+        raw_bot = raw_subset.loc[bot.index][gene_set]
+
+        top_avg_tpm = raw_top.mean(axis=0) + .01
+        bot_avg_tpm = raw_bot.mean(axis=0) + .01
+
+        fc = np.log2(top_avg_tpm / bot_avg_tpm)
+
+        fig = px.scatter(x = fc, 
+           y = -np.log10(p_adj),
+           text=gene_set)
+
+        fig.update_layout(autosize=False, width=600, height=600)
+        fc_abs_max = max(fc,key=abs)
+        fig.update_xaxes(range=[-fc_abs_max - 1, fc_abs_max + 1])
+        fig.update_layout(template='simple_white')
+        '''
 
 # Create the Shiny app
 app = App(app_ui, server)
