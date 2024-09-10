@@ -119,16 +119,28 @@ app_ui = ui.page_fluid(
                                                 multiple=True),
                              ui.input_selectize("gene_factor_compartment",
                                                 "Select Compartment:",
-                                                list(sh.quipi_raw["compartment"].unique())),
-                             ui.input_slider("gene_factor_slider",
-                                             "Choose Percentile:",
-                                             value = .2,
-                                             min = 0.05,
-                                             max = .5,
-                                             step = .05),
-                                             ),
-                             output_widget("gene_factor_analysis")))),
-    title = "QuIPI - Querying IPI",
+                                                list(sh.quipi_raw["compartment"].unique()))),
+                             output_widget("gene_factor_analysis"))),
+
+            ui.nav_panel("Molly DGE Ranking",
+                         ui.page_sidebar(
+                             ui.sidebar(
+                                ui.input_selectize("flow_score_to_rank",
+                                                    "Flow score for ranking:",
+                                                    list(sh.flow_scores.keys())),
+                                ui.input_slider("dge_slider",
+                                                "Choose Quartile:",
+                                                value = .2,
+                                                min = 0.05,
+                                                max = .5,
+                                                step = .05),
+                                ui.input_selectize("dge_compartment",
+                                                    "DGE Compartment:",
+                                                    list(sh.quipi_raw["compartment"].unique())),
+                             ),
+                             output_widget("compartment_featurescore_dge")
+                             ))),
+    title = "QuIPI - Querying IPI"
 )
 
 # Define the server logic (empty in this case since we're just creating static pages)
@@ -150,7 +162,7 @@ def server(input, output, session):
 
             fig = make_subplots(rows =  n_rows , cols = n_col, 
                                 subplot_titles=genes,
-                                vertical_spacing=.05,horizontal_spacing=.01,
+                                vertical_spacing=.05,horizontal_spacing=.02,
                                 shared_xaxes=True,shared_yaxes=True)
 
 
@@ -164,7 +176,7 @@ def server(input, output, session):
                                             size=10,  # Adjust marker size if needed
                                             color=input_arr[gene],  # Color by the numerical value
                                             colorscale='Viridis',
-                                            colorbar=dict(title=gene,xanchor="right",yanchor="middle")  # Choose a colorscale (e.g., Viridis, Plasma, etc.)),
+                                            #colorbar=dict(title=gene,x=(1+col)*.4756,y = (1+row) * .5)#xanchor="right",yanchor="middle")  # Choose a colorscale (e.g., Viridis, Plasma, etc.)),
                                             ))
                 
                 fig.add_trace(scatter, row= row+1, col= col+1)
@@ -286,7 +298,7 @@ def server(input, output, session):
     def gene_factor_analysis():
         gene_set = list(input.gene_factor_genes())
         compartment = input.gene_factor_compartment()
-        percentile = input.gene_factor_slider()
+        #percentile = input.gene_factor_slider()
 
         log2_subset = sh.quipi_log2[sh.quipi_log2["archetype"] != "Unclassified"][sh.quipi_log2["compartment"] == compartment][sh.non_genes+gene_set]
         raw_subset = sh.quipi_raw[sh.quipi_raw["archetype"] != "Unclassified"][sh.quipi_raw["compartment"] == compartment][sh.non_genes+gene_set]
@@ -297,8 +309,7 @@ def server(input, output, session):
 
         fig = make_subplots(rows = 1 , cols = 2,
                                 vertical_spacing=.05,horizontal_spacing=.01,
-                                shared_xaxes=True,shared_yaxes=True,
-                                subplot_titles=[str(gene_set), "PanCan Archetypes"])
+                                shared_xaxes=True,shared_yaxes=True)
         
 
         test = go.Scatter(x = log2_subset_full["x_umap1"], y = log2_subset_full["x_umap2"],
@@ -318,6 +329,52 @@ def server(input, output, session):
         fig.update_layout(showlegend=False)
 
         return fig
+    
+    @render_widget
+    def compartment_featurescore_dge():
+        rank_cat = sh.flow_scores[input.flow_score_to_rank()]
+        comp = input.dge_compartment()
+        quantile = input.dge_slider()
+
+        top_patients = sh.quipi_flow[sh.quipi_flow[rank_cat] > sh.quipi_flow[rank_cat].quantile(1 - quantile)]["sample_name"]
+        bot_patients = sh.quipi_flow[sh.quipi_flow[rank_cat] < sh.quipi_flow[rank_cat].quantile(quantile)]["sample_name"]
+
+
+        top_tpm = sh.quipi_raw[sh.quipi_raw["sample_name"].isin(top_patients)]
+        top_comp = top_tpm[top_tpm["compartment"] == comp]
+
+        bot_tpm = sh.quipi_raw[sh.quipi_raw["sample_name"].isin(bot_patients)]
+        bot_comp = bot_tpm[bot_tpm["compartment"] == comp]
+
+        print(len(top_tpm), len(top_comp), len(bot_tpm), len(bot_comp))
+
+        top_data = top_comp[sh.genes]
+        bot_data = bot_comp[sh.genes]
+
+        p_vals = ranksums(top_data,bot_data)[1]
+        p_adj = multipletests(p_vals, method = "fdr_bh")[1]
+
+        top_avg_tpm = top_data.mean(axis=0) + .01
+        bot_avg_tpm = bot_data.mean(axis=0) + .01
+
+        fc = np.log2(top_avg_tpm / bot_avg_tpm)
+        print(fc,type(fc), p_vals, p_adj)
+
+        fig = px.scatter(x = fc, 
+           y = -np.log10(p_adj),
+           hover_data={"Gene": fc.index})
+
+        fig.update_layout(autosize=False, width=600, height=600)
+        fc_abs_max = abs(max(fc,key=abs))
+        fig.update_layout(xaxis=dict(range=[-fc_abs_max-1, fc_abs_max+1]))
+        fig.update_layout(template='simple_white')
+
+        return fig
+
+        
+
+        
+
 
 
         '''
