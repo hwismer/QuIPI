@@ -20,15 +20,18 @@ non_genes = ["patient", "sample_name",
              "compartment", "archetype", 
              "x_umap1", "x_umap2"]
 
-genes = list(set(quipi_raw.columns) - set(non_genes))
 
-#genes = ["DLK1", "NCAM1", "IGF2", "PLAG1","LY6H", "MDK", "NTRK3", "FGFR1", "NTRK3", "SLC7A3"]
+#genes = list(set(quipi_raw.columns) - set(non_genes))
+
+genes = ["DLK1", "NCAM1", "IGF2", "PLAG1","LY6H", "MDK", "NTRK3", "FGFR1", "NTRK3", "SLC7A3"]
 
 categoricals_dict = {"Patient" : "patient",
                      "Indication" : "indication", 
                      "Tissue" : "sample_type_cat",
                      "Compartment" : "compartment", 
                      "Archetype" : "archetype"}
+
+categoricals_dict_reversed = {y:x for x,y in categoricals_dict.items()}
 
 tissue_dict = {"Tumor" : "T",
                "Normal" : "N"}
@@ -67,15 +70,35 @@ colors_pancan = {
     'ID CD8 Mac' : '#f68c20'}
 
 colors_indic = {
-    'BLAD' : 'gold',
-    'CRC' : 'darkturquoise',
-    'GBM' : 'grey50',
-    'GYN' : 'salmon1', 
-    'HEP' : 'cornflowerblue',
-    'HNSC' : 'olivedrab',
+    'BLAD' : "#FFD700",
+    'CRC' : "#00CED1",
+    'GBM' : ' #7f7f7f',
+    'GYN' : "#FF8C69", 
+    'HEP' : "#6495ED",
+    'HNSC' : "#6B8E23",
     'KID' : '#ed1e21',
     'LUNG' : '#2c276b',
-    'MEL' : 'gold4',
-    'PDAC' : 'yellow3',
-    'PNET' : 'plum4', 
-    'SRC' : 'hotpink'}
+    'MEL' : "#8B7500",
+    'PDAC' : "#CDCD00",
+    'PNET' : "#8B668B", 
+    'SRC' : "#FF69B4"}
+
+cancer_glossary = {
+    "BLAD" : ["Bladder"],
+    "CRC" : ["Colorectal"],
+    "GBM" : ["Glioblastoma"],
+    "HEP" : ["Hepatic"],
+    "HNSC" : ["Head & Neck Squamous Cell Carcinoma"],
+    "KID" : ["Kidney"],
+    "LUNG" : ["Lung"],
+    "MEL" : ["Melanoma"],
+    "PDAC" : ["Pancreate Ductal Adenocarcinoma"],
+    "PNET" : ["Primitive Neuro-Ectodermal"],
+    "SRC" : ["Sarcoma"]
+}
+
+cancer_glossary_df = pd.DataFrame.from_dict(cancer_glossary,
+                                            orient = "index",
+                                            columns = ["Elaborated"],)
+cancer_glossary_df["Abbreviation"] = cancer_glossary_df.index
+cancer_glossary_df = cancer_glossary_df[["Abbreviation", "Elaborated"]]

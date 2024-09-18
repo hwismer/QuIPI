@@ -5,8 +5,6 @@ from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 
 import shared as sh
-#from shared import app_dir, quipi_raw, quipi_log10, quipi_log2
-#from shared import genes, non_genes, categoricals, colors_pancan, colors_indic, transformations, corr_methods
 
 import numpy as np
 import pandas as pd
@@ -19,6 +17,8 @@ from scipy.stats import mannwhitneyu
 from statsmodels.stats.multitest import multipletests
 from scipy.stats import ranksums
 
+import molly_dge_split as mds
+
 
 # Define the UI
 app_ui = ui.page_fluid(
@@ -27,11 +27,13 @@ app_ui = ui.page_fluid(
     ui.navset_tab(
 
         ui.nav_panel("Home", 
-                     ui.h2("Welcome to the Home Page"), 
-                     ui.p("This is the home tab.")),
+                     ui.h2("Welcome to QuIPI"), 
+                     ui.p("Here are some useful references."),
+                     ui.layout_column_wrap(
+                        output_widget("pancan_archetypes"),
+                        output_widget("cancer_glossary"))),
 
         ui.nav_panel("PanCan UMAP Gene Expression",
-                     
                     ui.page_sidebar(
                          ui.sidebar(
                     
@@ -46,12 +48,10 @@ app_ui = ui.page_fluid(
                                             "Choose Transformation: ",
                                             ["Raw", "Log2", "Log10"],
                                             multiple= False,
-                                            selected= "Log2"),
-                            output_widget("pancan_archetypes")),
-
+                                            selected= "Log2")),
                         ui.layout_columns(output_widget("pancan_subplots")))),
 
-        ui.nav_panel("Boxplots / Violin Plots",
+        ui.nav_panel("Box/Violin Plots",
                     ui.page_sidebar(
                         ui.sidebar(
                             ui.input_selectize("box_viol_plot",
@@ -73,60 +73,59 @@ app_ui = ui.page_fluid(
                                             selected= "Log2")),             
                         output_widget("expression_box_viol"))),
 
-        ui.nav_panel("Correlation Matrix Analysis",
+        ui.nav_panel("Correlation Plots",
             ui.page_sidebar(
-                ui.sidebar("Explore the correlation of selected genes.",
-                ui.input_selectize("corr_gene_input",
-                                    "Select Genes:",
-                                    sh.genes,
+                    ui.sidebar("Explore the correlation of selected genes.",
+                    ui.input_action_button("corr_run", "Run"),
+                    ui.input_selectize("corr_gene_input",
+                                        "Select Genes:",
+                                        sh.genes,
+                                        multiple=True),
+                    ui.input_selectize("corr_indication",
+                                    "Select Indications:",
+                                    list(sh.quipi_raw["indication"].unique()),
+                                    multiple = True),
+                    ui.input_selectize("corr_tissue",
+                                    "Select Tissue:",
+                                    ["Tumor", "Normal"],
+                                    multiple = True),
+                    ui.input_selectize("corr_compartment",
+                                    "Select Compartments:",
+                                    list(sh.quipi_raw["compartment"].unique()),
                                     multiple=True),
-                ui.input_selectize("corr_indication",
-                                   "Select Indications:",
-                                   list(sh.quipi_raw["indication"].unique()),
-                                   multiple = True,
-                                   selected=list(sh.quipi_raw["indication"].unique())),
-                ui.input_selectize("corr_tissue",
-                                   "Select Tissue:",
-                                   ["Tumor", "Normal"],
-                                   multiple = True,
-                                   selected=["Tumor", "Normal"]),
-                ui.input_selectize("corr_compartment",
-                                   "Select Compartments:",
-                                   list(sh.quipi_raw["compartment"].unique()),
-                                   multiple=True,
-                                   selected=list(sh.quipi_raw["compartment"].unique())),
-                ui.input_selectize("corr_archetype",
-                                   "Select Archetypes:",
-                                   list(sh.quipi_raw["archetype"].unique()),
-                                   multiple=True,
-                                   selected=list(sh.quipi_raw["archetype"].unique())),
-                ui.input_selectize("corr_transform",
-                                   "Select Transformation:",
-                                   ["Raw", "Log2", "Log10"],
-                                   selected="Log2"),
-                ui.input_selectize("corr_method_input",
-                                "Select Method:",
-                                ["Pearson", "Spearman"],
-                                selected="Spearman")),
+                    ui.input_selectize("corr_archetype",
+                                    "Select Archetypes:",
+                                    list(sh.quipi_raw["archetype"].unique()),
+                                    multiple=True),
+                    ui.input_selectize("corr_transform",
+                                    "Select Transformation:",
+                                    ["Raw", "Log2", "Log10"],
+                                    selected="Log2"),
+                    ui.input_selectize("corr_method_input",
+                                    "Select Method:",
+                                    ["Pearson", "Spearman"],
+                                    selected="Spearman")),
             output_widget("gene_correlation_heatmap"))),
             
-            ui.nav_panel("Gene Factor Analysis",
+            ui.nav_panel("PanCan Gene Factor Scores",
                          ui.page_sidebar(
                              ui.sidebar(
-                             ui.input_selectize("gene_factor_genes",
-                                                "Select Genes:",
-                                                sh.genes,
-                                                multiple=True),
-                             ui.input_selectize("gene_factor_compartment",
-                                                "Select Compartment:",
-                                                list(sh.quipi_raw["compartment"].unique()))),
+                                ui.input_action_button("gene_factor_run", "Run"),
+                             
+                                ui.input_selectize("gene_factor_genes",
+                                                    "Select Genes:",
+                                                    sh.genes,
+                                                    multiple=True),
+                                ui.input_selectize("gene_factor_compartment",
+                                                    "Select Compartment:",
+                                                    list(sh.quipi_raw["compartment"].unique()))),
                              output_widget("gene_factor_analysis"))),
 
             ui.nav_panel("Molly DGE Ranking",
                          ui.page_sidebar(
                              ui.sidebar(
                                 ui.input_selectize("flow_score_to_rank",
-                                                    "Flow score for ranking:",
+                                                    "Feature Score For Ranking:",
                                                     list(sh.flow_scores.keys())),
                                 ui.input_slider("dge_slider",
                                                 "Choose Quartile:",
@@ -138,12 +137,14 @@ app_ui = ui.page_fluid(
                                                     "DGE Compartment:",
                                                     list(sh.quipi_raw["compartment"].unique())),
                              ),
-                             output_widget("compartment_featurescore_dge")
-                             ))),
+                             ui.layout_column_wrap(
+                                output_widget("compartment_featurescore_dge"),
+                                #ui.output_table("compart_feat_table"),
+                                #ui.output_table("compart_feat_table_bot")
+    )))),
     title = "QuIPI - Querying IPI"
 )
 
-# Define the server logic (empty in this case since we're just creating static pages)
 def server(input, output, session):
 
     @render_widget
@@ -187,26 +188,37 @@ def server(input, output, session):
 
             return fig
         
-        
-    def pancan_archetypes():
+    @render_widget
+    def cancer_glossary():
+        df = sh.cancer_glossary_df
 
+        fig = go.Figure(data=[go.Table(
+            header=dict(values=list(df.columns),
+                        fill_color='white',
+                        font = dict(color = "black",size = 18),
+                        align='center'),
+            cells=dict(values=[df[col] for col in df.columns],
+                    fill_color=[[sh.colors_indic[color] for color in df["Abbreviation"]]],  # Apply row colors
+                    align='center',
+                    height=30,
+                    font = dict(color = 'white', size = 18)))
+        ])
         
-        colors = [sh.colors_pancan[classification] for classification in sh.pancan_only_raw["archetype"]]
-        fig = go.Scatter(x = sh.pancan_only_raw["x_umap1"], y = sh.pancan_only_raw["x_umap2"],
-                         mode = 'markers',
-                         marker=dict(
-                               size=10,
-                               color=colors,
-                              ),
-                         hovertext=sh.pancan_only_raw["archetype"],
-                         showlegend=True
-                        )
-        #fig = sh.quipi_raw.plot.scatter(x="x_umap1", y="x_umap2",
-        #                            color = "archetype",
-        #                            color_discrete_map = sh.colors_pancan)
-        #fig.update_layout(template='simple_white')
-        #fig.update_layout(title_text= "Archetype UMAP", title_x=0.5)
-        #fig.update_layout(autosize=False, width=500, height=400)
+        fig.update_layout(autosize=False, width=600,height=800)
+        return fig
+        
+    @render_widget
+    def pancan_archetypes():
+        
+
+        fig = px.scatter(sh.pancan_only_raw, x = "x_umap1", y="x_umap2", 
+                         color="archetype", color_discrete_map=sh.colors_pancan)
+        fig.update_traces(marker=dict(size=12))
+        fig.update_layout(legend_title_text = "Archetype")
+        fig.update_layout(autosize=False, width=650, height=500,template = "simple_white")
+        fig.update_yaxes(visible=False)
+        fig.update_xaxes(visible=False)
+   
         return fig
 
     @render_widget
@@ -222,10 +234,12 @@ def server(input, output, session):
 
         if input.box_viol_plot() == "Boxplot":
             fig = px.box(input_arr, x = x_cat, y = gene, color = group,
-                         color_discrete_sequence=px.colors.qualitative.D3)
+                         color_discrete_sequence=px.colors.qualitative.D3,
+                         labels=sh.categoricals_dict_reversed)
         else:
             fig = px.violin(input_arr, x = x_cat, y = gene, color = group,
-                            color_discrete_sequence=px.colors.qualitative.D3)
+                            color_discrete_sequence=px.colors.qualitative.D3,
+                            labels=sh.categoricals_dict_reversed)
             
         fig.update_layout(title_text= gene + " " + transform + "(TPM)", title_x=0.5)
         return fig
@@ -253,6 +267,7 @@ def server(input, output, session):
 
 
     @render_widget
+    @reactive.event(input.corr_run)
     def gene_correlation_heatmap():
 
         genes = list(input.corr_gene_input())
@@ -288,13 +303,14 @@ def server(input, output, session):
                         zmin = -1, zmax =1,
                         color_continuous_scale = "RdBu_r",
                         text_auto=True)
-        fig.update_layout(template='simple_white')
+        fig.update_layout(template='simple_white', coloraxis_colorbar_x=.8)
         fig.update_xaxes(showgrid=False, showline=False)
         fig.update_yaxes(showgrid=False, showline=False)
 
         return fig
     
     @render_widget
+    @reactive.event(input.gene_factor_run)
     def gene_factor_analysis():
         gene_set = list(input.gene_factor_genes())
         compartment = input.gene_factor_compartment()
@@ -307,31 +323,35 @@ def server(input, output, session):
         z_subset["factor_score"] = z_subset.mean(axis=1)
         log2_subset_full = log2_subset[sh.non_genes].merge(z_subset,left_index=True,right_index=True)
 
-        fig = make_subplots(rows = 1 , cols = 2,
-                                vertical_spacing=.05,horizontal_spacing=.01,
-                                shared_xaxes=True,shared_yaxes=True)
-        
+        fig = px.scatter(log2_subset_full, x = "x_umap1", y = "x_umap2", 
+                         color = "factor_score", color_continuous_scale="viridis")
 
-        test = go.Scatter(x = log2_subset_full["x_umap1"], y = log2_subset_full["x_umap2"],
-                          mode = 'markers',
-                          marker=dict(
-                              size=10,
-                              color=log2_subset_full["factor_score"],
-                              colorscale='Viridis', 
-                              ))
-        #gene_factors.update_layout(template='simple_white')
-        #gene_factors.update_layout(title_text= str(gene_set), title_x=0.5)
-
-        fig.add_trace(test, row=1,col=1)
-        fig.add_trace(pancan_archetypes(), row=1,col=2)
-        fig.update_xaxes(scaleratio=1, showticklabels=False)
-        fig.update_yaxes(scaleratio=1, showticklabels=False)
-        fig.update_layout(showlegend=False)
-
+        fig.update_layout(template="simple_white", autosize=False, width=650, height=500,
+                          legend_title_text = "Factor Score")
         return fig
+
     
     @render_widget
     def compartment_featurescore_dge():
+
+        return mds.molly_dge(input.flow_score_to_rank(), input.dge_compartment(), input.dge_slider())[0]
+    
+    @render.table
+    def compart_feat_table():
+        df,top,bot = mds.molly_dge(input.flow_score_to_rank(), input.dge_compartment(), input.dge_slider())
+        #print(len(df),df["patient"], type(df["patient"]))
+        #return pd.DataFrame.from_dict({"Test":[1,2]})
+        #return mds.molly_dge(input.flow_score_to_rank(), input.dge_compartment(), input.dge_slider())[1]
+        return top
+    
+    @render.table
+    def compart_feat_table_bot():
+        df,top,bot = mds.molly_dge(input.flow_score_to_rank(), input.dge_compartment(), input.dge_slider())
+        #print(len(df),df["patient"], type(df["patient"]))
+        #return pd.DataFrame.from_dict({"Test":[1,2]})
+        #return mds.molly_dge(input.flow_score_to_rank(), input.dge_compartment(), input.dge_slider())[1]
+        return bot
+        '''
         rank_cat = sh.flow_scores[input.flow_score_to_rank()]
         comp = input.dge_compartment()
         quantile = input.dge_slider()
@@ -346,8 +366,6 @@ def server(input, output, session):
         bot_tpm = sh.quipi_raw[sh.quipi_raw["sample_name"].isin(bot_patients)]
         bot_comp = bot_tpm[bot_tpm["compartment"] == comp]
 
-        print(len(top_tpm), len(top_comp), len(bot_tpm), len(bot_comp))
-
         top_data = top_comp[sh.genes]
         bot_data = bot_comp[sh.genes]
 
@@ -358,7 +376,6 @@ def server(input, output, session):
         bot_avg_tpm = bot_data.mean(axis=0) + .01
 
         fc = np.log2(top_avg_tpm / bot_avg_tpm)
-        print(fc,type(fc), p_vals, p_adj)
 
         fig = px.scatter(x = fc, 
            y = -np.log10(p_adj),
@@ -374,10 +391,7 @@ def server(input, output, session):
         
 
         
-
-
-
-        '''
+        ##########
         n_total = len(log2_subset_full)
         num_tailed = int(n_total * percentile)
 
