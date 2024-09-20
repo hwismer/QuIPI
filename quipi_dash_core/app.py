@@ -17,131 +17,202 @@ from scipy.stats import mannwhitneyu
 from statsmodels.stats.multitest import multipletests
 from scipy.stats import ranksums
 
-import molly_dge_split as mds
+import quipi_dash_core.ranked_patient_dge as rpd
+import quipi_dash_core.gene_factor as gf
 
 
 # Define the UI
 app_ui = ui.page_fluid(
+
+    # ENTIRE PAGE TITLE
     ui.panel_title("QuIPI - Querying IPI"),
-    
-    ui.navset_tab(
 
-        ui.nav_panel("Home", 
-                     ui.h2("Welcome to QuIPI"), 
-                     ui.p("Here are some useful references."),
-                     ui.layout_column_wrap(
-                        output_widget("pancan_archetypes"),
-                        output_widget("cancer_glossary"))),
+        # Create navigation tab bar containing a tab for each GUI function.
+        ui.navset_tab(
+            
+            # Home tab with useful information, references etc.
+            ui.nav_panel("Home",
+                ui.h2("Welcome to QuIPI"), 
+                ui.p("Here are some useful references."),
+                ui.layout_column_wrap(
+                    output_widget("pancan_archetypes"),
+                    output_widget("cancer_glossary"))
+            ),
 
-        ui.nav_panel("PanCan UMAP Gene Expression",
+            # Box/Violin plot where the user selects a gene and can group by custom categories
+            ui.nav_panel("Box/Violin Plots",
+                ui.page_sidebar(
+                    ui.sidebar(
+                        ui.input_selectize("box_viol_plot",
+                                           "Select Plot Type:",
+                                           ["Boxplot","Violin Plot"]),
+                        ui.input_selectize("box_viol_gene_input",
+                                           "Select Gene:",
+                                           sh.genes),
+                        ui.input_selectize("box_viol_x_category",
+                                           "Select X-Axis Category:",
+                                           list(sh.categoricals_dict.keys())),
+                        ui.input_selectize("box_viol_groupby",
+                                           "Group by:",
+                                           list(sh.categoricals_dict.keys())),
+                        ui.input_selectize("box_viol_transformation",
+                                           "Choose Transformation: ",
+                                           ["Raw", "Log2", "Log10"],
+                                           multiple= False,
+                                           selected= "Log2")),             
+                        output_widget("expression_box_viol")
+                )
+            ),
+
+            # Pairwise correlation plot between user-defined genes.
+            ui.nav_panel("Correlation Plots",
+                ui.page_sidebar(
+                    ui.sidebar("Explore the correlation of selected genes.",
+                    ui.input_action_button("corr_run", "Run"),
+                    ui.input_selectize("corr_gene_input",
+                                       "Select Genes:",
+                                       sh.genes,
+                                       multiple=True),
+                    ui.input_selectize("corr_indication",
+                                       "Select Indications:",
+                                       list(sh.quipi_raw["indication"].unique()),
+                                       multiple = True),
+                    ui.input_selectize("corr_tissue",
+                                       "Select Tissue:",
+                                       ["Tumor", "Normal"],
+                                       multiple = True),
+                    ui.input_selectize("corr_compartment",
+                                       "Select Compartments:",
+                                       list(sh.quipi_raw["compartment"].unique()),
+                                       multiple=True),
+                    ui.input_selectize("corr_archetype",
+                                       "Select Archetypes:",
+                                       list(sh.quipi_raw["archetype"].unique()),
+                                       multiple=True),
+                    ui.input_selectize("corr_transform",
+                                       "Select Transformation:",
+                                       ["Raw", "Log2", "Log10"],
+                                       selected="Log2"),
+                    ui.input_selectize("corr_method_input",
+                                       "Select Method:",
+                                       ["Pearson", "Spearman"],
+                                       selected="Spearman")),
+                output_widget("gene_correlation_heatmap")
+                )
+            ),
+
+            ui.nav_menu("PanCan Archetype UMAP",
+
+                # Tab where user can select multiple eachs and view their expression overlayed on the individual
+                # PanCan UMAPs
+                ui.nav_panel("PanCan UMAP Gene Expression",
                     ui.page_sidebar(
-                         ui.sidebar(
-                    
+                        ui.sidebar(
+                            ui.h3("PanCan UMAP Gene Expression"),
                             ui.input_selectize("pancan_gene_input",
                                                 "Select Genes:",
                                                 sh.genes,
                                                 multiple = True),
                             ui.input_selectize("pancan_compartment_input",
-                                               "Select Compartment:",
-                                               list(sh.quipi_raw["compartment"].unique())),
+                                            "Select Compartment:",
+                                            list(sh.quipi_raw["compartment"].unique())
+                                            ),
                             ui.input_selectize("pancan_umap_transformation",
-                                            "Choose Transformation: ",
+                                            "Choose Transformation:",
                                             ["Raw", "Log2", "Log10"],
                                             multiple= False,
-                                            selected= "Log2")),
-                        ui.layout_columns(output_widget("pancan_subplots")))),
+                                            selected= "Log2")
+                            ),
+                            ui.layout_columns(output_widget("pancan_subplots"))
+                    )
+                ),
 
-        ui.nav_panel("Box/Violin Plots",
+                # Given user-defined gene list, plots the gene factor score on top of the PanCan UMAP
+                ui.nav_panel("PanCan Gene Factor Scores",
                     ui.page_sidebar(
                         ui.sidebar(
-                            ui.input_selectize("box_viol_plot",
-                                               "Select Plot Type:",
-                                               ["Boxplot","Violin Plot"]),
-                            ui.input_selectize("box_viol_gene_input",
-                                                "Select Gene:",
-                                                sh.genes,),
-                            ui.input_selectize("box_viol_x_category",
-                                               "Select X-Axis Category:",
-                                               list(sh.categoricals_dict.keys())),
-                            ui.input_selectize("box_viol_groupby",
-                                            "Group by:",
-                                            list(sh.categoricals_dict.keys())),
-                            ui.input_selectize("box_viol_transformation",
-                                            "Choose Transformation: ",
-                                            ["Raw", "Log2", "Log10"],
-                                            multiple= False,
-                                            selected= "Log2")),             
-                        output_widget("expression_box_viol"))),
+                            ui.h3("PanCan Gene Factor Scores"),
+                            ui.input_action_button("gene_factor_run", "Run"),
+                            ui.input_selectize("gene_factor_genes",
+                                                "Select Genes:",
+                                                sh.genes,
+                                                multiple=True),
+                            ui.input_selectize("gene_factor_compartment",
+                                            "Select Compartment:",
+                                            list(sh.quipi_raw["compartment"].unique()))
+                        ),
+                        output_widget("gene_factor_analysis")
+                    )
+                )
+            ),
 
-        ui.nav_panel("Correlation Plots",
-            ui.page_sidebar(
-                    ui.sidebar("Explore the correlation of selected genes.",
-                    ui.input_action_button("corr_run", "Run"),
-                    ui.input_selectize("corr_gene_input",
-                                        "Select Genes:",
-                                        sh.genes,
-                                        multiple=True),
-                    ui.input_selectize("corr_indication",
-                                    "Select Indications:",
-                                    list(sh.quipi_raw["indication"].unique()),
-                                    multiple = True),
-                    ui.input_selectize("corr_tissue",
-                                    "Select Tissue:",
-                                    ["Tumor", "Normal"],
-                                    multiple = True),
-                    ui.input_selectize("corr_compartment",
-                                    "Select Compartments:",
-                                    list(sh.quipi_raw["compartment"].unique()),
-                                    multiple=True),
-                    ui.input_selectize("corr_archetype",
-                                    "Select Archetypes:",
-                                    list(sh.quipi_raw["archetype"].unique()),
-                                    multiple=True),
-                    ui.input_selectize("corr_transform",
-                                    "Select Transformation:",
-                                    ["Raw", "Log2", "Log10"],
-                                    selected="Log2"),
-                    ui.input_selectize("corr_method_input",
-                                    "Select Method:",
-                                    ["Pearson", "Spearman"],
-                                    selected="Spearman")),
-            output_widget("gene_correlation_heatmap"))),
-            
-            ui.nav_panel("PanCan Gene Factor Scores",
-                         ui.page_sidebar(
-                             ui.sidebar(
-                                ui.input_action_button("gene_factor_run", "Run"),
-                             
-                                ui.input_selectize("gene_factor_genes",
-                                                    "Select Genes:",
-                                                    sh.genes,
-                                                    multiple=True),
-                                ui.input_selectize("gene_factor_compartment",
-                                                    "Select Compartment:",
-                                                    list(sh.quipi_raw["compartment"].unique()))),
-                             output_widget("gene_factor_analysis"))),
+            ui.nav_menu("Ranked DGE",
+                # Differential Gene Expression (DGE) between the top and bottom quantiles
+                # of patients based on pre-calculated IPI feature scores.
+                ui.nav_panel("Feature Score Ranked DGE",
+                    ui.page_sidebar(
+                        ui.sidebar(
+                            ui.h1("Feature Score Ranked DGE"),
+                            ui.input_action_button("dge_run", "Run"),
+                            ui.input_selectize("flow_score_to_rank",
+                                            "Feature Score For Ranking:",
+                                            list(sh.feature_scores.keys())),
+                            ui.input_slider("dge_slider",
+                                            "Quartile:",
+                                            value = .2,
+                                            min = 0.05,
+                                            max = .5,
+                                            step = .05),
+                            ui.input_selectize("dge_compartment",
+                                                "DGE Compartment:",
+                                                list(sh.quipi_raw["compartment"].unique())),
+                            ui.input_numeric("dge_fc_thresh",
+                                            "Compartment for DGE:",
+                                            value=2),
+                            ui.input_numeric("dge_p_thresh",
+                                            "P-Value Threshold:",
+                                            value = .00001)
+                        ),
+                        ui.layout_column_wrap(
+                            output_widget("compartment_featurescore_dge")
+                        )
+                    )
+                ),
 
-            ui.nav_panel("Molly DGE Ranking",
-                         ui.page_sidebar(
-                             ui.sidebar(
-                                ui.input_selectize("flow_score_to_rank",
-                                                    "Feature Score For Ranking:",
-                                                    list(sh.flow_scores.keys())),
-                                ui.input_slider("dge_slider",
-                                                "Choose Quartile:",
-                                                value = .2,
-                                                min = 0.05,
-                                                max = .5,
-                                                step = .05),
-                                ui.input_selectize("dge_compartment",
-                                                    "DGE Compartment:",
-                                                    list(sh.quipi_raw["compartment"].unique())),
-                             ),
-                             ui.layout_column_wrap(
-                                output_widget("compartment_featurescore_dge"),
-                                #ui.output_table("compart_feat_table"),
-                                #ui.output_table("compart_feat_table_bot")
-    )))),
+                # DGE between the top and bottom quantiles of patients based on
+                # gene factor scores calculated from a collection of genes.
+                ui.nav_panel("Factor Score Ranked DGE",
+                    ui.page_sidebar(
+                        ui.sidebar(
+                            ui.h1("Factor Score Ranked DGE"),
+                            ui.input_action_button("fs_dge_run","Run"),
+                            ui.input_selectize("fs_dge_genes",
+                                            "Genes for gene-factor score:",
+                                            sh.genes,
+                                            multiple=True),
+                            ui.input_selectize("fs_dge_compartment",
+                                            "Compartment to calculate gene-factor score:",
+                                            list(sh.quipi_raw["compartment"].unique())),
+                            ui.input_slider("fs_dge_slider",
+                                            "Quartile:",
+                                            value = .2,
+                                            min = 0.05, max = .5,
+                                            step = .05),
+                            ui.input_selectize("fs_dge_compartment_for_dge",
+                                            "Compartment for DGE:",
+                                            list(sh.quipi_raw["compartment"].unique())),
+                            ui.input_numeric("fs_dge_fc_thresh",
+                                            "Fold Change Threshold",
+                                            value = 2),
+                            ui.input_numeric("fs_dge_p_thresh",
+                                            "P-Value Threshold",
+                                            value=.00001)
+                            ),
+                        output_widget("gfs_ranked_dge")
+                    )
+                )
+            )
+        ),
     title = "QuIPI - Querying IPI"
 )
 
@@ -156,6 +227,8 @@ def server(input, output, session):
         input_arr = sh.transformations[transform]
         input_arr = input_arr[input_arr["compartment"] == compartment]
 
+
+
         if len(genes) != 0:
 
             n_col = min(4,len(genes))
@@ -168,6 +241,7 @@ def server(input, output, session):
 
 
             for count, gene in enumerate(genes):
+                
                 row = count // n_col
                 col = count % n_col
 
@@ -209,8 +283,6 @@ def server(input, output, session):
         
     @render_widget
     def pancan_archetypes():
-        
-
         fig = px.scatter(sh.pancan_only_raw, x = "x_umap1", y="x_umap2", 
                          color="archetype", color_discrete_map=sh.colors_pancan)
         fig.update_traces(marker=dict(size=12))
@@ -232,17 +304,18 @@ def server(input, output, session):
         gene = input.box_viol_gene_input()
         group = sh.categoricals_dict[input.box_viol_groupby()]
 
-        if input.box_viol_plot() == "Boxplot":
-            fig = px.box(input_arr, x = x_cat, y = gene, color = group,
-                         color_discrete_sequence=px.colors.qualitative.D3,
-                         labels=sh.categoricals_dict_reversed)
-        else:
-            fig = px.violin(input_arr, x = x_cat, y = gene, color = group,
+        if gene is not None and gene != "" and gene != []:
+            if input.box_viol_plot() == "Boxplot":
+                fig = px.box(input_arr, x = x_cat, y = gene, color = group,
                             color_discrete_sequence=px.colors.qualitative.D3,
                             labels=sh.categoricals_dict_reversed)
-            
-        fig.update_layout(title_text= gene + " " + transform + "(TPM)", title_x=0.5)
-        return fig
+            else:
+                fig = px.violin(input_arr, x = x_cat, y = gene, color = group,
+                                color_discrete_sequence=px.colors.qualitative.D3,
+                                labels=sh.categoricals_dict_reversed)
+                
+            fig.update_layout(title_text= gene + " " + transform + "(TPM)", title_x=0.5)
+            return fig
     
 
     @render.data_frame
@@ -281,7 +354,6 @@ def server(input, output, session):
         transform = input.corr_transform()
 
         input_arr = sh.transformations[transform]
-        #input_arr = input_arr[genes]
         input_arr = input_arr[input_arr["indication"].isin(indications)]
         input_arr = input_arr[input_arr["compartment"].isin(compartments)]
         input_arr = input_arr[input_arr["archetype"].isin(archetypes)]
@@ -312,116 +384,51 @@ def server(input, output, session):
     @render_widget
     @reactive.event(input.gene_factor_run)
     def gene_factor_analysis():
+        
         gene_set = list(input.gene_factor_genes())
         compartment = input.gene_factor_compartment()
-        #percentile = input.gene_factor_slider()
-
-        log2_subset = sh.quipi_log2[sh.quipi_log2["archetype"] != "Unclassified"][sh.quipi_log2["compartment"] == compartment][sh.non_genes+gene_set]
-        raw_subset = sh.quipi_raw[sh.quipi_raw["archetype"] != "Unclassified"][sh.quipi_raw["compartment"] == compartment][sh.non_genes+gene_set]
-
-        z_subset = log2_subset[gene_set].apply(zscore)
-        z_subset["factor_score"] = z_subset.mean(axis=1)
-        log2_subset_full = log2_subset[sh.non_genes].merge(z_subset,left_index=True,right_index=True)
+        log2_subset_full = gf.calculate_gene_factor_score(gene_set, compartment)
 
         fig = px.scatter(log2_subset_full, x = "x_umap1", y = "x_umap2", 
-                         color = "factor_score", color_continuous_scale="viridis")
+                         color = "factor_score", color_continuous_scale="viridis",
+                         labels = {"factor_score" : "Factor Score"})
 
         fig.update_layout(template="simple_white", autosize=False, width=650, height=500,
                           legend_title_text = "Factor Score")
+        
+        fig.update_traces(marker=dict(size=12))
+        fig.update_layout(legend_title_text = "Archetype")
+        fig.update_yaxes(visible=False)
+        fig.update_xaxes(visible=False)
         return fig
 
     
     @render_widget
+    @reactive.event(input.dge_run)
     def compartment_featurescore_dge():
-
-        return mds.molly_dge(input.flow_score_to_rank(), input.dge_compartment(), input.dge_slider())[0]
+        return rpd.feature_ranked_dge(input.flow_score_to_rank(), 
+                                      input.dge_compartment(), 
+                                      input.dge_slider(),
+                                      input.dge_fc_thresh(),
+                                      input.dge_p_thresh())[0]
     
-    @render.table
-    def compart_feat_table():
-        df,top,bot = mds.molly_dge(input.flow_score_to_rank(), input.dge_compartment(), input.dge_slider())
-        #print(len(df),df["patient"], type(df["patient"]))
-        #return pd.DataFrame.from_dict({"Test":[1,2]})
-        #return mds.molly_dge(input.flow_score_to_rank(), input.dge_compartment(), input.dge_slider())[1]
-        return top
-    
-    @render.table
-    def compart_feat_table_bot():
-        df,top,bot = mds.molly_dge(input.flow_score_to_rank(), input.dge_compartment(), input.dge_slider())
-        #print(len(df),df["patient"], type(df["patient"]))
-        #return pd.DataFrame.from_dict({"Test":[1,2]})
-        #return mds.molly_dge(input.flow_score_to_rank(), input.dge_compartment(), input.dge_slider())[1]
-        return bot
-        '''
-        rank_cat = sh.flow_scores[input.flow_score_to_rank()]
-        comp = input.dge_compartment()
-        quantile = input.dge_slider()
 
-        top_patients = sh.quipi_flow[sh.quipi_flow[rank_cat] > sh.quipi_flow[rank_cat].quantile(1 - quantile)]["sample_name"]
-        bot_patients = sh.quipi_flow[sh.quipi_flow[rank_cat] < sh.quipi_flow[rank_cat].quantile(quantile)]["sample_name"]
+    @render_widget
+    @reactive.event(input.fs_dge_run)
+    def gfs_ranked_dge():
+        gfs_genes = list(input.fs_dge_genes())
+        gfs_compartment = input.fs_dge_compartment()
 
+        dge_quantile = input.fs_dge_slider()
+        dge_compartment = input.fs_dge_compartment_for_dge()
 
-        top_tpm = sh.quipi_raw[sh.quipi_raw["sample_name"].isin(top_patients)]
-        top_comp = top_tpm[top_tpm["compartment"] == comp]
+        fc_thresh = input.fs_dge_fc_thresh()
+        p_thresh = input.fs_dge_p_thresh()
 
-        bot_tpm = sh.quipi_raw[sh.quipi_raw["sample_name"].isin(bot_patients)]
-        bot_comp = bot_tpm[bot_tpm["compartment"] == comp]
-
-        top_data = top_comp[sh.genes]
-        bot_data = bot_comp[sh.genes]
-
-        p_vals = ranksums(top_data,bot_data)[1]
-        p_adj = multipletests(p_vals, method = "fdr_bh")[1]
-
-        top_avg_tpm = top_data.mean(axis=0) + .01
-        bot_avg_tpm = bot_data.mean(axis=0) + .01
-
-        fc = np.log2(top_avg_tpm / bot_avg_tpm)
-
-        fig = px.scatter(x = fc, 
-           y = -np.log10(p_adj),
-           hover_data={"Gene": fc.index})
-
-        fig.update_layout(autosize=False, width=600, height=600)
-        fc_abs_max = abs(max(fc,key=abs))
-        fig.update_layout(xaxis=dict(range=[-fc_abs_max-1, fc_abs_max+1]))
-        fig.update_layout(template='simple_white')
+        fig = rpd.factor_score_ranked_dge(gfs_genes,gfs_compartment,dge_quantile,dge_compartment, fc_thresh, p_thresh)
 
         return fig
 
-        
-
-        
-        ##########
-        n_total = len(log2_subset_full)
-        num_tailed = int(n_total * percentile)
-
-        log2_sorted = log2_subset_full.sort_values("factor_score",ascending=False)
-        top = log2_sorted.head(num_tailed)
-        bot = log2_sorted.tail(num_tailed)
-
-        top_data = top[gene_set]
-        bot_data = bot[gene_set]
-
-        p_vals = ranksums(top_data,bot_data)[1]
-        p_adj = multipletests(p_vals, method = "fdr_bh")[1]
-
-        raw_top = raw_subset.loc[top.index][gene_set]
-        raw_bot = raw_subset.loc[bot.index][gene_set]
-
-        top_avg_tpm = raw_top.mean(axis=0) + .01
-        bot_avg_tpm = raw_bot.mean(axis=0) + .01
-
-        fc = np.log2(top_avg_tpm / bot_avg_tpm)
-
-        fig = px.scatter(x = fc, 
-           y = -np.log10(p_adj),
-           text=gene_set)
-
-        fig.update_layout(autosize=False, width=600, height=600)
-        fc_abs_max = max(fc,key=abs)
-        fig.update_xaxes(range=[-fc_abs_max - 1, fc_abs_max + 1])
-        fig.update_layout(template='simple_white')
-        '''
 
 # Create the Shiny app
 app = App(app_ui, server)

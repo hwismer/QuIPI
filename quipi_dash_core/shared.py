@@ -11,20 +11,23 @@ quipi_flow = pd.read_pickle("./data/clean/flow_mat.pi")
 
 pancan_only_raw = quipi_raw[quipi_raw["archetype"] != "Unclassified"]
 
+# All categorial columns for the underlying data minus the UMAP coordinates
 categoricals = ["patient", "sample_name",
              "indication", "sample_type","sample_type_cat",
              "compartment", "archetype"]
 
+# Everything that isn't a gene, including umap coordinates.
 non_genes = ["patient", "sample_name",
              "indication", "sample_type","sample_type_cat",
              "compartment", "archetype", 
              "x_umap1", "x_umap2"]
 
 
-#genes = list(set(quipi_raw.columns) - set(non_genes))
+genes = list(set(quipi_raw.columns) - set(non_genes))
 
 genes = ["DLK1", "NCAM1", "IGF2", "PLAG1","LY6H", "MDK", "NTRK3", "FGFR1", "NTRK3", "SLC7A3"]
 
+# Cleaned categories for user mapped to underlying data column names
 categoricals_dict = {"Patient" : "patient",
                      "Indication" : "indication", 
                      "Tissue" : "sample_type_cat",
@@ -33,9 +36,11 @@ categoricals_dict = {"Patient" : "patient",
 
 categoricals_dict_reversed = {y:x for x,y in categoricals_dict.items()}
 
+# Mapped names for each simple T/N indication
 tissue_dict = {"Tumor" : "T",
                "Normal" : "N"}
 
+# Mapped names for each data representation
 transformations = {"Raw" : quipi_raw,
                    "Log2" : quipi_log2,
                    "Log10" : quipi_log10}
@@ -43,7 +48,8 @@ transformations = {"Raw" : quipi_raw,
 corr_methods = {"Spearman" : "spearman",
                 "Pearson" : "pearson"}
 
-flow_scores = {"Myeloid" : "Myelo_score",
+# Mapped names for each feature score to its corresponding column name in the data
+feature_scores = {"Myeloid" : "Myelo_score",
                "T Cell" : 'T_score',
                "Stroma" : "Stroma_score",
                "T Reg" : "Treg_score",
@@ -55,6 +61,7 @@ flow_scores = {"Myeloid" : "Myelo_score",
                "cDC2" : "cDC2_score",
                "Exhausted" : "Ex_score"}
 
+# Colors for each PanCan archetype
 colors_pancan = {
     'IR CD8 Mac' : '#ed1e21',
     'IR CD8 Mono' : '#f06ba8',
@@ -69,6 +76,7 @@ colors_pancan = {
     'ID Mono' : '#b8882c',
     'ID CD8 Mac' : '#f68c20'}
 
+# Colors for each cancer indication
 colors_indic = {
     'BLAD' : "#FFD700",
     'CRC' : "#00CED1",
@@ -83,11 +91,12 @@ colors_indic = {
     'PNET' : "#8B668B", 
     'SRC' : "#FF69B4"}
 
+# Used to create abbreviation table on the front page.
 cancer_glossary = {
     "BLAD" : ["Bladder"],
     "CRC" : ["Colorectal"],
     "GBM" : ["Glioblastoma"],
-    "HEP" : ["Hepatic"],
+    "HEP" : ["Hepatobiliary"],
     "HNSC" : ["Head & Neck Squamous Cell Carcinoma"],
     "KID" : ["Kidney"],
     "LUNG" : ["Lung"],
@@ -96,7 +105,6 @@ cancer_glossary = {
     "PNET" : ["Primitive Neuro-Ectodermal"],
     "SRC" : ["Sarcoma"]
 }
-
 cancer_glossary_df = pd.DataFrame.from_dict(cancer_glossary,
                                             orient = "index",
                                             columns = ["Elaborated"],)
