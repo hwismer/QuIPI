@@ -1,6 +1,6 @@
 from pathlib import Path
-
 import pandas as pd
+import plotly.graph_objects as go
 
 app_dir = Path(__file__).parent
 
@@ -110,3 +110,21 @@ cancer_glossary_df = pd.DataFrame.from_dict(cancer_glossary,
                                             columns = ["Elaborated"],)
 cancer_glossary_df["Abbreviation"] = cancer_glossary_df.index
 cancer_glossary_df = cancer_glossary_df[["Abbreviation", "Elaborated"]]
+
+def plot_cancer_glossary_table():
+    df = cancer_glossary_df
+
+    fig = go.Figure(data=[go.Table(
+        header=dict(values=list(df.columns),
+                    fill_color='white',
+                    font = dict(color = "black",size = 18),
+                    align='center'),
+        cells=dict(values=[df[col] for col in df.columns],
+                fill_color=[[colors_indic[color] for color in df["Abbreviation"]]],  # Apply row colors
+                align='center',
+                height=30,
+                font = dict(color = 'white', size = 18)))
+    ])
+    
+    fig.update_layout(autosize=False, width=600,height=800)
+    return fig

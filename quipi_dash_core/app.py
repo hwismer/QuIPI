@@ -19,6 +19,8 @@ from scipy.stats import ranksums
 
 import quipi_dash_core.ranked_patient_dge as rpd
 import quipi_dash_core.gene_factor as gf
+import box_viol_expression_plot as bv
+import pancan_plots as pp
 
 
 # Define the UI
@@ -47,8 +49,9 @@ app_ui = ui.page_fluid(
                                            "Select Plot Type:",
                                            ["Boxplot","Violin Plot"]),
                         ui.input_selectize("box_viol_gene_input",
-                                           "Select Gene:",
-                                           sh.genes),
+                                           "Select Genes:",
+                                           sh.genes,
+                                           multiple=True),
                         ui.input_selectize("box_viol_x_category",
                                            "Select X-Axis Category:",
                                            list(sh.categoricals_dict.keys())),
@@ -170,11 +173,13 @@ app_ui = ui.page_fluid(
                                             "Compartment for DGE:",
                                             value=2),
                             ui.input_numeric("dge_p_thresh",
-                                            "P-Value Threshold:",
+                                            "-Log10(P-Value) Threshold:",
                                             value = .00001)
                         ),
+                        output_widget("compartment_featurescore_dge"),
                         ui.layout_column_wrap(
-                            output_widget("compartment_featurescore_dge")
+                            output_widget("compartment_featurescore_dge_bot"),
+                            output_widget("compartment_featurescore_dge_top")
                         )
                     )
                 ),
@@ -202,14 +207,17 @@ app_ui = ui.page_fluid(
                                             "Compartment for DGE:",
                                             list(sh.quipi_raw["compartment"].unique())),
                             ui.input_numeric("fs_dge_fc_thresh",
-                                            "Fold Change Threshold",
+                                            "Fold Change Magnitude Threshold",
                                             value = 2),
                             ui.input_numeric("fs_dge_p_thresh",
-                                            "P-Value Threshold",
+                                            "-Log10(P-Value) Threshold",
                                             value=.00001)
                             ),
-                        output_widget("gfs_ranked_dge")
-                    )
+                        output_widget("gfs_ranked_dge"),
+                        ui.layout_column_wrap(
+                            output_widget("gfs_ranked_dge_bot"),
+                            output_widget("gfs_ranked_dge_top"))
+                    ),
                 )
             )
         ),
@@ -217,105 +225,38 @@ app_ui = ui.page_fluid(
 )
 
 def server(input, output, session):
-
+        
+    @render_widget
+    def cancer_glossary():
+        return sh.plot_cancer_glossary_table()
+        
+    @render_widget
+    def pancan_archetypes():
+        return pp.plot_pancan_archetypes()
+    
     @render_widget
     def pancan_subplots():
         
         transform = input.pancan_umap_transformation()
         genes = input.pancan_gene_input()
         compartment = input.pancan_compartment_input()
-        input_arr = sh.transformations[transform]
-        input_arr = input_arr[input_arr["compartment"] == compartment]
 
-
-
-        if len(genes) != 0:
-
-            n_col = min(4,len(genes))
-            n_rows = (len(genes) + n_col - 1) // n_col
-
-            fig = make_subplots(rows =  n_rows , cols = n_col, 
-                                subplot_titles=genes,
-                                vertical_spacing=.05,horizontal_spacing=.02,
-                                shared_xaxes=True,shared_yaxes=True)
-
-
-            for count, gene in enumerate(genes):
-                
-                row = count // n_col
-                col = count % n_col
-
-                scatter = go.Scatter(x = input_arr["x_umap1"], y = input_arr["x_umap2"],
-                                        mode = 'markers',
-                                        marker=dict(
-                                            size=10,  # Adjust marker size if needed
-                                            color=input_arr[gene],  # Color by the numerical value
-                                            colorscale='Viridis',
-                                            #colorbar=dict(title=gene,x=(1+col)*.4756,y = (1+row) * .5)#xanchor="right",yanchor="middle")  # Choose a colorscale (e.g., Viridis, Plasma, etc.)),
-                                            ))
-                
-                fig.add_trace(scatter, row= row+1, col= col+1)
-            
-            fig.update_layout(height=300*n_rows, width=300*n_col, showlegend=False)
-            fig.update_xaxes(scaleanchor="y", scaleratio=1, showticklabels=False)
-            fig.update_yaxes(scaleanchor="x", scaleratio=1, showticklabels=False)
-
-            return fig
-        
-    @render_widget
-    def cancer_glossary():
-        df = sh.cancer_glossary_df
-
-        fig = go.Figure(data=[go.Table(
-            header=dict(values=list(df.columns),
-                        fill_color='white',
-                        font = dict(color = "black",size = 18),
-                        align='center'),
-            cells=dict(values=[df[col] for col in df.columns],
-                    fill_color=[[sh.colors_indic[color] for color in df["Abbreviation"]]],  # Apply row colors
-                    align='center',
-                    height=30,
-                    font = dict(color = 'white', size = 18)))
-        ])
-        
-        fig.update_layout(autosize=False, width=600,height=800)
+        fig =pp.plot_pancan_exprn_subplots(transform, genes, compartment)
         return fig
-        
-    @render_widget
-    def pancan_archetypes():
-        fig = px.scatter(sh.pancan_only_raw, x = "x_umap1", y="x_umap2", 
-                         color="archetype", color_discrete_map=sh.colors_pancan)
-        fig.update_traces(marker=dict(size=12))
-        fig.update_layout(legend_title_text = "Archetype")
-        fig.update_layout(autosize=False, width=650, height=500,template = "simple_white")
-        fig.update_yaxes(visible=False)
-        fig.update_xaxes(visible=False)
-   
-        return fig
+
 
     @render_widget
     def expression_box_viol():
 
         transform = input.box_viol_transformation()
         x_cat = sh.categoricals_dict[input.box_viol_x_category()]
-
-        input_arr = sh.transformations[transform]
-
         gene = input.box_viol_gene_input()
-        group = sh.categoricals_dict[input.box_viol_groupby()]
+        group = input.box_viol_groupby()
+        plot_type = input.box_viol_plot()
 
-        if gene is not None and gene != "" and gene != []:
-            if input.box_viol_plot() == "Boxplot":
-                fig = px.box(input_arr, x = x_cat, y = gene, color = group,
-                            color_discrete_sequence=px.colors.qualitative.D3,
-                            labels=sh.categoricals_dict_reversed)
-            else:
-                fig = px.violin(input_arr, x = x_cat, y = gene, color = group,
-                                color_discrete_sequence=px.colors.qualitative.D3,
-                                labels=sh.categoricals_dict_reversed)
-                
-            fig.update_layout(title_text= gene + " " + transform + "(TPM)", title_x=0.5)
-            return fig
+        fig = bv.box_viol_exprn(transform, x_cat, gene, group, plot_type)
+
+        return fig
     
 
     @render.data_frame
@@ -401,6 +342,7 @@ def server(input, output, session):
         fig.update_yaxes(visible=False)
         fig.update_xaxes(visible=False)
         return fig
+    
 
     
     @render_widget
@@ -411,6 +353,35 @@ def server(input, output, session):
                                       input.dge_slider(),
                                       input.dge_fc_thresh(),
                                       input.dge_p_thresh())[0]
+    
+    @render_widget
+    @reactive.event(input.dge_run)
+    def compartment_featurescore_dge_top():
+        df = rpd.feature_ranked_dge(input.flow_score_to_rank(), 
+                                      input.dge_compartment(), 
+                                      input.dge_slider(),
+                                      input.dge_fc_thresh(),
+                                      input.dge_p_thresh())[1]
+        
+        fig = rpd.plot_fc_table(df,"Positive")
+
+        return fig
+
+    
+    @render_widget
+    @reactive.event(input.dge_run)
+    def compartment_featurescore_dge_bot():
+        df =  rpd.feature_ranked_dge(input.flow_score_to_rank(), 
+                                      input.dge_compartment(), 
+                                      input.dge_slider(),
+                                      input.dge_fc_thresh(),
+                                      input.dge_p_thresh())[2]
+        
+        fig = rpd.plot_fc_table(df,"Negative")
+
+        return fig
+    
+    
     
 
     @render_widget
@@ -425,10 +396,46 @@ def server(input, output, session):
         fc_thresh = input.fs_dge_fc_thresh()
         p_thresh = input.fs_dge_p_thresh()
 
-        fig = rpd.factor_score_ranked_dge(gfs_genes,gfs_compartment,dge_quantile,dge_compartment, fc_thresh, p_thresh)
+        fig = rpd.factor_ranked_dge(gfs_genes,gfs_compartment,dge_quantile,dge_compartment, fc_thresh, p_thresh)[0]
+
+        return fig
+    
+    @render_widget
+    @reactive.event(input.fs_dge_run)
+    def gfs_ranked_dge_top():
+        gfs_genes = list(input.fs_dge_genes())
+        gfs_compartment = input.fs_dge_compartment()
+
+        dge_quantile = input.fs_dge_slider()
+        dge_compartment = input.fs_dge_compartment_for_dge()
+
+        fc_thresh = input.fs_dge_fc_thresh()
+        p_thresh = input.fs_dge_p_thresh()
+
+        df = rpd.factor_ranked_dge(gfs_genes,gfs_compartment,dge_quantile,dge_compartment, fc_thresh, p_thresh)[1]
+
+        fig = rpd.plot_fc_table(df,"Positive")
+
+        return fig
+    
+    @render_widget
+    @reactive.event(input.fs_dge_run)
+    def gfs_ranked_dge_bot():
+        gfs_genes = list(input.fs_dge_genes())
+        gfs_compartment = input.fs_dge_compartment()
+
+        dge_quantile = input.fs_dge_slider()
+        dge_compartment = input.fs_dge_compartment_for_dge()
+
+        fc_thresh = input.fs_dge_fc_thresh()
+        p_thresh = input.fs_dge_p_thresh()
+
+        df = rpd.factor_ranked_dge(gfs_genes,gfs_compartment,dge_quantile,dge_compartment, fc_thresh, p_thresh)[2]
+        fig = rpd.plot_fc_table(df,"Negative")
 
         return fig
 
+    
 
 # Create the Shiny app
 app = App(app_ui, server)
