@@ -37,7 +37,7 @@ app_ui = ui.page_fluid(
                 ui.h2("Welcome to QuIPI"), 
                 ui.p("Here are some useful references."),
                 ui.layout_column_wrap(
-                    output_widget("pancan_archetypes"),
+                    output_widget("pancan_archetypes_home"),
                     output_widget("cancer_glossary"))
             ),
 
@@ -144,7 +144,10 @@ app_ui = ui.page_fluid(
                                             "Select Compartment:",
                                             list(sh.quipi_raw["compartment"].unique()))
                         ),
-                        output_widget("gene_factor_analysis")
+                        ui.layout_column_wrap(
+                            output_widget("gene_factor_analysis"),
+                            output_widget("pancan_archetypes_gfs")
+                        )
                     )
                 )
             ),
@@ -229,11 +232,19 @@ def server(input, output, session):
     @render_widget
     def cancer_glossary():
         return sh.plot_cancer_glossary_table()
-        
-    @render_widget
-    def pancan_archetypes():
-        return pp.plot_pancan_archetypes()
     
+    @render_widget
+    def pancan_archetypes_home():
+        fig = pp.plot_pancan_archetypes()
+        fig.update_layout(autosize=False, width=650, height=500,template = "simple_white")
+        return fig
+    @render_widget
+    @reactive.event(input.gene_factor_run)
+    def pancan_archetypes_gfs():
+        fig = pp.plot_pancan_archetypes()
+        fig.update_layout(autosize=False, width=600, height=450,template = "simple_white")
+        return fig
+        
     @render_widget
     def pancan_subplots():
         
@@ -334,7 +345,7 @@ def server(input, output, session):
                          color = "factor_score", color_continuous_scale="viridis",
                          labels = {"factor_score" : "Factor Score"})
 
-        fig.update_layout(template="simple_white", autosize=False, width=650, height=500,
+        fig.update_layout(template="simple_white", autosize=False, width=600, height=450,
                           legend_title_text = "Factor Score")
         
         fig.update_traces(marker=dict(size=12))

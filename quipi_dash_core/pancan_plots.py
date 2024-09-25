@@ -23,9 +23,6 @@ import box_viol_expression_plot as bv
 
 def plot_pancan_exprn_subplots(transform, genes, compartment):
 
-    #transform = input.pancan_umap_transformation()
-    #genes = input.pancan_gene_input()
-    #compartment = input.pancan_compartment_input()
     input_arr = sh.transformations[transform]
     input_arr = input_arr[input_arr["compartment"] == compartment]
 
@@ -74,7 +71,7 @@ def plot_pancan_archetypes():
                          color="archetype", color_discrete_map=sh.colors_pancan)
     fig.update_traces(marker=dict(size=12))
     fig.update_layout(legend_title_text = "Archetype")
-    fig.update_layout(autosize=False, width=650, height=500,template = "simple_white")
+    fig.update_layout(template = "simple_white")
     fig.update_yaxes(visible=False)
     fig.update_xaxes(visible=False)
 
