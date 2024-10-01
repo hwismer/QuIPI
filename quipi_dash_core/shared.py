@@ -25,7 +25,7 @@ non_genes = ["patient", "sample_name",
 
 genes = list(set(quipi_raw.columns) - set(non_genes))
 
-genes = ["DLK1", "NCAM1", "IGF2", "PLAG1","LY6H", "MDK", "NTRK3", "FGFR1", "NTRK3", "SLC7A3"]
+#genes = ["DLK1", "NCAM1", "IGF2", "PLAG1","LY6H", "MDK", "NTRK3", "FGFR1", "NTRK3", "SLC7A3"]
 
 # Cleaned categories for user mapped to underlying data column names
 categoricals_dict = {"Patient" : "patient",
