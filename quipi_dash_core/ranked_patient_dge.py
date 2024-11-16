@@ -16,10 +16,13 @@ import quipi_dash_core.gene_factor as gf
 def factor_ranked_dge(gfs_genes, gfs_compartment, quantile, dge_compartment,fc_threshold=1, p_val_thresh=0.000001):
    
    gfs = gf.calculate_gene_factor_score(gfs_genes, gfs_compartment)
+   print(gfs)
 
    
-   top_data, bot_data = rank_using_score(gfs, "factor_score", quantile, gfs_compartment)
+   top_data, bot_data = rank_using_score(gfs, "factor_score", quantile, dge_compartment)
+   print(top_data, bot_data)
    change_df = do_dge(top_data, bot_data)
+   print(change_df)
    sig_pos, sig_neg = filter_dge(change_df, fc_threshold, p_val_thresh)
    fig = plot_dge(change_df,fc_threshold,p_val_thresh)
 
