@@ -17,8 +17,8 @@ from scipy.stats import mannwhitneyu
 from statsmodels.stats.multitest import multipletests
 from scipy.stats import ranksums
 
-import quipi_dash_core.ranked_patient_dge as rpd
-import quipi_dash_core.gene_factor as gf
+import ranked_patient_dge as rpd
+import gene_factor as gf
 import box_viol_expression_plot as bv
 import pancan_plots as pp
 
@@ -36,21 +36,27 @@ app_ui = ui.page_fluid(
             ui.nav_panel("Home",
                 ui.h2("Welcome to QuIPI"), 
                 ui.p("Here are some useful references."),
-                ui.layout_column_wrap(
-                    output_widget("pancan_archetypes_home"),
-                    output_widget("cancer_glossary"))
+                
+                    ui.row(
+                        ui.column(6,output_widget("pancan_archetypes_home")),
+                        ),
+                    ui.row(
+                        ui.column(6,output_widget("plot_indication_breakdown")),
+                        ui.column(6,output_widget("cancer_glossary"))
+                    ),
             ),
 
             # Box/Violin plot where the user selects a gene and can group by custom categories
             ui.nav_panel("Box/Violin Plots",
                 ui.page_sidebar(
                     ui.sidebar(
+                        ui.input_action_button("box_viol_run", "Run"),
                         ui.input_selectize("box_viol_plot",
                                            "Select Plot Type:",
                                            ["Boxplot","Violin Plot"]),
                         ui.input_selectize("box_viol_gene_input",
                                            "Select Genes:",
-                                           sh.genes,
+                                           [],
                                            multiple=True),
                         ui.input_selectize("box_viol_x_category",
                                            "Select X-Axis Category:",
@@ -60,7 +66,7 @@ app_ui = ui.page_fluid(
                                            list(sh.categoricals_dict.keys())),
                         ui.input_selectize("box_viol_transformation",
                                            "Choose Transformation: ",
-                                           ["Raw", "Log2", "Log10"],
+                                           ["Raw", "Log2"],
                                            multiple= False,
                                            selected= "Log2")),             
                         output_widget("expression_box_viol")
@@ -74,11 +80,12 @@ app_ui = ui.page_fluid(
                     ui.input_action_button("corr_run", "Run"),
                     ui.input_selectize("corr_gene_input",
                                        "Select Genes:",
-                                       sh.genes,
-                                       multiple=True),
+                                       [],
+                                       multiple=True,
+                                       options = {'server':True}),
                     ui.input_selectize("corr_indication",
                                        "Select Indications:",
-                                       list(sh.quipi_raw["indication"].unique()),
+                                       sh.indications,
                                        multiple = True),
                     ui.input_selectize("corr_tissue",
                                        "Select Tissue:",
@@ -86,15 +93,15 @@ app_ui = ui.page_fluid(
                                        multiple = True),
                     ui.input_selectize("corr_compartment",
                                        "Select Compartments:",
-                                       list(sh.quipi_raw["compartment"].unique()),
+                                       sh.compartments,
                                        multiple=True),
                     ui.input_selectize("corr_archetype",
                                        "Select Archetypes:",
-                                       list(sh.quipi_raw["archetype"].unique()),
+                                       sh.archetypes,
                                        multiple=True),
                     ui.input_selectize("corr_transform",
                                        "Select Transformation:",
-                                       ["Raw", "Log2", "Log10"],
+                                       ["Raw", "Log2"],
                                        selected="Log2"),
                     ui.input_selectize("corr_method_input",
                                        "Select Method:",
@@ -111,18 +118,19 @@ app_ui = ui.page_fluid(
                 ui.nav_panel("PanCan UMAP Gene Expression",
                     ui.page_sidebar(
                         ui.sidebar(
+                            ui.input_action_button("pancan_umap_run", "Run"),
                             ui.h3("PanCan UMAP Gene Expression"),
                             ui.input_selectize("pancan_gene_input",
                                                 "Select Genes:",
-                                                sh.genes,
+                                                [],
                                                 multiple = True),
                             ui.input_selectize("pancan_compartment_input",
                                             "Select Compartment:",
-                                            list(sh.quipi_raw["compartment"].unique())
+                                            sh.compartments
                                             ),
                             ui.input_selectize("pancan_umap_transformation",
                                             "Choose Transformation:",
-                                            ["Raw", "Log2", "Log10"],
+                                            ["Raw", "Log2"],
                                             multiple= False,
                                             selected= "Log2")
                             ),
@@ -138,11 +146,11 @@ app_ui = ui.page_fluid(
                             ui.input_action_button("gene_factor_run", "Run"),
                             ui.input_selectize("gene_factor_genes",
                                                 "Select Genes:",
-                                                sh.genes,
+                                                [],
                                                 multiple=True),
                             ui.input_selectize("gene_factor_compartment",
                                             "Select Compartment:",
-                                            list(sh.quipi_raw["compartment"].unique()))
+                                            sh.compartments)
                         ),
                         ui.layout_column_wrap(
                             output_widget("gene_factor_analysis"),
@@ -171,9 +179,9 @@ app_ui = ui.page_fluid(
                                             step = .05),
                             ui.input_selectize("dge_compartment",
                                                 "DGE Compartment:",
-                                                list(sh.quipi_raw["compartment"].unique())),
+                                                sh.compartments),
                             ui.input_numeric("dge_fc_thresh",
-                                            "Compartment for DGE:",
+                                            "Log2FC Threshold:",
                                             value=2),
                             ui.input_numeric("dge_p_thresh",
                                             "-Log10(P-Value) Threshold:",
@@ -183,7 +191,11 @@ app_ui = ui.page_fluid(
                         ui.layout_column_wrap(
                             output_widget("compartment_featurescore_dge_bot"),
                             output_widget("compartment_featurescore_dge_top")
-                        )
+                        ),
+                        ui.h4("Methods"),
+                        ui.p("""The Wilxocon Rank-sum test is used to calculate differentially expressed genes.
+                             P-values are corrected using Benjamini/Hochberg multiple testing correction.
+                             """)
                     )
                 ),
 
@@ -196,11 +208,11 @@ app_ui = ui.page_fluid(
                             ui.input_action_button("fs_dge_run","Run"),
                             ui.input_selectize("fs_dge_genes",
                                             "Genes for gene-factor score:",
-                                            sh.genes,
+                                            [],
                                             multiple=True),
                             ui.input_selectize("fs_dge_compartment",
                                             "Compartment to calculate gene-factor score:",
-                                            list(sh.quipi_raw["compartment"].unique())),
+                                            sh.compartments),
                             ui.input_slider("fs_dge_slider",
                                             "Quartile:",
                                             value = .2,
@@ -208,7 +220,7 @@ app_ui = ui.page_fluid(
                                             step = .05),
                             ui.input_selectize("fs_dge_compartment_for_dge",
                                             "Compartment for DGE:",
-                                            list(sh.quipi_raw["compartment"].unique())),
+                                            sh.compartments),
                             ui.input_numeric("fs_dge_fc_thresh",
                                             "Fold Change Magnitude Threshold",
                                             value = 2),
@@ -228,16 +240,20 @@ app_ui = ui.page_fluid(
 )
 
 def server(input, output, session):
-        
     @render_widget
     def cancer_glossary():
         return sh.plot_cancer_glossary_table()
+    
+    @render_widget
+    def plot_indication_breakdown():
+        return sh.plot_indication_breakdown()
     
     @render_widget
     def pancan_archetypes_home():
         fig = pp.plot_pancan_archetypes()
         fig.update_layout(autosize=False, width=650, height=500,template = "simple_white")
         return fig
+    
     @render_widget
     @reactive.event(input.gene_factor_run)
     def pancan_archetypes_gfs():
@@ -246,6 +262,7 @@ def server(input, output, session):
         return fig
         
     @render_widget
+    @reactive.event(input.pancan_umap_run)
     def pancan_subplots():
         
         transform = input.pancan_umap_transformation()
@@ -257,6 +274,7 @@ def server(input, output, session):
 
 
     @render_widget
+    @reactive.event(input.box_viol_run)
     def expression_box_viol():
 
         transform = input.box_viol_transformation()
@@ -295,7 +313,7 @@ def server(input, output, session):
     @reactive.event(input.corr_run)
     def gene_correlation_heatmap():
 
-        genes = list(input.corr_gene_input())
+        genes = input.corr_gene_input()
         indications = input.corr_indication()
         method = sh.corr_methods[input.corr_method_input()]
         compartments = input.corr_compartment()
@@ -305,12 +323,16 @@ def server(input, output, session):
 
         transform = input.corr_transform()
 
-        input_arr = sh.transformations[transform]
+        if transform == "Raw":
+            input_arr = pd.read_csv("./data/quipi_raw_tpm.csv", usecols=sh.non_genes + genes)
+        elif transform == "Log2":
+            input_arr = pd.read_csv("./data/quipi_log2_tpm.csv", usecols=sh.non_genes + genes)
+
         input_arr = input_arr[input_arr["indication"].isin(indications)]
         input_arr = input_arr[input_arr["compartment"].isin(compartments)]
         input_arr = input_arr[input_arr["archetype"].isin(archetypes)]
         input_arr = input_arr[input_arr["sample_type_cat"].isin(tissues)]
-        input_arr = input_arr[genes]
+        input_arr = input_arr[list(genes)]
 
         corr_df = input_arr.corr(method=method)
 
@@ -446,12 +468,62 @@ def server(input, output, session):
 
         return fig
 
+    #ui.input_selectize("box_viol_gene_input",
+    #ui.input_selectize("corr_gene_input",
+    #ui.input_selectize("pancan_gene_input",
+    #ui.input_selectize("gene_factor_genes",
+    #ui.input_selectize("fs_dge_genes",
+
+    @reactive.effect
+    def _():
+        ui.update_selectize(
+            "box_viol_gene_input",
+            choices=sh.genes,
+            selected=[],
+            server=True,
+        )
+
+    @reactive.effect
+    def _():
+        ui.update_selectize(
+            "corr_gene_input",
+            choices=sh.genes,
+            selected=[],
+            server=True,
+        )
+
+    @reactive.effect
+    def _():
+        ui.update_selectize(
+            "pancan_gene_input",
+            choices=sh.genes,
+            selected=[],
+            server=True,
+        )
+
+    @reactive.effect
+    def _():
+        ui.update_selectize(
+            "gene_factor_genes",
+            choices=sh.genes,
+            selected=[],
+            server=True,
+        )
+
+    @reactive.effect
+    def _():
+        ui.update_selectize(
+            "fs_dge_genes",
+            choices=sh.genes,
+            selected=[],
+            server=True,
+        )
+    
     
 
 # Create the Shiny app
 app = App(app_ui, server)
 
-# Run the app
-#app.run()
+print("Done")
 
 
