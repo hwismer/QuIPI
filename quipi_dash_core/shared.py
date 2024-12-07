@@ -163,8 +163,8 @@ def plot_indication_breakdown():
 
 
 def plot_archetype_beakdown():
-    arch_counts = pd.read_csv("./data/quipi_raw_tpm.csv", usecols=["patient","archetype"])
-    arch_counts = arch_counts.groupby("patient")["archetype"].unique().value_counts().reset_index()
+    arch_counts = pd.read_csv("./data/quipi_raw_tpm.csv", usecols=["sample_name","archetype"])
+    arch_counts = arch_counts.groupby("sample_name")["archetype"].unique().value_counts().reset_index()
     arch_counts["archetype"] = [ind[0] for ind in arch_counts["archetype"]]
 
     fig = px.bar(arch_counts, x = "archetype", y = "count", 

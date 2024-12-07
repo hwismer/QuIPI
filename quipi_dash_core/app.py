@@ -56,8 +56,7 @@ app_ui = ui.page_navbar(
                         full_screen=False,     
                 ),
                 ui.card(ui.card_header("PanCan Archetype Breakdown"),
-                        ui.card_body(output_widget("pancan_archetype_breakdown"),
-                        ui.card_footer("*Note: Stratified counts at the top of bars show up due to the same patient having multiple biopsies, with archetype differing between them."))),
+                        ui.card_body(output_widget("pancan_archetype_breakdown"))),
             width=.5)
         ),
 
