@@ -85,7 +85,7 @@ app_ui = ui.page_navbar(
                                         ["Raw", "Log2"],
                                         multiple= False,
                                         selected= "Log2")),             
-                    output_widget("expression_box_viol"),
+                    ui.card(ui.card_body(output_widget("expression_box_viol"))),
             ),
         ),
 
@@ -102,19 +102,23 @@ app_ui = ui.page_navbar(
                 ui.input_selectize("corr_indication",
                                     "Select Indications:",
                                     sh.indications,
-                                    multiple = True),
+                                    multiple = True,
+                                    selected=sh.indications),
                 ui.input_selectize("corr_tissue",
                                     "Select Tissue:",
                                     ["Tumor", "Normal"],
-                                    multiple = True),
+                                    multiple = True,
+                                    selected=["Tumor","Normal"]),
                 ui.input_selectize("corr_compartment",
                                     "Select Compartments:",
                                     sh.compartments,
-                                    multiple=True),
+                                    multiple=True,
+                                    selected=sh.compartments),
                 ui.input_selectize("corr_archetype",
                                     "Select Archetypes:",
                                     sh.archetypes,
-                                    multiple=True),
+                                    multiple=True,
+                                    selected=sh.archetypes),
                 ui.input_selectize("corr_transform",
                                     "Select Transformation:",
                                     ["Raw", "Log2"],
@@ -370,7 +374,7 @@ def server(input, output, session):
                         zmin = -1, zmax =1,
                         color_continuous_scale = "RdBu_r",
                         text_auto=True)
-        fig.update_layout(template='simple_white', coloraxis_colorbar_x=.8)
+        fig.update_layout(template='simple_white', coloraxis_colorbar_x=.8,autosize=True)
         fig.update_xaxes(showgrid=False, showline=False)
         fig.update_yaxes(showgrid=False, showline=False)
 
