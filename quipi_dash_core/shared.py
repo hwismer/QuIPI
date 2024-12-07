@@ -48,12 +48,7 @@ with open("./data/quipi_flow_scores.csv", 'r') as file:
 
 cats = ('patient','sample_name','indication', 'archetype', 'sample_type', 'sample_type_cat', 'x_umap1', 'x_umap2')
 non_cats = tuple(set(quipi_flow_columns) - set(cats))
-
-
 genes = list(set(quipi_all_columns) - set(non_genes))
-
-#pancan_only_raw = pd.read_csv("./data/quipi_raw_tpm.csv", usecols=["archetype", "x_umap1", "x_umap2"])
-
 categorical_data = pd.read_csv("./data/quipi_raw_tpm.csv", usecols=cats)
 
 
@@ -148,7 +143,6 @@ def plot_cancer_glossary_table():
 
 def plot_indication_breakdown():
     ind_counts = categorical_data.groupby("patient")["indication"].unique().value_counts().reset_index()
-    #ind_counts = pd.read_csv("./data/quipi_raw_tpm.csv", usecols=non_genes).groupby("patient")["indication"].unique().value_counts().reset_index()
     ind_counts["indication"] = [ind[0] for ind in ind_counts["indication"]]
     
     fig = px.bar(ind_counts, x = "indication", y = "count", 

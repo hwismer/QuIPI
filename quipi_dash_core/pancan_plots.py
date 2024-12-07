@@ -78,14 +78,9 @@ def plot_pancan_archetypes():
     fig.update_layout(template = "simple_white",
                       legend=dict(
                         y=0.5,  # Center vertically
-                        #xanchor='left',  # Align to the left of the legend box
-                        #yanchor='middle',  # Center vertically
                         font=dict(size=18)  # Increase font size
                         ),
     )
     fig.update_yaxes(visible=False)
     fig.update_xaxes(visible=False)
-    #fig.update_layout(width =1200)
-
-
     return fig
