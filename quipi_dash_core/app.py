@@ -1,4 +1,5 @@
 from shiny import App, render, ui, reactive
+from shinyswatch import theme
 import plotly.express as px
 from shinywidgets import output_widget, render_widget 
 from plotly.subplots import make_subplots
@@ -22,221 +23,237 @@ import gene_factor as gf
 import box_viol_expression_plot as bv
 import pancan_plots as pp
 
+RUN_STYLE="background-color: #AFE1AF; color: black;"
+
 
 # Define the UI
-app_ui = ui.page_fluid(
+app_ui = ui.page_navbar(
+    #ui.panel_title("Test"),
+
 
     # ENTIRE PAGE TITLE
-    ui.panel_title("QuIPI - Querying IPI"),
+    #ui.panel_title("QuIPI - Querying IPI", window_title="QuIPI",),
 
         # Create navigation tab bar containing a tab for each GUI function.
-        ui.navset_tab(
             
             # Home tab with useful information, references etc.
-            ui.nav_panel("Home",
-                ui.h2("Welcome to QuIPI"), 
-                ui.p("Here are some useful references."),
-                
-                    ui.row(
-                        ui.column(6,output_widget("pancan_archetypes_home")),
+        ui.nav_panel("Home",
+            ui.panel_title("Welcome to QuIPI",), 
+            ui.p("Here are some useful references."),
+            ui.layout_column_wrap(
+                ui.card(ui.card_header("Cancer Indication Breakdown"),
+                        output_widget("plot_indication_breakdown"), 
+                        full_screen=False,
                         ),
-                    ui.row(
-                        ui.column(6,output_widget("plot_indication_breakdown")),
-                        ui.column(6,output_widget("cancer_glossary"))
-                    ),
-            ),
+                ui.card(ui.card_header("Cancer Indication Nomenclature"),
+                    output_widget("cancer_glossary"),
+                    full_screen=False),
+                ui.card(ui.card_header("PanCan Archetype UMAP"),
+                        ui.card_body(output_widget("pancan_archetypes_home")),
+                        ui.card_footer(
+                            ui.HTML(f'<a href="{"https://pubmed.ncbi.nlm.nih.gov/34963056/"}" target="_blank">Discovering dominant tumor immune archetypes in a pan-cancer census. Combes AJ, Samad B, Tsui J, et al. Cell. 2022</a>')
+                        ),
+                        full_screen=False,     
+                ),
+                ui.card(ui.card_header("PanCan Archetype Breakdown"),
+                        ui.card_body(output_widget("pancan_archetype_breakdown"),
+                        ui.card_footer("*Note: Stratified counts at the top of bars show up due to the same patient having multiple biopsies, with archetype differing between them."))),
+            width=.5)
+        ),
 
-            # Box/Violin plot where the user selects a gene and can group by custom categories
-            ui.nav_panel("Box/Violin Plots",
+        # Box/Violin plot where the user selects a gene and can group by custom categories
+        ui.nav_panel("Box/Violin Plots",
+            ui.page_sidebar(
+                ui.sidebar(
+                    ui.h3("Explore gene expression by category"),
+                    ui.input_action_button("box_viol_run", "Run", style=RUN_STYLE),
+                    ui.input_selectize("box_viol_plot",
+                                        "Select Plot Type:",
+                                        ["Boxplot","Violin Plot"]),
+                    ui.input_selectize("box_viol_gene_input",
+                                        "Select Genes:",
+                                        [],
+                                        multiple=True),
+                    ui.input_selectize("box_viol_x_category",
+                                        "Select X-Axis Category:",
+                                        list(sh.categoricals_dict.keys())),
+                    ui.input_selectize("box_viol_groupby",
+                                        "Group by:",
+                                        list(sh.categoricals_dict.keys())),
+                    ui.input_selectize("box_viol_transformation",
+                                        "Choose Transformation: ",
+                                        ["Raw", "Log2"],
+                                        multiple= False,
+                                        selected= "Log2")),             
+                    output_widget("expression_box_viol"),
+            ),
+        ),
+
+        # Pairwise correlation plot between user-defined genes.
+        ui.nav_panel("Correlation Plots",
+            ui.page_sidebar(
+                ui.sidebar("Explore the correlation of selected genes.",
+                ui.input_action_button("corr_run", "Run",style=RUN_STYLE),
+                ui.input_selectize("corr_gene_input",
+                                    "Select Genes:",
+                                    [],
+                                    multiple=True,
+                                    options = {'server':True}),
+                ui.input_selectize("corr_indication",
+                                    "Select Indications:",
+                                    sh.indications,
+                                    multiple = True),
+                ui.input_selectize("corr_tissue",
+                                    "Select Tissue:",
+                                    ["Tumor", "Normal"],
+                                    multiple = True),
+                ui.input_selectize("corr_compartment",
+                                    "Select Compartments:",
+                                    sh.compartments,
+                                    multiple=True),
+                ui.input_selectize("corr_archetype",
+                                    "Select Archetypes:",
+                                    sh.archetypes,
+                                    multiple=True),
+                ui.input_selectize("corr_transform",
+                                    "Select Transformation:",
+                                    ["Raw", "Log2"],
+                                    selected="Log2"),
+                ui.input_selectize("corr_method_input",
+                                    "Select Method:",
+                                    ["Pearson", "Spearman"],
+                                    selected="Spearman")),
+            output_widget("gene_correlation_heatmap")
+            )
+        ),
+
+        ui.nav_menu("PanCan Archetype UMAP",
+
+            # Tab where user can select multiple eachs and view their expression overlayed on the individual
+            # PanCan UMAPs
+            ui.nav_panel("PanCan UMAP Gene Expression",
                 ui.page_sidebar(
                     ui.sidebar(
-                        ui.input_action_button("box_viol_run", "Run"),
-                        ui.input_selectize("box_viol_plot",
-                                           "Select Plot Type:",
-                                           ["Boxplot","Violin Plot"]),
-                        ui.input_selectize("box_viol_gene_input",
-                                           "Select Genes:",
-                                           [],
-                                           multiple=True),
-                        ui.input_selectize("box_viol_x_category",
-                                           "Select X-Axis Category:",
-                                           list(sh.categoricals_dict.keys())),
-                        ui.input_selectize("box_viol_groupby",
-                                           "Group by:",
-                                           list(sh.categoricals_dict.keys())),
-                        ui.input_selectize("box_viol_transformation",
-                                           "Choose Transformation: ",
-                                           ["Raw", "Log2"],
-                                           multiple= False,
-                                           selected= "Log2")),             
-                        output_widget("expression_box_viol")
+                        ui.h3("PanCan UMAP Gene Expression"),
+                        ui.input_action_button("pancan_umap_run", "Run",style=RUN_STYLE),
+                        ui.input_selectize("pancan_gene_input",
+                                            "Select Genes:",
+                                            [],
+                                            multiple = True),
+                        ui.input_selectize("pancan_compartment_input",
+                                        "Select Compartment:",
+                                        sh.compartments
+                                        ),
+                        ui.input_selectize("pancan_umap_transformation",
+                                        "Choose Transformation:",
+                                        ["Raw", "Log2"],
+                                        multiple= False,
+                                        selected= "Log2")
+                        ),
+                        ui.layout_columns(output_widget("pancan_subplots"))
                 )
             ),
 
-            # Pairwise correlation plot between user-defined genes.
-            ui.nav_panel("Correlation Plots",
+            # Given user-defined gene list, plots the gene factor score on top of the PanCan UMAP
+            ui.nav_panel("PanCan Gene Factor Scores",
                 ui.page_sidebar(
-                    ui.sidebar("Explore the correlation of selected genes.",
-                    ui.input_action_button("corr_run", "Run"),
-                    ui.input_selectize("corr_gene_input",
-                                       "Select Genes:",
-                                       [],
-                                       multiple=True,
-                                       options = {'server':True}),
-                    ui.input_selectize("corr_indication",
-                                       "Select Indications:",
-                                       sh.indications,
-                                       multiple = True),
-                    ui.input_selectize("corr_tissue",
-                                       "Select Tissue:",
-                                       ["Tumor", "Normal"],
-                                       multiple = True),
-                    ui.input_selectize("corr_compartment",
-                                       "Select Compartments:",
-                                       sh.compartments,
-                                       multiple=True),
-                    ui.input_selectize("corr_archetype",
-                                       "Select Archetypes:",
-                                       sh.archetypes,
-                                       multiple=True),
-                    ui.input_selectize("corr_transform",
-                                       "Select Transformation:",
-                                       ["Raw", "Log2"],
-                                       selected="Log2"),
-                    ui.input_selectize("corr_method_input",
-                                       "Select Method:",
-                                       ["Pearson", "Spearman"],
-                                       selected="Spearman")),
-                output_widget("gene_correlation_heatmap")
-                )
-            ),
-
-            ui.nav_menu("PanCan Archetype UMAP",
-
-                # Tab where user can select multiple eachs and view their expression overlayed on the individual
-                # PanCan UMAPs
-                ui.nav_panel("PanCan UMAP Gene Expression",
-                    ui.page_sidebar(
-                        ui.sidebar(
-                            ui.input_action_button("pancan_umap_run", "Run"),
-                            ui.h3("PanCan UMAP Gene Expression"),
-                            ui.input_selectize("pancan_gene_input",
-                                                "Select Genes:",
-                                                [],
-                                                multiple = True),
-                            ui.input_selectize("pancan_compartment_input",
-                                            "Select Compartment:",
-                                            sh.compartments
-                                            ),
-                            ui.input_selectize("pancan_umap_transformation",
-                                            "Choose Transformation:",
-                                            ["Raw", "Log2"],
-                                            multiple= False,
-                                            selected= "Log2")
-                            ),
-                            ui.layout_columns(output_widget("pancan_subplots"))
-                    )
-                ),
-
-                # Given user-defined gene list, plots the gene factor score on top of the PanCan UMAP
-                ui.nav_panel("PanCan Gene Factor Scores",
-                    ui.page_sidebar(
-                        ui.sidebar(
-                            ui.h3("PanCan Gene Factor Scores"),
-                            ui.input_action_button("gene_factor_run", "Run"),
-                            ui.input_selectize("gene_factor_genes",
-                                                "Select Genes:",
-                                                [],
-                                                multiple=True),
-                            ui.input_selectize("gene_factor_compartment",
-                                            "Select Compartment:",
-                                            sh.compartments)
-                        ),
-                        ui.layout_column_wrap(
-                            output_widget("gene_factor_analysis"),
-                            output_widget("pancan_archetypes_gfs")
-                        )
-                    )
-                )
-            ),
-
-            ui.nav_menu("Ranked DGE",
-                # Differential Gene Expression (DGE) between the top and bottom quantiles
-                # of patients based on pre-calculated IPI feature scores.
-                ui.nav_panel("Feature Score Ranked DGE",
-                    ui.page_sidebar(
-                        ui.sidebar(
-                            ui.h1("Feature Score Ranked DGE"),
-                            ui.input_action_button("dge_run", "Run"),
-                            ui.input_selectize("flow_score_to_rank",
-                                            "Feature Score For Ranking:",
-                                            list(sh.feature_scores.keys())),
-                            ui.input_slider("dge_slider",
-                                            "Quartile:",
-                                            value = .2,
-                                            min = 0.05,
-                                            max = .5,
-                                            step = .05),
-                            ui.input_selectize("dge_compartment",
-                                                "DGE Compartment:",
-                                                sh.compartments),
-                            ui.input_numeric("dge_fc_thresh",
-                                            "Log2FC Threshold:",
-                                            value=2),
-                            ui.input_numeric("dge_p_thresh",
-                                            "-Log10(P-Value) Threshold:",
-                                            value = .00001)
-                        ),
-                        output_widget("compartment_featurescore_dge"),
-                        ui.layout_column_wrap(
-                            output_widget("compartment_featurescore_dge_bot"),
-                            output_widget("compartment_featurescore_dge_top")
-                        ),
-                        ui.h4("Methods"),
-                        ui.p("""The Wilxocon Rank-sum test is used to calculate differentially expressed genes.
-                             P-values are corrected using Benjamini/Hochberg multiple testing correction.
-                             """)
-                    )
-                ),
-
-                # DGE between the top and bottom quantiles of patients based on
-                # gene factor scores calculated from a collection of genes.
-                ui.nav_panel("Factor Score Ranked DGE",
-                    ui.page_sidebar(
-                        ui.sidebar(
-                            ui.h1("Factor Score Ranked DGE"),
-                            ui.input_action_button("fs_dge_run","Run"),
-                            ui.input_selectize("fs_dge_genes",
-                                            "Genes for gene-factor score:",
+                    ui.sidebar(
+                        ui.h3("PanCan Gene Factor Scores"),
+                        ui.input_action_button("gene_factor_run", "Run",style=RUN_STYLE),
+                        ui.input_selectize("gene_factor_genes",
+                                            "Select Genes:",
                                             [],
                                             multiple=True),
-                            ui.input_selectize("fs_dge_compartment",
-                                            "Compartment to calculate gene-factor score:",
-                                            sh.compartments),
-                            ui.input_slider("fs_dge_slider",
-                                            "Quartile:",
-                                            value = .2,
-                                            min = 0.05, max = .5,
-                                            step = .05),
-                            ui.input_selectize("fs_dge_compartment_for_dge",
-                                            "Compartment for DGE:",
-                                            sh.compartments),
-                            ui.input_numeric("fs_dge_fc_thresh",
-                                            "Fold Change Magnitude Threshold",
-                                            value = 2),
-                            ui.input_numeric("fs_dge_p_thresh",
-                                            "-Log10(P-Value) Threshold",
-                                            value=.00001)
-                            ),
-                        output_widget("gfs_ranked_dge"),
-                        ui.layout_column_wrap(
-                            output_widget("gfs_ranked_dge_bot"),
-                            output_widget("gfs_ranked_dge_top"))
+                        ui.input_selectize("gene_factor_compartment",
+                                        "Select Compartment:",
+                                        sh.compartments)
                     ),
+                    ui.layout_column_wrap(
+                        output_widget("gene_factor_analysis"),
+                        output_widget("pancan_archetypes_gfs")
+                    )
                 )
             )
         ),
-    title = "QuIPI - Querying IPI"
+
+        ui.nav_menu("Ranked DGE",
+            # Differential Gene Expression (DGE) between the top and bottom quantiles
+            # of patients based on pre-calculated IPI feature scores.
+            ui.nav_panel("Feature Score Ranked DGE",
+                ui.page_sidebar(
+                    ui.sidebar(
+                        ui.h1("Feature Score Ranked DGE"),
+                        ui.input_action_button("dge_run", "Run",style=RUN_STYLE),
+                        ui.input_selectize("flow_score_to_rank",
+                                        "Feature Score For Ranking:",
+                                        list(sh.feature_scores.keys())),
+                        ui.input_slider("dge_slider",
+                                        "Quartile:",
+                                        value = .2,
+                                        min = 0.05,
+                                        max = .5,
+                                        step = .05),
+                        ui.input_selectize("dge_compartment",
+                                            "DGE Compartment:",
+                                            sh.compartments),
+                        ui.input_numeric("dge_fc_thresh",
+                                        "Log2FC Threshold:",
+                                        value=2),
+                        ui.input_numeric("dge_p_thresh",
+                                        "-Log10(P-Value) Threshold:",
+                                        value = .00001)
+                    ),
+                    output_widget("compartment_featurescore_dge"),
+                    ui.layout_column_wrap(
+                        output_widget("compartment_featurescore_dge_bot"),
+                        output_widget("compartment_featurescore_dge_top")
+                    ),
+                    ui.h4("Methods"),
+                    ui.p("""The Wilxocon Rank-sum test is used to calculate differentially expressed genes.
+                            P-values are corrected using Benjamini/Hochberg multiple testing correction.
+                            """)
+                )
+            ),
+
+            # DGE between the top and bottom quantiles of patients based on
+            # gene factor scores calculated from a collection of genes.
+            ui.nav_panel("Factor Score Ranked DGE",
+                ui.page_sidebar(
+                    ui.sidebar(
+                        ui.h1("Factor Score Ranked DGE"),
+                        ui.input_action_button("fs_dge_run","Run",style=RUN_STYLE),
+                        ui.input_selectize("fs_dge_genes",
+                                        "Genes for gene-factor score:",
+                                        [],
+                                        multiple=True),
+                        ui.input_selectize("fs_dge_compartment",
+                                        "Compartment to calculate gene-factor score:",
+                                        sh.compartments),
+                        ui.input_slider("fs_dge_slider",
+                                        "Quartile:",
+                                        value = .2,
+                                        min = 0.05, max = .5,
+                                        step = .05),
+                        ui.input_selectize("fs_dge_compartment_for_dge",
+                                        "Compartment for DGE:",
+                                        sh.compartments),
+                        ui.input_numeric("fs_dge_fc_thresh",
+                                        "Fold Change Magnitude Threshold",
+                                        value = 2),
+                        ui.input_numeric("fs_dge_p_thresh",
+                                        "-Log10(P-Value) Threshold",
+                                        value=.00001)
+                        ),
+                    output_widget("gfs_ranked_dge"),
+                    ui.layout_column_wrap(
+                        output_widget("gfs_ranked_dge_bot"),
+                        output_widget("gfs_ranked_dge_top"))
+                ),
+            )
+        ),
+    title = "QuIPI - Querying IPI",
+    theme=theme.lumen,
+    bg= '#8ddbeb',
 )
 
 def server(input, output, session):
@@ -253,6 +270,10 @@ def server(input, output, session):
         fig = pp.plot_pancan_archetypes()
         fig.update_layout(autosize=False, width=650, height=500,template = "simple_white")
         return fig
+    
+    @render_widget
+    def pancan_archetype_breakdown():
+        return sh.plot_archetype_beakdown()
     
     @render_widget
     @reactive.event(input.gene_factor_run)
@@ -467,12 +488,6 @@ def server(input, output, session):
         fig = rpd.plot_fc_table(df,"Negative")
 
         return fig
-
-    #ui.input_selectize("box_viol_gene_input",
-    #ui.input_selectize("corr_gene_input",
-    #ui.input_selectize("pancan_gene_input",
-    #ui.input_selectize("gene_factor_genes",
-    #ui.input_selectize("fs_dge_genes",
 
     @reactive.effect
     def _():

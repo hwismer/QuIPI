@@ -75,8 +75,17 @@ def plot_pancan_archetypes():
                          color="archetype", color_discrete_map=sh.colors_pancan)
     fig.update_traces(marker=dict(size=12))
     fig.update_layout(legend_title_text = "Archetype")
-    fig.update_layout(template = "simple_white")
+    fig.update_layout(template = "simple_white",
+                      legend=dict(
+                        y=0.5,  # Center vertically
+                        #xanchor='left',  # Align to the left of the legend box
+                        #yanchor='middle',  # Center vertically
+                        font=dict(size=18)  # Increase font size
+                        ),
+    )
     fig.update_yaxes(visible=False)
     fig.update_xaxes(visible=False)
+    #fig.update_layout(width =1200)
+
 
     return fig

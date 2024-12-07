@@ -10,7 +10,7 @@ import pandas as pd
 from statsmodels.stats.multitest import multipletests
 from scipy.stats import ranksums
 
-import quipi_dash_core.gene_factor as gf
+import gene_factor as gf
 
 
 def factor_ranked_dge(gfs_genes, gfs_compartment, quantile, dge_compartment,fc_threshold=1, p_val_thresh=0.000001):
@@ -31,6 +31,8 @@ def feature_ranked_dge(feature_score,compartment,quantile, fc_threshold= 1, p_va
    comp = compartment
    quantile = quantile
    
+   
+
    top_data, bot_data = rank_using_score(sh.quipi_flow, rank_cat, quantile, comp)
    change_df = do_dge(top_data, bot_data)
    sig_pos, sig_neg = filter_dge(change_df, fc_threshold, p_val_thresh)
