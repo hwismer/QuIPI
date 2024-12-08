@@ -523,12 +523,10 @@ def server(input, output, session):
             selected=[],
             server=True,
         )
-    
-    
+       
 
 # Create the Shiny app
 app = App(app_ui, server)
 
-print("Done")
 
 

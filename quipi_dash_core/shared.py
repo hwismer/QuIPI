@@ -138,7 +138,7 @@ def plot_cancer_glossary_table():
                 font = dict(color = 'black', size = 16)))
     ])
     
-    fig.update_layout(autosize=True,)#, width=600,height=800)
+    fig.update_layout(autosize=True,)
     return fig
 
 def plot_indication_breakdown():
@@ -153,11 +153,10 @@ def plot_indication_breakdown():
 
     return fig
 
-
+categorical_data = pd.read_csv("./data/quipi_raw_tpm.csv", usecols=cats)
 
 def plot_archetype_beakdown():
-    arch_counts = pd.read_csv("./data/quipi_raw_tpm.csv", usecols=["sample_name","archetype"])
-    arch_counts = arch_counts.groupby("sample_name")["archetype"].unique().value_counts().reset_index()
+    arch_counts = categorical_data[["sample_name", "archetype"]].groupby("sample_name")["archetype"].unique().value_counts().reset_index()
     arch_counts["archetype"] = [ind[0] for ind in arch_counts["archetype"]]
 
     fig = px.bar(arch_counts, x = "archetype", y = "count", 
