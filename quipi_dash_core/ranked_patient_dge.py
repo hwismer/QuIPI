@@ -32,8 +32,10 @@ def feature_ranked_dge(feature_score,compartment,quantile, fc_threshold= 1, p_va
    quantile = quantile
    
    
-
-   top_data, bot_data = rank_using_score(sh.quipi_flow, rank_cat, quantile, comp)
+   flow_df = pd.read_csv("./data/quipi_flow_scores.csv")
+   
+   top_data, bot_data = rank_using_score(flow_df, rank_cat, quantile, comp)
+   print(top_data, bot_data)
    change_df = do_dge(top_data, bot_data)
    sig_pos, sig_neg = filter_dge(change_df, fc_threshold, p_val_thresh)
    fig = plot_dge(change_df,fc_threshold,p_val_thresh)
@@ -48,7 +50,7 @@ def rank_using_score(df, rank_cat, quantile, comp):
    bot_patients = df[df[rank_cat] < df[rank_cat].quantile(quantile)][["sample_name", rank_cat]]
 
 
-   top_tpm = sh.quipi_raw[sh.quipi_raw["sample_name"].isin(top_patients["sample_name"])]
+   top_tpm = df[df["sample_name"].isin(top_patients["sample_name"])]
    top_comp = top_tpm[top_tpm["compartment"] == comp]
 
    bot_tpm = sh.quipi_raw[sh.quipi_raw["sample_name"].isin(bot_patients["sample_name"])]
