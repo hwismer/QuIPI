@@ -5,21 +5,21 @@ import csv
 
 
 # All categorial columns for the underlying data minus the UMAP coordinates
-categoricals = ("patient", "sample_name",
+categoricals = ["patient", "sample_name",
              "indication", "sample_type","sample_type_cat",
-             "compartment", "archetype")
+             "compartment", "archetype"]
 
 # Everything that isn't a gene, including umap coordinates.
-non_genes = ("patient", "sample_name",
+non_genes = ["patient", "sample_name",
              "indication", "sample_type","sample_type_cat",
              "compartment", "archetype", 
-             "x_umap1", "x_umap2")
+             "x_umap1", "x_umap2"]
 
-indications = ('LUNG', 'HEP', 'ADR', 'GBM', 'CRC', 'BRC', 'KID', 'MEL', 'PNET', 'GYN', 'HNSC', 'SI', 'SRC', 'GALL', 'PDAC', 'BLAD')
-compartments = ('Live', 'Tumor', 'Treg', 'Myeloid', 'Stroma', 'T_cell')
-archetypes = ('Unclassified', 'ID Mono', 'ID CD8 Mac', 'IR CD8 Mono', 
+indications = ['LUNG', 'HEP', 'ADR', 'GBM', 'CRC', 'BRC', 'KID', 'MEL', 'PNET', 'GYN', 'HNSC', 'SI', 'SRC', 'GALL', 'PDAC', 'BLAD']
+compartments = ['Live', 'Tumor', 'Treg', 'Myeloid', 'Stroma', 'T_cell']
+archetypes = ['Unclassified', 'ID Mono', 'ID CD8 Mac', 'IR CD8 Mono', 
               'MC DC2', 'IS CD8', 'TC Mac', 'TC DC', 'IR CD4 Mac', 
-              'IR CD8 Mac', 'ID CD4 Mac', 'MC DC1', 'IS CD4')
+              'IR CD8 Mac', 'ID CD4 Mac', 'MC DC1', 'IS CD4']
 
 indic_to_color = {'LUNG':'rgb(102, 197, 204)',
                   'HEP':'rgb(246, 207, 113)', 

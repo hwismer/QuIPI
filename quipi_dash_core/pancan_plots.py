@@ -17,17 +17,14 @@ from scipy.stats import mannwhitneyu
 from statsmodels.stats.multitest import multipletests
 from scipy.stats import ranksums
 
-import ranked_patient_dge as rpd
-import gene_factor as gf
-import box_viol_expression_plot as bv
-
 def plot_pancan_exprn_subplots(transform, genes, compartment):
 
     #input_arr = sh.transformations[transform]
     if transform == "Raw":
-        input_arr = pd.read_csv("./data/quipi_raw_tpm.csv", usecols=sh.non_genes + genes)
+        input_arr = pd.read_csv("./data/quipi_raw_tpm.csv", usecols=sh.non_genes + list(genes))
     elif transform == "Log2":
-        input_arr = pd.read_csv("./data/quipi_log2_tpm.csv", usecols=sh.non_genes + genes)
+        input_arr = pd.read_csv("./data/quipi_log2_tpm.csv", usecols=sh.non_genes + list(genes))
+    
     input_arr = input_arr[input_arr["compartment"] == compartment]
 
 

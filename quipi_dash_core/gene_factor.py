@@ -4,10 +4,9 @@ from scipy.stats import zscore
 import shared as sh
 
 def calculate_gene_factor_score(gene_set,compartment):
-    return None
 
-    input_arr = pd.read_csv("./quipi_log2_tpm.csv", usecols=sh.non_genes + gene_set)
-    #log2_subset = sh.quipi_log2[sh.quipi_log2["archetype"] != "Unclassified"][sh.quipi_log2["compartment"] == compartment][sh.non_genes+gene_set]
+    input_arr = pd.read_csv("./data/quipi_log2_tpm.csv", usecols=sh.non_genes + gene_set)
+    log2_subset = input_arr[input_arr["archetype"] != "Unclassified"][input_arr["compartment"] == compartment][sh.non_genes+gene_set]
     #raw_subset = sh.quipi_raw[sh.quipi_raw["archetype"] != "Unclassified"][sh.quipi_raw["compartment"] == compartment][sh.non_genes+gene_set]
 
     z_subset = log2_subset[gene_set].apply(zscore)
