@@ -173,6 +173,7 @@ app_ui = ui.page_navbar(
                 ui.layout_sidebar(
                     ui.sidebar(
                         ui.h4("Feature Score Ranked DGE"),
+                        ui.h6("This is slow at the moment. Don't click Run multiple times in succession. Optimization coming soon."),
                         ui.input_action_button("dge_run", "Run",style=RUN_STYLE),
                         ui.input_selectize("flow_score_to_rank",
                                         "Feature Score For Ranking:",
@@ -211,6 +212,7 @@ app_ui = ui.page_navbar(
                 ui.layout_sidebar(
                     ui.sidebar(
                         ui.h4("Factor Score Ranked DGE"),
+                        ui.h6("This is slow at the moment. Don't click Run multiple times in succession. Optimization coming soon."),
                         ui.input_action_button("fs_dge_run","Run",style=RUN_STYLE),
                         ui.input_selectize("fs_dge_genes",
                                         "Genes for gene-factor score:",
