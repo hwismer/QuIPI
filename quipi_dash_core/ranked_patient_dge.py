@@ -1,7 +1,6 @@
 import shared as sh
 
 import plotly.express as px
-from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 
 import numpy as np
@@ -16,7 +15,9 @@ import gene_factor as gf
 def factor_ranked_dge(gfs_genes, gfs_compartment, quantile, dge_compartment,fc_threshold=1, p_val_thresh=0.000001):
    
    gfs = gf.calculate_gene_factor_score(gfs_genes, gfs_compartment)
-   top_data, bot_data = rank_using_score(gfs, "factor_score", quantile, dge_compartment)
+
+   quipi_raw = pd.read_csv("./data/quipi_raw_tpm.csv")
+   top_data, bot_data = rank_using_score(gfs, quipi_raw,"factor_score", quantile, dge_compartment)
    change_df = do_dge(top_data, bot_data)
    sig_pos, sig_neg = filter_dge(change_df, fc_threshold, p_val_thresh)
    fig = plot_dge(change_df,fc_threshold,p_val_thresh)
@@ -31,10 +32,10 @@ def feature_ranked_dge(feature_score,compartment,quantile, fc_threshold= 1, p_va
    comp = compartment
    quantile = quantile
    
-   
    flow_df = pd.read_csv("./data/quipi_flow_scores.csv",usecols=["sample_name", sh.feature_scores[feature_score]])
+   quipi_raw = pd.read_csv("./data/quipi_raw_tpm.csv")
    
-   top_data, bot_data = rank_using_score(flow_df, rank_cat, quantile, comp)
+   top_data, bot_data = rank_using_score(flow_df, quipi_raw, rank_cat, quantile, comp)
    change_df = do_dge(top_data, bot_data)
    sig_pos, sig_neg = filter_dge(change_df, fc_threshold, p_val_thresh)
    fig = plot_dge(change_df,fc_threshold,p_val_thresh)
@@ -44,11 +45,9 @@ def feature_ranked_dge(feature_score,compartment,quantile, fc_threshold= 1, p_va
 
 
 
-def rank_using_score(df, rank_cat, quantile, comp):
+def rank_using_score(df, quipi_raw, rank_cat, quantile, comp):
    top_patients = df[df[rank_cat] > df[rank_cat].quantile(1 - quantile)][["sample_name", rank_cat]]
    bot_patients = df[df[rank_cat] < df[rank_cat].quantile(quantile)][["sample_name", rank_cat]]
-
-   quipi_raw = pd.read_csv("./data/quipi_raw_tpm.csv")
 
    top = quipi_raw[(quipi_raw["sample_name"].isin(top_patients["sample_name"])) & (quipi_raw["compartment"] == comp)]
 
@@ -71,7 +70,7 @@ def do_dge(group1, group2):
 
    fchange_df = pd.DataFrame({"Gene":fc.index,
                              "Log2(FC)":fc,
-                             "P-Value":p_vals,
+                             "P-Value": p_vals,
                              "P-Value Adj." : p_adj,
                              "log10_p_val":log_p_val})
    
@@ -88,7 +87,7 @@ def determine_dge(df, fc_thresh, p_val_thresh):
 def filter_dge(fc_df, fc_thresh, p_thresh):
    fc_df["sig_call"] = fc_df.apply(determine_dge,axis=1,args = (fc_thresh,p_thresh))
 
-   keep_cols = ["Gene", "Log2(FC)","P-Value Adj."]
+   keep_cols = ["Gene", "Log2(FC)", "P-Value","P-Value Adj."]
    sig_pos = fc_df[fc_df["sig_call"] == "positive_sig"].sort_values(by = ["log10_p_val", "Log2(FC)"],ascending=False)[keep_cols]
    sig_neg = fc_df[fc_df["sig_call"] == "negative_sig"].sort_values(by = ["log10_p_val", "Log2(FC)"],ascending=False)[keep_cols]
     

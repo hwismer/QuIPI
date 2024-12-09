@@ -46,7 +46,7 @@ app_ui = ui.page_navbar(
         ui.nav_panel("Box/Violin Plots",
             ui.layout_sidebar(
                 ui.sidebar(
-                    ui.h3("Explore gene expression by category"),
+                    ui.h4("Explore gene expression by category"),
                     ui.input_action_button("box_viol_run", "Run", style=RUN_STYLE),
                     ui.input_selectize("box_viol_plot",
                                         "Select Plot Type:",
@@ -75,41 +75,42 @@ app_ui = ui.page_navbar(
         # Pairwise correlation plot between user-defined genes.
         ui.nav_panel("Correlation Plots",
             ui.layout_sidebar(
-                ui.sidebar("Explore the correlation of selected genes.",
-                ui.input_action_button("corr_run", "Run",style=RUN_STYLE),
-                ui.input_selectize("corr_gene_input",
-                                    "Select Genes:",
-                                    [],
-                                    multiple=True,
-                                    options = {'server':True}),
-                ui.input_selectize("corr_indication",
-                                    "Select Indications:",
-                                    choices=sh.indications,
-                                    selected=sh.indications,
-                                    multiple = True),
-                ui.input_selectize("corr_tissue",
-                                    "Select Tissue:",
-                                    choices=["Tumor", "Normal"],
-                                    selected = ["Tumor", "Normal"],
-                                    multiple = True),
-                ui.input_selectize("corr_compartment",
-                                    "Select Compartments:",
-                                    choices=sh.compartments,
-                                    selected=sh.compartments,
-                                    multiple=True),
-                ui.input_selectize("corr_archetype",
-                                    "Select Archetypes:",
-                                    choices=sh.archetypes,
-                                    multiple=True,
-                                    selected=sh.archetypes),
-                ui.input_selectize("corr_transform",
-                                    "Select Transformation:",
-                                    choices=["Raw", "Log2"],
-                                    selected="Log2"),
-                ui.input_selectize("corr_method_input",
-                                    "Select Method:",
-                                    choices=["Pearson", "Spearman"],
-                                    selected="Spearman")),
+                ui.sidebar(
+                    ui.h4("Explore the correlation of selected genes."),
+                    ui.input_action_button("corr_run", "Run",style=RUN_STYLE),
+                    ui.input_selectize("corr_gene_input",
+                                        "Select Genes:",
+                                        [],
+                                        multiple=True,
+                                        options = {'server':True}),
+                    ui.input_selectize("corr_indication",
+                                        "Select Indications:",
+                                        choices=sh.indications,
+                                        selected=sh.indications,
+                                        multiple = True),
+                    ui.input_selectize("corr_tissue",
+                                        "Select Tissue:",
+                                        choices=["Tumor", "Normal"],
+                                        selected = ["Tumor", "Normal"],
+                                        multiple = True),
+                    ui.input_selectize("corr_compartment",
+                                        "Select Compartments:",
+                                        choices=sh.compartments,
+                                        selected=sh.compartments,
+                                        multiple=True),
+                    ui.input_selectize("corr_archetype",
+                                        "Select Archetypes:",
+                                        choices=sh.archetypes,
+                                        multiple=True,
+                                        selected=sh.archetypes),
+                    ui.input_selectize("corr_transform",
+                                        "Select Transformation:",
+                                        choices=["Raw", "Log2"],
+                                        selected="Log2"),
+                    ui.input_selectize("corr_method_input",
+                                        "Select Method:",
+                                        choices=["Pearson", "Spearman"],
+                                        selected="Spearman")),
             ui.card(ui.card_body(output_widget("gene_correlation_heatmap")),
                     ui.card_footer("Click button in the bottom right for fullscreen view."),
                     full_screen=True)
@@ -123,7 +124,7 @@ app_ui = ui.page_navbar(
             ui.nav_panel("PanCan UMAP Gene Expression",
                 ui.layout_sidebar(
                     ui.sidebar(
-                        ui.h3("PanCan UMAP Gene Expression"),
+                        ui.h4("PanCan UMAP Gene Expression"),
                         ui.input_action_button("pancan_umap_run", "Run",style=RUN_STYLE),
                         ui.input_selectize("pancan_gene_input",
                                             "Select Genes:",
@@ -147,7 +148,7 @@ app_ui = ui.page_navbar(
             ui.nav_panel("PanCan Gene Factor Scores",
                 ui.layout_sidebar(
                     ui.sidebar(
-                        ui.h3("PanCan Gene Factor Scores"),
+                        ui.h4("PanCan Gene Factor Scores"),
                         ui.input_action_button("gene_factor_run", "Run",style=RUN_STYLE),
                         ui.input_selectize("gene_factor_genes",
                                             "Select Genes:",
@@ -171,7 +172,7 @@ app_ui = ui.page_navbar(
             ui.nav_panel("Feature Score Ranked DGE",
                 ui.layout_sidebar(
                     ui.sidebar(
-                        ui.h1("Feature Score Ranked DGE"),
+                        ui.h4("Feature Score Ranked DGE"),
                         ui.input_action_button("dge_run", "Run",style=RUN_STYLE),
                         ui.input_selectize("flow_score_to_rank",
                                         "Feature Score For Ranking:",
@@ -190,7 +191,7 @@ app_ui = ui.page_navbar(
                                         value=2),
                         ui.input_numeric("dge_p_thresh",
                                         "-Log10(P-Value) Threshold:",
-                                        value = .00001)
+                                        value = 1)
                     ),
                     output_widget("compartment_featurescore_dge"),
                     ui.layout_column_wrap(
@@ -209,7 +210,7 @@ app_ui = ui.page_navbar(
             ui.nav_panel("Factor Score Ranked DGE",
                 ui.layout_sidebar(
                     ui.sidebar(
-                        ui.h1("Factor Score Ranked DGE"),
+                        ui.h4("Factor Score Ranked DGE"),
                         ui.input_action_button("fs_dge_run","Run",style=RUN_STYLE),
                         ui.input_selectize("fs_dge_genes",
                                         "Genes for gene-factor score:",
@@ -231,7 +232,7 @@ app_ui = ui.page_navbar(
                                         value = 2),
                         ui.input_numeric("fs_dge_p_thresh",
                                         "-Log10(P-Value) Threshold",
-                                        value=.00001)
+                                        value=1)
                         ),
                     output_widget("gfs_ranked_dge"),
                     ui.layout_column_wrap(
