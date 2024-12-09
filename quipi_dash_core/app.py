@@ -243,7 +243,7 @@ app_ui = ui.page_navbar(
         ),
     title = "QuIPI - Querying IPI",
     theme=theme.lumen,
-    bg= '#8ddbeb',
+    bg= '#85aad4',
 )
 
 def server(input, output, session):
