@@ -3,7 +3,6 @@ import plotly.graph_objects as go
 import plotly.express as px
 import csv
 
-
 # All categorial columns for the underlying data minus the UMAP coordinates
 categoricals = ["patient", "sample_name",
              "indication", "sample_type","sample_type_cat",
@@ -38,20 +37,23 @@ indic_to_color = {'LUNG':'rgb(102, 197, 204)',
                   'PDAC':'rgb(220, 176, 242)',
                   'BLAD':'rgb(135, 197, 95)'}
 
+
+# Open the file in read mode
 with open("./data/quipi_raw_tpm.csv", 'r') as file:
-    reader = csv.DictReader(file)
-    quipi_all_columns = reader.fieldnames
+    reader = csv.reader(file)
+    # Read the first row only (header)
+    quipi_all_columns= next(reader)
 
 with open("./data/quipi_flow_scores.csv", 'r') as file:
-    reader = csv.DictReader(file)
-    quipi_flow_columns = reader.fieldnames
+    reader = csv.reader(file)
+    # Read the first row only (header)
+    quipi_flow_columns= next(reader)
 
 cats = ('patient','sample_name','indication', 'archetype', 'sample_type', 'sample_type_cat', 'x_umap1', 'x_umap2')
 non_cats = tuple(set(quipi_flow_columns) - set(cats))
 genes = list(set(quipi_all_columns) - set(non_genes))
+
 categorical_data = pd.read_csv("./data/quipi_raw_tpm.csv", usecols=cats)
-
-
 
 # Cleaned categories for user mapped to underlying data column names
 categoricals_dict = {"Patient" : "patient",
@@ -152,8 +154,6 @@ def plot_indication_breakdown():
     fig.update_layout(title_x= .5, title_y = .98,font=dict(size=16))
 
     return fig
-
-categorical_data = pd.read_csv("./data/quipi_raw_tpm.csv", usecols=cats)
 
 def plot_archetype_beakdown():
     arch_counts = categorical_data[["sample_name", "archetype"]].groupby("sample_name")["archetype"].unique().value_counts().reset_index()

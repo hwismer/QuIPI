@@ -12,9 +12,9 @@ import ranked_patient_dge as rpd
 import gene_factor as gf
 import box_viol_expression_plot as bv
 import pancan_plots as pp
+import correlation_analysis as corr
 
 RUN_STYLE="background-color: #AFE1AF; color: black;"
-
 
 # Define the UI
 app_ui = ui.page_navbar(
@@ -299,27 +299,6 @@ def server(input, output, session):
         fig = bv.box_viol_exprn(transform, x_cat, gene, group, plot_type)
 
         return fig
-    
-
-    @render.data_frame
-    def gene_corr_df():
-        genes = list(input.corr_gene_input())
-        indications = input.corr_indication()
-        method = sh.corr_methods[input.corr_method_input()]
-        compartments = input.corr_compartment()
-        archetypes = input.corr_archetype()
-        tissues = [sh.tissue_dict[tis] for tis in input.corr_tissue()]
-
-        transform = input.corr_transform()
-
-        input_arr = sh.transformations[transform]
-        input_arr = input_arr[input_arr["indication"].isin(indications)]
-        input_arr = input_arr[input_arr["compartment"].isin(compartments)]
-        input_arr = input_arr[input_arr["archetype"].isin(archetypes)]
-        input_arr = input_arr[input_arr["sample_type_cat"].isin(tissues)]
-        input_arr = input_arr[genes]
-
-        return input_arr
 
 
     @render_widget
@@ -332,42 +311,10 @@ def server(input, output, session):
         compartments = input.corr_compartment()
         archetypes = input.corr_archetype()
         tissues = [sh.tissue_dict[tis] for tis in input.corr_tissue()]
-
-
         transform = input.corr_transform()
 
-        if transform == "Raw":
-            input_arr = pd.read_csv("./data/quipi_raw_tpm.csv", usecols=sh.non_genes + list(genes))
-        elif transform == "Log2":
-            input_arr = pd.read_csv("./data/quipi_log2_tpm.csv", usecols=sh.non_genes + list(genes))
-
-        input_arr = input_arr[input_arr["indication"].isin(indications)]
-        input_arr = input_arr[input_arr["compartment"].isin(compartments)]
-        input_arr = input_arr[input_arr["archetype"].isin(archetypes)]
-        input_arr = input_arr[input_arr["sample_type_cat"].isin(tissues)]
-        input_arr = input_arr[list(genes)]
-
-        corr_df = input_arr.corr(method=method)
-
-        # Create a mask for the upper triangle
-        mask = np.triu(np.ones_like(corr_df, dtype=bool))
-
-        # Apply the mask to the correlation matrix
-        corr_lower_tri = corr_df.mask(mask)
-
-        corr_lower_tri = corr_lower_tri.dropna(axis=0, how = "all")
-        corr_lower_tri = corr_lower_tri.dropna(axis=1, how = "all")
-
-        fig = px.imshow(corr_lower_tri.fillna(""),
-                        zmin = -1, zmax =1,
-                        color_continuous_scale = "RdBu_r",
-                        text_auto=True)
-        
-        fig.update_layout(template='simple_white',autosize=True)
-        fig.update_xaxes(showgrid=False, showline=False)
-        fig.update_yaxes(showgrid=False, showline=False)
-
-        return fig
+        return corr.gene_correlation_heatmap(genes, indications, method, compartments, archetypes, tissues, transform)
+    
     
     @render_widget
     @reactive.event(input.gene_factor_run)
@@ -391,97 +338,75 @@ def server(input, output, session):
         return fig
     
 
+
+    # DGE by COMPARTMENT score
+    @reactive.calc
+    @reactive.event(input.dge_run)
+    def feature_ranked_dge_reactive():
+
+        fig, sig_pos, sig_neg = rpd.feature_ranked_dge(input.flow_score_to_rank(), 
+                                      input.dge_compartment(), 
+                                      input.dge_slider(),
+                                      input.dge_fc_thresh(),
+                                      input.dge_p_thresh())
+
+        return fig, sig_pos, sig_neg
+    
+
     
     @render_widget
-    @reactive.event(input.dge_run)
     def compartment_featurescore_dge():
-        return rpd.feature_ranked_dge(input.flow_score_to_rank(), 
-                                      input.dge_compartment(), 
-                                      input.dge_slider(),
-                                      input.dge_fc_thresh(),
-                                      input.dge_p_thresh())[0]
+        return feature_ranked_dge_reactive()[0]
     
     @render_widget
-    @reactive.event(input.dge_run)
     def compartment_featurescore_dge_top():
-        df = rpd.feature_ranked_dge(input.flow_score_to_rank(), 
-                                      input.dge_compartment(), 
-                                      input.dge_slider(),
-                                      input.dge_fc_thresh(),
-                                      input.dge_p_thresh())[1]
+        df =  feature_ranked_dge_reactive()[1]
         
         fig = rpd.plot_fc_table(df,"Positive")
 
         return fig
-
     
     @render_widget
-    @reactive.event(input.dge_run)
     def compartment_featurescore_dge_bot():
-        df =  rpd.feature_ranked_dge(input.flow_score_to_rank(), 
-                                      input.dge_compartment(), 
-                                      input.dge_slider(),
-                                      input.dge_fc_thresh(),
-                                      input.dge_p_thresh())[2]
-        
+        df = feature_ranked_dge_reactive()[2]
         fig = rpd.plot_fc_table(df,"Negative")
-
         return fig
     
-    
-    
 
-    @render_widget
+    # DGE by FACTOR score
+    @reactive.calc
     @reactive.event(input.fs_dge_run)
+    def factor_ranked_dge_reactive():
+
+        fig, sig_pos, sig_neg = rpd.factor_ranked_dge(list(input.fs_dge_genes()),
+                                                      input.fs_dge_compartment(),
+                                                      input.fs_dge_slider(),
+                                                      input.fs_dge_compartment_for_dge(),
+                                                      input.fs_dge_fc_thresh(),
+                                                      input.fs_dge_p_thresh())
+
+        return fig, sig_pos, sig_neg
+
+    
+    @render_widget
     def gfs_ranked_dge():
-        gfs_genes = list(input.fs_dge_genes())
-        gfs_compartment = input.fs_dge_compartment()
-
-        dge_quantile = input.fs_dge_slider()
-        dge_compartment = input.fs_dge_compartment_for_dge()
-
-        fc_thresh = input.fs_dge_fc_thresh()
-        p_thresh = input.fs_dge_p_thresh()
-
-        fig = rpd.factor_ranked_dge(gfs_genes,gfs_compartment,dge_quantile,dge_compartment, fc_thresh, p_thresh)[0]
-
-        return fig
+        return factor_ranked_dge_reactive()[0]
     
     @render_widget
-    @reactive.event(input.fs_dge_run)
     def gfs_ranked_dge_top():
-        gfs_genes = list(input.fs_dge_genes())
-        gfs_compartment = input.fs_dge_compartment()
-
-        dge_quantile = input.fs_dge_slider()
-        dge_compartment = input.fs_dge_compartment_for_dge()
-
-        fc_thresh = input.fs_dge_fc_thresh()
-        p_thresh = input.fs_dge_p_thresh()
-
-        df = rpd.factor_ranked_dge(gfs_genes,gfs_compartment,dge_quantile,dge_compartment, fc_thresh, p_thresh)[1]
-
+        df = factor_ranked_dge_reactive()[1]
         fig = rpd.plot_fc_table(df,"Positive")
-
         return fig
     
     @render_widget
-    @reactive.event(input.fs_dge_run)
     def gfs_ranked_dge_bot():
-        gfs_genes = list(input.fs_dge_genes())
-        gfs_compartment = input.fs_dge_compartment()
-
-        dge_quantile = input.fs_dge_slider()
-        dge_compartment = input.fs_dge_compartment_for_dge()
-
-        fc_thresh = input.fs_dge_fc_thresh()
-        p_thresh = input.fs_dge_p_thresh()
-
-        df = rpd.factor_ranked_dge(gfs_genes,gfs_compartment,dge_quantile,dge_compartment, fc_thresh, p_thresh)[2]
+        df = factor_ranked_dge_reactive()[2]
         fig = rpd.plot_fc_table(df,"Negative")
-
         return fig
+        
 
+    # Gene selection drop down inputs to make them computer server-side
+    # otherwise the app takes an extremely long time to launch.
     @reactive.effect
     def _():
         ui.update_selectize(
@@ -490,7 +415,6 @@ def server(input, output, session):
             selected=[],
             server=True,
         )
-
     @reactive.effect
     def _():
         ui.update_selectize(
@@ -499,7 +423,6 @@ def server(input, output, session):
             selected=[],
             server=True,
         )
-
     @reactive.effect
     def _():
         ui.update_selectize(
@@ -508,7 +431,6 @@ def server(input, output, session):
             selected=[],
             server=True,
         )
-
     @reactive.effect
     def _():
         ui.update_selectize(
@@ -517,7 +439,6 @@ def server(input, output, session):
             selected=[],
             server=True,
         )
-
     @reactive.effect
     def _():
         ui.update_selectize(
@@ -530,6 +451,7 @@ def server(input, output, session):
 
 # Create the Shiny app
 app = App(app_ui, server)
+
 
 
 
