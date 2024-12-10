@@ -21,9 +21,9 @@ def plot_pancan_exprn_subplots(transform, genes, compartment):
 
     #input_arr = sh.transformations[transform]
     if transform == "Raw":
-        input_arr = pd.read_csv("./data/quipi_raw_tpm.csv", usecols=sh.non_genes + list(genes))
+        input_arr = pd.read_feather("./data/quipi_raw_tpm.feather", columns=sh.non_genes + list(genes))
     elif transform == "Log2":
-        input_arr = pd.read_csv("./data/quipi_log2_tpm.csv", usecols=sh.non_genes + list(genes))
+        input_arr = pd.read_feather("./data/quipi_log2_tpm.feather", columns=sh.non_genes + list(genes))
     
     input_arr = input_arr[input_arr["compartment"] == compartment]
 

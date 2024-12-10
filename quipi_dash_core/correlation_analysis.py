@@ -9,7 +9,7 @@ def gene_correlation_heatmap(genes, indications, method, compartments, archetype
         if transform == "Raw":
             input_arr = pd.read_feather("./data/quipi_raw_tpm.feather", columns=sh.non_genes + list(genes))
         elif transform == "Log2":
-            input_arr = pd.read_feather("./data/quipi_log2_tpm.feather", columns==sh.non_genes + list(genes))
+            input_arr = pd.read_feather("./data/quipi_log2_tpm.feather", columns=sh.non_genes + list(genes))
 
         input_arr = input_arr[input_arr["indication"].isin(indications)]
         input_arr = input_arr[input_arr["compartment"].isin(compartments)]

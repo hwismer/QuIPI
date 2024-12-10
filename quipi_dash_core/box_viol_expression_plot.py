@@ -11,9 +11,9 @@ import shared as sh
 def box_viol_exprn(transform, x_cat, genes, groupby, plot_type):
 
     if transform == "Raw":
-        input_arr = pd.read_csv("./data/quipi_raw_tpm.csv", usecols=sh.non_genes + list(genes))
+        input_arr = pd.read_feather("./data/quipi_raw_tpm.feather", columns=sh.non_genes + list(genes))
     elif transform == "Log2":
-        input_arr = pd.read_csv("./data/quipi_log2_tpm.csv", usecols=sh.non_genes + list(genes))
+        input_arr = pd.read_feather("./data/quipi_log2_tpm.feather", columns=sh.non_genes + list(genes))
 
     group = sh.categoricals_dict[groupby]
 
