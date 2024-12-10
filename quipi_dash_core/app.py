@@ -38,7 +38,11 @@ app_ui = ui.page_navbar(
                         full_screen=False,     
                 ),
                 ui.card(ui.card_header("PanCan Archetype Breakdown"),
-                        ui.card_body(output_widget("pancan_archetype_breakdown"))),
+                        ui.card_body(output_widget("pancan_archetype_breakdown")),
+                        ui.card_footer("""
+                                       Nota Bene: Unclassified patients do not have Feature Scores assigned to them.
+                                       Any calculations involving a feature score are subset to include archetyped patients only.
+                                       """)),
             width=.5)
         ),
 
@@ -162,7 +166,15 @@ app_ui = ui.page_navbar(
                         ui.card(ui.card_body(output_widget("gene_factor_analysis"))),
                         ui.card(ui.card_body(output_widget("pancan_archetypes_gfs")))
                     )
-                )
+                ),
+                ui.h5("Gene Factor Score Calculation"),
+                ui.p("""
+                    Data is subset to include archetyped patients only within a given compartment.
+                    Gene factor scores are calculated by first calculating a per-gene Z-Score across patients
+                    and subsequently averaging the Z-Scores within each patient resulting in each patient being
+                    assigned a gene factor score depending on their expression of the input gene set.
+
+                    """)
             )
         ),
 
@@ -173,7 +185,6 @@ app_ui = ui.page_navbar(
                 ui.layout_sidebar(
                     ui.sidebar(
                         ui.h4("Feature Score Ranked DGE"),
-                        ui.h6("This is slow at the moment. Don't click Run multiple times in succession. Optimization coming soon."),
                         ui.input_action_button("dge_run", "Run",style=RUN_STYLE),
                         ui.input_selectize("flow_score_to_rank",
                                         "Feature Score For Ranking:",
@@ -199,11 +210,19 @@ app_ui = ui.page_navbar(
                         output_widget("compartment_featurescore_dge_bot"),
                         output_widget("compartment_featurescore_dge_top")
                     ),
-                    ui.h4("Methods"),
-                    ui.p("""The Wilxocon Rank-sum test is used to calculate differentially expressed genes.
-                            P-values are corrected using Benjamini/Hochberg multiple testing correction.
-                            """)
-                )
+                ),
+                ui.h4("Feature Scoring and DGE Group Formation"),
+                ui.p("""
+                    Data is subset to include only patients assigned feature scores. Effectively, this means that
+                    patients without an archetype designation are not considered. Patients are ranked based
+                    on their feature score in the specified compartment and are split based on the specified
+                    quantile. For the chose quantile, the resulting groups used for DGE are top quantile percent
+                    of patients with the highest score and the bottom quantile percent of patients with the lowest score.
+                """),
+                ui.h4("Differential Gene Expression"),
+                ui.p("""The Wilcoxon Rank-sum test is used to calculate differentially expressed genes.
+                        P-values are corrected using Benjamini/Hochberg multiple testing correction.
+                        """),
             ),
 
             # DGE between the top and bottom quantiles of patients based on
@@ -212,7 +231,6 @@ app_ui = ui.page_navbar(
                 ui.layout_sidebar(
                     ui.sidebar(
                         ui.h4("Factor Score Ranked DGE"),
-                        ui.h6("This is slow at the moment. Don't click Run multiple times in succession. Optimization coming soon."),
                         ui.input_action_button("fs_dge_run","Run",style=RUN_STYLE),
                         ui.input_selectize("fs_dge_genes",
                                         "Genes for gene-factor score:",
@@ -241,7 +259,21 @@ app_ui = ui.page_navbar(
                         output_widget("gfs_ranked_dge_bot"),
                         output_widget("gfs_ranked_dge_top"))
                 ),
-            )
+
+                ui.h4("Differential Gene Expression"),
+                ui.p("""The Wilcoxon Rank-sum test is used to calculate differentially expressed genes.
+                        P-values are corrected using Benjamini/Hochberg multiple testing correction.
+                        """),
+                ui.h5("Gene Factor Score Calculation"),
+                ui.p("""
+                    Data is subset to include archetyped patients only within a given compartment.
+                    Gene factor scores are calculated by first calculating a per-gene Z-Score across patients
+                    and subsequently averaging the Z-Scores within each patient resulting in each patient being
+                    assigned a gene factor score depending on their expression of the input gene set.
+
+                    """)
+            ),
+            
         ),
     title = "QuIPI - Querying IPI",
     theme=theme.lumen,
@@ -451,7 +483,7 @@ def server(input, output, session):
 
 # Create the Shiny app
 app = App(app_ui, server)
-
+#quipi_raw = pd.read_csv("./data/quipi_raw_tpm.csv")
 
 
 
