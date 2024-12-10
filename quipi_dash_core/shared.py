@@ -41,12 +41,12 @@ indic_to_color = {'LUNG':'rgb(102, 197, 204)',
 
 
 # Open the file in read mode
-with open("./data/quipi_raw_tpm.csv", 'r') as file:
+with open("./data/quipi_raw_cols.csv", 'r') as file:
     reader = csv.reader(file)
     # Read the first row only (header)
     quipi_all_columns= next(reader)
 
-with open("./data/quipi_flow_scores.csv", 'r') as file:
+with open("./data/quipi_flow_score_cols.csv", 'r') as file:
     reader = csv.reader(file)
     # Read the first row only (header)
     quipi_flow_columns= next(reader)
