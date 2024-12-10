@@ -483,7 +483,6 @@ def server(input, output, session):
 
 # Create the Shiny app
 app = App(app_ui, server)
-#quipi_raw = pd.read_csv("./data/quipi_raw_tpm.csv")
 
 
 

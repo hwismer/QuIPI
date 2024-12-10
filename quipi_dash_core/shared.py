@@ -3,8 +3,6 @@ import plotly.graph_objects as go
 import plotly.express as px
 import csv
 
-import time
-
 
 
 # All categorial columns for the underlying data minus the UMAP coordinates
@@ -57,7 +55,7 @@ cats = ('patient','sample_name','indication', 'archetype', 'sample_type', 'sampl
 non_cats = tuple(set(quipi_flow_columns) - set(cats))
 genes = list(set(quipi_all_columns) - set(non_genes))
 
-categorical_data = pd.read_csv("./data/quipi_raw_tpm.csv", usecols=cats)
+categorical_data = pd.read_feather("./data/quipi_raw_tpm.feather", columns=cats)
 
 # Cleaned categories for user mapped to underlying data column names
 categoricals_dict = {"Patient" : "patient",
@@ -170,12 +168,3 @@ def plot_archetype_beakdown():
     fig.update_layout(title_x= .5, title_y = .98,font=dict(size=16))
 
     return fig
-
-#start_time = time.time()
-
-#quipi_raw = pd.read_csv("./data/quipi_raw_tpm.csv")
-#quipi_raw = pd.read_parquet("./test.pq")
-#quipi_raw = pd.read_feather("./test.feather")
-
-#read_time = time.time()
-#print(f"Read time: {read_time - start_time:.2f} seconds")
