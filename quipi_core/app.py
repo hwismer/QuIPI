@@ -149,10 +149,10 @@ app_ui = ui.page_navbar(
             ),
 
             # Given user-defined gene list, plots the gene factor score on top of the PanCan UMAP
-            ui.nav_panel("PanCan Gene Factor Scores",
+            ui.nav_panel("PanCan Gene Signature Overlay",
                 ui.layout_sidebar(
                     ui.sidebar(
-                        ui.h4("PanCan Gene Factor Scores"),
+                        ui.h4("PanCan Gene Signature Overlay"),
                         ui.input_action_button("gene_factor_run", "Run",style=RUN_STYLE),
                         ui.input_selectize("gene_factor_genes",
                                             "Select Genes:",
@@ -167,12 +167,12 @@ app_ui = ui.page_navbar(
                         ui.card(ui.card_body(output_widget("pancan_archetypes_gfs")))
                     )
                 ),
-                ui.h5("Gene Factor Score Calculation"),
+                ui.h5("Gene Signature Score Calculation"),
                 ui.p("""
                     Data is subset to include archetyped patients only within a given compartment.
-                    Gene factor scores are calculated by first calculating a per-gene Z-Score across patients
+                    Gene signature scores are calculated by first calculating a per-gene Z-Score across patients
                     and subsequently averaging the Z-Scores within each patient resulting in each patient being
-                    assigned a gene factor score depending on their expression of the input gene set.
+                    assigned a gene signature score depending on their expression of the input gene set.
 
                     """)
             )
@@ -227,17 +227,17 @@ app_ui = ui.page_navbar(
 
             # DGE between the top and bottom quantiles of patients based on
             # gene factor scores calculated from a collection of genes.
-            ui.nav_panel("Factor Score Ranked DGE",
+            ui.nav_panel("Gene Signature Score Ranked DGE",
                 ui.layout_sidebar(
                     ui.sidebar(
-                        ui.h4("Factor Score Ranked DGE"),
+                        ui.h4("Gene Signature Score Ranked DGE"),
                         ui.input_action_button("fs_dge_run","Run",style=RUN_STYLE),
                         ui.input_selectize("fs_dge_genes",
-                                        "Genes for gene-factor score:",
+                                        "Genes for gene-signature score:",
                                         [],
                                         multiple=True),
                         ui.input_selectize("fs_dge_compartment",
-                                        "Compartment to calculate gene-factor score:",
+                                        "Compartment to calculate gene-signature score:",
                                         sh.compartments),
                         ui.input_slider("fs_dge_slider",
                                         "Quartile:",
@@ -264,12 +264,12 @@ app_ui = ui.page_navbar(
                 ui.p("""The Wilcoxon Rank-sum test is used to calculate differentially expressed genes.
                         P-values are corrected using Benjamini/Hochberg multiple testing correction.
                         """),
-                ui.h5("Gene Factor Score Calculation"),
+                ui.h5("Gene-Signature Score Calculation"),
                 ui.p("""
                     Data is subset to include archetyped patients only within a given compartment.
-                    Gene factor scores are calculated by first calculating a per-gene Z-Score across patients
+                    Gene-signature scores are calculated by first calculating a per-gene Z-Score across patients
                     and subsequently averaging the Z-Scores within each patient resulting in each patient being
-                    assigned a gene factor score depending on their expression of the input gene set.
+                    assigned a gene-signature score depending on their expression of the input gene set.
 
                     """)
             ),
@@ -361,7 +361,7 @@ def server(input, output, session):
                          labels = {"factor_score" : "Factor Score"})
 
         fig.update_layout(template="simple_white", autosize=False, width=600, height=450,
-                          legend_title_text = "Factor Score")
+                          legend_title_text = "Gene-Signature Score")
         
         fig.update_traces(marker=dict(size=12))
         fig.update_layout(legend_title_text = "Archetype")

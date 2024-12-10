@@ -30,5 +30,5 @@ def box_viol_exprn(transform, x_cat, genes, groupby, plot_type):
                             color_discrete_sequence=px.colors.qualitative.D3,
                             labels=sh.categoricals_dict_reversed)
             
-        fig.update_layout(title_text= "Mean(" + " ".join(genes) + ") " + transform + "(TPM)", title_x=0.5)
+        fig.update_layout(title_text= "Mean(" + transform + "TPM(" + ", ".join(genes) + ")", title_x=0.5)
         return fig
