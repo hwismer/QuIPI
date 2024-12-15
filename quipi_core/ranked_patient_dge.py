@@ -15,10 +15,9 @@ import time
 
 
 
-def factor_ranked_dge(gfs_genes, gfs_compartment, quantile, dge_compartment,fc_threshold=1, p_val_thresh=0.000001):
+def factor_ranked_dge(gfs_genes, gfs_compartment, quantile, dge_compartment,fc_threshold=1, p_val_thresh=0.000001, highlight_genes=[]):
    
    gfs = gf.calculate_gene_factor_score(gfs_genes, gfs_compartment)
-
 
    quipi_raw = pd.read_feather("./data/quipi_raw_tpm.feather")
 
@@ -26,13 +25,13 @@ def factor_ranked_dge(gfs_genes, gfs_compartment, quantile, dge_compartment,fc_t
    change_df = do_dge(top_data, bot_data)
    sig_pos, sig_neg = filter_dge(change_df, fc_threshold, p_val_thresh)
 
-   fig = plot_dge(change_df,fc_threshold,p_val_thresh)
+   fig = plot_dge(change_df,fc_threshold,p_val_thresh,highlight_genes)
 
    return fig, sig_pos, sig_neg
         
 
 
-def feature_ranked_dge(feature_score,compartment,quantile, fc_threshold= 1, p_val_thresh=0.000001):
+def feature_ranked_dge(feature_score,compartment,quantile, fc_threshold= 1, p_val_thresh=0.000001,highlight_genes=[]):
 
    rank_cat = sh.feature_scores[feature_score]
    comp = compartment
@@ -44,7 +43,7 @@ def feature_ranked_dge(feature_score,compartment,quantile, fc_threshold= 1, p_va
    top_data, bot_data = rank_using_score(flow_df, quipi_raw, rank_cat, quantile, comp)
    change_df = do_dge(top_data, bot_data)
    sig_pos, sig_neg = filter_dge(change_df, fc_threshold, p_val_thresh)
-   fig = plot_dge(change_df,fc_threshold,p_val_thresh)
+   fig = plot_dge(change_df,fc_threshold,p_val_thresh,highlight_genes)
 
    return fig, sig_pos, sig_neg
 
@@ -99,13 +98,43 @@ def filter_dge(fc_df, fc_thresh, p_thresh):
     
    return sig_pos, sig_neg
 
-def plot_dge(fc_df, fc_threshold,p_val_thresh):
+def plot_dge(fc_df, fc_threshold,p_val_thresh,highlight_genes):
+
+   fc_df['label_display'] = fc_df['Gene'].apply(lambda x: x if x in highlight_genes else "")
+
+   # Create the scatter plot with Plotly Express
+   #fig = px.scatter(df, x='x', y='y', text='label_display')
    
    fig = px.scatter(fc_df,x = "Log2(FC)", y = "log10_p_val",
       hover_data={"Gene"},
       labels = {"Log2(FC)":"Log2(FC)", "log10_p_val": "-log10(P-Value)"},
+      #text = "label_display",
       color="sig_call",
       color_discrete_map={"positive_sig":"red", "nonsig":"black","negative_sig":"blue"})
+   
+   for i, label in enumerate(fc_df['label_display']):
+    if label in highlight_genes:
+        x=fc_df["Log2(FC)"][i]
+        y=fc_df["log10_p_val"][i]
+
+        if x < 0:
+            ax = -1
+        else:
+            ax = 1
+        fig.add_annotation(
+            x=x,
+            y=y,
+            text=label,
+            showarrow=True,
+            arrowhead=2,
+            ax= ax * 200,
+            ay=-25,
+            font=dict(size=12, color="black"),  # text color
+            bgcolor="lime",  # bright green background
+            borderpad=2,    # padding around text
+            bordercolor="green",  # border color for the box
+            borderwidth=1   # border width for the box
+        )
    
    log_p_val_max = max(fc_df["log10_p_val"])
    fig.add_shape(
