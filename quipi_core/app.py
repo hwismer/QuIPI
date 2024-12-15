@@ -240,15 +240,19 @@ app_ui = ui.page_navbar(
                             ui.card_body(ui.output_data_frame("compartment_featurescore_dge_top"))
                         ),
                     ),
-                    ui.download_button("download_featurescore_dges", "Download DGEs",)
+                    ui.download_button("download_featurescore_dges", "Download DGEs",),
+                    ui.card(
+                        ui.card_header("Expression Levels for genes of interest"),
+                        ui.card_body(output_widget("compartment_featurescore_dge_boxplot"))
+                    ),
                 ),
                 ui.h4("Feature Scoring and DGE Group Formation"),
                 ui.p("""
                     Data is subset to include only patients assigned feature scores. Effectively, this means that
                     patients without an archetype designation are not considered. Patients are ranked based
                     on their feature score in the specified compartment and are split based on the specified
-                    quantile. For the chose quantile, the resulting groups used for DGE are top quantile percent
-                    of patients with the highest score and the bottom quantile percent of patients with the lowest score.
+                    quartile. For the chose quartile, the resulting groups used for DGE are top quartile percent
+                    of patients with the highest score and the bottom quartile percent of patients with the lowest score.
                 """),
                 ui.h4("Differential Gene Expression"),
                 ui.p("""The Wilcoxon Rank-sum test is used to calculate differentially expressed genes.
@@ -301,6 +305,9 @@ app_ui = ui.page_navbar(
                                 max_height=500),
                     ),
                 ui.download_button("download_signaturecore_dges", "Download DGEs"),
+                ui.card(
+                    ui.card_header("Expression levels for genes of interest"),
+                    ui.card_body(output_widget('gfs_ranked_dge_highlighted_exprn_box'))),
                 ),
 
                 ui.h4("Differential Gene Expression"),
@@ -431,14 +438,14 @@ def server(input, output, session):
     @reactive.event(input.dge_run)
     def feature_ranked_dge_reactive():
 
-        fig, sig_pos, sig_neg = rpd.feature_ranked_dge(input.flow_score_to_rank(), 
+        fig, sig_pos, sig_neg, highlighted_boxplot = rpd.feature_ranked_dge(input.flow_score_to_rank(), 
                                       input.dge_compartment(), 
                                       input.dge_slider(),
                                       input.dge_fc_thresh(),
                                       input.dge_p_thresh(),
-                                      input.dge_highlight_genes())
+                                      list(input.dge_highlight_genes()))
 
-        return fig, sig_pos, sig_neg
+        return fig, sig_pos, sig_neg, highlighted_boxplot
 
     
     @render_widget
@@ -453,6 +460,12 @@ def server(input, output, session):
     def compartment_featurescore_dge_bot():
         return feature_ranked_dge_reactive()[2]
     
+    @render_widget
+    def compartment_featurescore_dge_boxplot():
+        boxplot = feature_ranked_dge_reactive()[3]
+        if boxplot is not None:
+            return boxplot
+    
     @render.download(filename="FeatureScore_DGES.csv")
     def download_featurescore_dges():
         df = pd.concat([feature_ranked_dge_reactive()[1],feature_ranked_dge_reactive()[2]], axis = 0, ignore_index=True)
@@ -465,21 +478,24 @@ def server(input, output, session):
     @reactive.calc
     @reactive.event(input.fs_dge_run)
     def factor_ranked_dge_reactive():
+        
+        if len(input.fs_dge_genes()) != 0:
+            fig, sig_pos, sig_neg, highlight_boxplot = rpd.factor_ranked_dge(list(input.fs_dge_genes()),
+                                                        input.fs_dge_compartment(),
+                                                        input.fs_dge_slider(),
+                                                        input.fs_dge_compartment_for_dge(),
+                                                        input.fs_dge_fc_thresh(),
+                                                        input.fs_dge_p_thresh(),
+                                                        list(input.fs_dge_highlight_genes()))
 
-        fig, sig_pos, sig_neg = rpd.factor_ranked_dge(list(input.fs_dge_genes()),
-                                                      input.fs_dge_compartment(),
-                                                      input.fs_dge_slider(),
-                                                      input.fs_dge_compartment_for_dge(),
-                                                      input.fs_dge_fc_thresh(),
-                                                      input.fs_dge_p_thresh(),
-                                                      input.fs_dge_highlight_genes())
-
-        return fig, sig_pos, sig_neg
+            return fig, sig_pos, sig_neg, highlight_boxplot
+        
 
     
     @render_widget
     def gfs_ranked_dge():
         return factor_ranked_dge_reactive()[0]
+
     
     @render.data_frame
     def gfs_ranked_dge_top():
@@ -488,6 +504,13 @@ def server(input, output, session):
     @render.data_frame
     def gfs_ranked_dge_bot():
         return factor_ranked_dge_reactive()[2]
+    
+    @render_widget
+    def gfs_ranked_dge_highlighted_exprn_box():
+        boxplot = factor_ranked_dge_reactive()[3]
+        
+        if boxplot != None :
+            return boxplot
     
     @render.download(filename="SignatureScore_DGES.csv")
     def download_signaturecore_dges():

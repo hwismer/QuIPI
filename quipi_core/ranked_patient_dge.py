@@ -11,23 +11,43 @@ from scipy.stats import ranksums
 
 import gene_factor as gf
 
-import time
 
+
+def highlight_boxplot(top_data,bot_data,highlight_genes):
+   if len(highlight_genes) != 0:
+      top_data_highlight = top_data[highlight_genes]
+      bot_data_highlight = bot_data[highlight_genes]
+      top_data_highlight["group"] = "Top Quartile Group"
+      bot_data_highlight["group"] = "Bottom Quartile Group"
+
+      comb_df = pd.concat((top_data_highlight,bot_data_highlight)).reset_index().drop(columns="index").melt(id_vars = ["group"])
+
+      fig = px.box(comb_df, x="variable", y = "value",color = "group",
+                labels = {"variable":"Gene", "value": "TPM", "group":"Group"})
+   
+      fig.update_layout(template = "simple_white",
+                        legend=dict(y=0.5,  # Center vertically
+                        font=dict(size=14)))
+      return fig
+   
+   else:
+      return None
+    
 
 
 def factor_ranked_dge(gfs_genes, gfs_compartment, quantile, dge_compartment,fc_threshold=1, p_val_thresh=0.000001, highlight_genes=[]):
    
    gfs = gf.calculate_gene_factor_score(gfs_genes, gfs_compartment)
-
    quipi_raw = pd.read_feather("./data/quipi_raw_tpm.feather")
 
    top_data, bot_data = rank_using_score(gfs, quipi_raw,"factor_score", quantile, dge_compartment)
    change_df = do_dge(top_data, bot_data)
    sig_pos, sig_neg = filter_dge(change_df, fc_threshold, p_val_thresh)
-
    fig = plot_dge(change_df,fc_threshold,p_val_thresh,highlight_genes)
 
-   return fig, sig_pos, sig_neg
+   highlighted_boxplot = highlight_boxplot(top_data,bot_data,highlight_genes)
+
+   return fig, sig_pos, sig_neg, highlighted_boxplot
         
 
 
@@ -45,7 +65,9 @@ def feature_ranked_dge(feature_score,compartment,quantile, fc_threshold= 1, p_va
    sig_pos, sig_neg = filter_dge(change_df, fc_threshold, p_val_thresh)
    fig = plot_dge(change_df,fc_threshold,p_val_thresh,highlight_genes)
 
-   return fig, sig_pos, sig_neg
+   highlighted_boxplot = highlight_boxplot(top_data,bot_data,highlight_genes)
+
+   return fig, sig_pos, sig_neg, highlighted_boxplot
 
 
 
