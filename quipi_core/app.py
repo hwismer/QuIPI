@@ -125,6 +125,7 @@ app_ui = ui.page_navbar(
             ),
 
             ui.nav_panel("Categorical Correlation Comparison",
+                ui.h3("Functionality Coming Soon."),
                 ui.layout_sidebar(
                         ui.sidebar(
                             ui.h4("Explore the correlation of genes between two chosen categories."),
