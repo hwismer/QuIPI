@@ -48,33 +48,54 @@ app_ui = ui.page_navbar(
         ),
 
         # Box/Violin plot where the user selects a gene and can group by custom categories
-        ui.nav_panel("Box/Violin Plots",
-            ui.layout_sidebar(
-                ui.sidebar(
-                    ui.h4("Explore gene expression by category"),
-                    ui.input_action_button("box_viol_run", "Run", style=RUN_STYLE),
-                    ui.input_selectize("box_viol_plot",
-                                        "Select Plot Type:",
-                                        ["Boxplot","Violin Plot"]),
-                    ui.input_selectize("box_viol_gene_input",
-                                        "Select Genes:",
-                                        [],
-                                        multiple=True),
-                    ui.input_selectize("box_viol_x_category",
-                                        "Select X-Axis Category:",
-                                        list(sh.categoricals_dict.keys()),
-                                        selected = "Compartment"),
-                    ui.input_selectize("box_viol_groupby",
-                                        "Group by:",
-                                        list(sh.categoricals_dict.keys()),
-                                        selected="Archetype"),
-                    ui.input_selectize("box_viol_transformation",
-                                        "Choose Transformation: ",
-                                        ["Raw", "Log2"],
-                                        multiple= False,
-                                        selected= "Log2")),
-            output_widget("expression_box_viol")
+        ui.nav_menu("Gene Expression",
+            ui.nav_panel("Box/Violin Plots",
+                ui.layout_sidebar(
+                    ui.sidebar(
+                        ui.h4("Explore gene expression by category"),
+                        ui.input_action_button("box_viol_run", "Run", style=RUN_STYLE),
+                        ui.input_selectize("box_viol_plot",
+                                            "Select Plot Type:",
+                                            ["Boxplot","Violin Plot"]),
+                        ui.input_selectize("box_viol_gene_input",
+                                            "Select Genes:",
+                                            [],
+                                            multiple=True),
+                        ui.input_selectize("box_viol_x_category",
+                                            "Select X-Axis Category:",
+                                            list(sh.categoricals_dict.keys()),
+                                            selected = "Compartment"),
+                        ui.input_selectize("box_viol_groupby",
+                                            "Group by:",
+                                            list(sh.categoricals_dict.keys()),
+                                            selected="Archetype"),
+                        ui.input_selectize("box_viol_transformation",
+                                            "Choose Transformation: ",
+                                            ["Raw", "Log2"],
+                                            multiple= False,
+                                            selected= "Log2")),
+                output_widget("expression_box_viol")
+                )
             ),
+            ui.nav_panel("Gene Expresssion Bar Plots",
+                ui.layout_sidebar(
+                    ui.sidebar(
+                        ui.h4("Compare gene expression between categories."),
+                        ui.input_action_button("gene_expr_bar_run", "Run", style=RUN_STYLE),
+                        ui.input_selectize("gene_expr_bar_genes",
+                                           "Select Genes",
+                                           [],
+                                           multiple=True,
+                                           options = {"server":True}),
+                        ui.input_selectize("gene_expr_bar_category",
+                                           "Select Category",
+                                           list(sh.categoricals_dict.keys()),
+                                           )
+
+
+                    )
+                )          
+            )
         ),
 
         # Pairwise correlation plot between user-defined genes.
@@ -328,15 +349,22 @@ app_ui = ui.page_navbar(
         ),
     ui.nav_spacer(),
     ui.nav_control(
-            ui.tags.img(
-                src="./data/images/github.png",
-                alt="GitHub",
-                style="height: 50px; width: 50px;",
-                href="https://github.com/your-profile"
-            ),
-            #href="https://github.com/your-profile",  # Replace with your GitHub URL
-            #target="_blank",
-            #class_="nav-link"
+        ui.tags.a(
+        ui.tags.i(class_="fa fa-github", style="font-size: 30px; color: black;"),
+        href="https://github.com/HarrisonWismer/QuIPI",  # The URL to navigate to
+        target="_blank",  # Opens in a new tab
+        style="text-decoration: none; margin-left: 0px;",  # Optional styling
+        ),
+
+    ),
+    ui.head_content(
+        ui.tags.style(
+            """
+            .navbar-nav .nav-link {
+                font-size: 20px !important; /* Adjust font size of navbar items */
+            }
+            """
+        ),
     ),
     title = "QuIPI - Querying IPI",
     theme=theme.lumen,
@@ -423,8 +451,7 @@ def server(input, output, session):
                          color = "factor_score", color_continuous_scale="viridis",
                          labels = {"factor_score" : "Factor Score"})
 
-        fig.update_layout(template="simple_white", autosize=False, width=600, height=450,
-                          legend_title_text = "Gene-Signature Score")
+        fig.update_layout(template="simple_white",autosize=False, width=600, height=450,legend_title_text = "Gene-Signature Score")
         
         fig.update_traces(marker=dict(size=12))
         fig.update_layout(legend_title_text = "Archetype")
@@ -524,74 +551,18 @@ def server(input, output, session):
 
     # Gene selection drop down inputs to make them computer server-side
     # otherwise the app takes an extremely long time to launch.
-    @reactive.effect
-    def _():
-        ui.update_selectize(
-            "box_viol_gene_input",
-            choices=sh.genes,
-            selected=[],
-            server=True,
-        )
-    @reactive.effect
-    def _():
-        ui.update_selectize(
-            "corr_gene_input",
-            choices=sh.genes,
-            selected=[],
-            server=True,
-        )
-    @reactive.effect
-    def _():
-        ui.update_selectize(
-            "pancan_gene_input",
-            choices=sh.genes,
-            selected=[],
-            server=True,
-        )
-    @reactive.effect
-    def _():
-        ui.update_selectize(
-            "gene_factor_genes",
-            choices=sh.genes,
-            selected=[],
-            server=True,
-        )
-    @reactive.effect
-    def _():
-        ui.update_selectize(
-            "fs_dge_genes",
-            choices=sh.genes,
-            selected=[],
-            server=True,
-        )
 
     @reactive.effect
     def _():
-        ui.update_selectize(
-            "corr_cat_gene_input",
-            choices=sh.genes,
-            selected=[],
-            server=True,
-        )
-
-    @reactive.effect
-    def _():
-        ui.update_selectize(
-            "fs_dge_highlight_genes",
-            choices=sh.genes,
-            selected=[],
-            server=True,
-        )
-
-    @reactive.effect
-    def _():
-        ui.update_selectize(
-            "dge_highlight_genes",
-            choices=sh.genes,
-            selected=[],
-            server=True,
-        )
-       
+        input_select_ids = ["box_viol_gene_input","corr_gene_input","pancan_gene_input","gene_factor_genes","fs_dge_genes",
+                        "corr_cat_gene_input","fs_dge_highlight_genes","dge_highlight_genes","gene_expr_bar_genes",]
+        for id in input_select_ids:
+            ui.update_selectize(
+                id,
+                choices=sh.genes,
+                selected=[],
+                server=True,
+            )
 
 # Create the Shiny app
 app = App(app_ui, server)

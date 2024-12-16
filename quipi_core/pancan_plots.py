@@ -1,6 +1,4 @@
-from shiny import App, render, ui, reactive
 import plotly.express as px
-from shinywidgets import output_widget, render_widget 
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 
@@ -9,13 +7,8 @@ import shared as sh
 import numpy as np
 import pandas as pd
 pd.options.plotting.backend = 'plotly'
-import matplotlib.pyplot as plt
 
 
-from scipy.stats import zscore
-from scipy.stats import mannwhitneyu
-from statsmodels.stats.multitest import multipletests
-from scipy.stats import ranksums
 
 def plot_pancan_exprn_subplots(transform, genes, compartment):
 
@@ -71,7 +64,7 @@ def plot_pancan_archetypes():
     fig = px.scatter(sh.categorical_data, x = "x_umap1", y="x_umap2", 
                          color="archetype", color_discrete_map=sh.colors_pancan)
     fig.update_traces(marker=dict(size=12))
-    fig.update_layout(legend_title_text = "Archetype")
+    fig.update_layout(legend_title_text = "Archetype",)
     fig.update_layout(template = "simple_white",
                       legend=dict(
                         y=0.5,  # Center vertically
