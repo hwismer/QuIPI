@@ -387,14 +387,6 @@ app_ui = ui.page_navbar(
         ),
 
     ),
-    ui.head_content(
-        ui.tags.link(
-            rel="icon", type="image/png", sizes="32x32", href="favicon-32x32.png"
-        ),
-        ui.tags.link(
-            rel="icon", type="image/png", sizes="16x16", href="favicon-16x16.png"
-        ),
-    ),
     title = "QuIPI - Querying IPI",
     theme=theme.lumen,
     bg= '#85aad4'
