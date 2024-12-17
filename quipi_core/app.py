@@ -17,11 +17,41 @@ import correlation_analysis as corr
 
 RUN_STYLE="background-color: #AFE1AF; color: black;"
 
+TAG_STYLE="""
+            /* Increase font size for nav panel text and center it */
+            .nav-link {
+                font-size: 20px;
+                font-weight: bold;
+                text-align: center;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            /* Ensure active tab text is also centered */
+            .nav-link.active {
+                text-align: center;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            /* Optional: Add padding for better spacing */
+            .nav-link {
+                padding: 10px 15px;
+            }
+            """
+
 # Define the UI
 app_ui = ui.page_navbar(
 
         ui.nav_panel("Home",
-            ui.panel_title("Welcome to QuIPI",), 
+        ui.head_content(
+            ui.tags.style(
+                TAG_STYLE
+            )
+        ),
+            ui.panel_title("Welcome to QuIPI"), 
             ui.p("Here are some useful references."),
             ui.layout_column_wrap(
                 ui.card(ui.card_header("Cancer Indication Breakdown"),
@@ -350,25 +380,24 @@ app_ui = ui.page_navbar(
     ui.nav_spacer(),
     ui.nav_control(
         ui.tags.a(
-        ui.tags.i(class_="fa fa-github", style="font-size: 30px; color: black;"),
+        ui.tags.i(class_="fa fa-github", style="font-size: 36px; color: black; justify-content: center;"),
         href="https://github.com/HarrisonWismer/QuIPI",  # The URL to navigate to
         target="_blank",  # Opens in a new tab
-        style="text-decoration: none; margin-left: 0px;",  # Optional styling
+        style="text-decoration: none; margin-left: 0px; justify-content: center;",  # Optional styling
         ),
 
     ),
     ui.head_content(
-        ui.tags.style(
-            """
-            .navbar-nav .nav-link {
-                font-size: 20px !important; /* Adjust font size of navbar items */
-            }
-            """
+        ui.tags.link(
+            rel="icon", type="image/png", sizes="32x32", href="favicon-32x32.png"
+        ),
+        ui.tags.link(
+            rel="icon", type="image/png", sizes="16x16", href="favicon-16x16.png"
         ),
     ),
     title = "QuIPI - Querying IPI",
     theme=theme.lumen,
-    bg= '#85aad4',
+    bg= '#85aad4'
 )
 
 def server(input, output, session):
