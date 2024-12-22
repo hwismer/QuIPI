@@ -5,6 +5,7 @@ channels:
   - defaults
 dependencies:
   - pip
+  - pip:
     - shinyswatch
     - pyarrow
   - anndata=0.10.8
