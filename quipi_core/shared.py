@@ -10,6 +10,7 @@ categoricals = ["patient", "sample_name",
              "indication", "sample_type","sample_type_cat",
              "compartment", "archetype"]
 
+
 # Everything that isn't a gene, including umap coordinates.
 non_genes = ["patient", "sample_name",
              "indication", "sample_type","sample_type_cat",
@@ -21,6 +22,10 @@ compartments = ['Live', 'Tumor', 'Treg', 'Myeloid', 'Stroma', 'T_cell']
 archetypes = ['Unclassified', 'ID Mono', 'ID CD8 Mac', 'IR CD8 Mono', 
               'MC DC2', 'IS CD8', 'TC Mac', 'TC DC', 'IR CD4 Mac', 
               'IR CD8 Mac', 'ID CD4 Mac', 'MC DC1', 'IS CD4']
+
+categorical_choices = {"Compartment":compartments, 
+                       "Archetype": archetypes, 
+                       "Indication": indications}
 
 indic_to_color = {'LUNG':'rgb(102, 197, 204)',
                   'HEP':'rgb(246, 207, 113)', 
@@ -130,16 +135,21 @@ def plot_cancer_glossary_table():
     df = cancer_glossary_df.sort_values("Abbreviation")
     colors = [indic_to_color[ind] for ind in df["Abbreviation"]]
 
-    fig = go.Figure(data=[go.Table(
-        header=dict(values=list(df.columns),
-                    fill_color='white',
-                    font = dict(color = "black",size = 18),
-                    align='center'),
-        cells=dict(values=[df[col] for col in df.columns],
-                fill_color=[colors],  # Apply row colors
-                align='center',
-                height=28,
-                font = dict(color = 'black', size = 16)))
+    fig = go.Figure(data=[
+        go.Table(
+            header=dict(
+                    values=[""] * 2,  # Empty header
+                    fill_color="white",      # Make header background white (or transparent)
+                    line_color="white"),
+            #header=dict(values=list(df.columns),
+            #            fill_color='white',
+            #            font = dict(color = "black",size = 18),
+            #            align='center'),
+            cells=dict(values=[df[col] for col in df.columns],
+                    fill_color=[colors],  # Apply row colors
+                    align='center',
+                    height=28,
+                    font = dict(color = 'black', size = 16)))
     ])
     
     fig.update_layout(autosize=True,)

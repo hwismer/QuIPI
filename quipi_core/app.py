@@ -113,7 +113,7 @@ app_ui = ui.page_navbar(
                                             list(sh.categoricals_dict.keys()),
                                             selected="Archetype"),
                         ui.input_selectize("box_viol_transformation",
-                                            "Choose Transformation: ",
+                                            "Select TPM Transformation: ",
                                             ["Raw", "Log2"],
                                             multiple= False,
                                             selected= "Log2")),
@@ -127,12 +127,12 @@ app_ui = ui.page_navbar(
                         ui.h4("Compare gene expression between categories."),
                         ui.input_action_button("gene_expr_bar_run", "Run", style=RUN_STYLE),
                         ui.input_selectize("gene_expr_bar_genes",
-                                           "Select Genes",
+                                           "Select Genes:",
                                            [],
                                            multiple=True,
                                            options = {"server":True}),
                         ui.input_selectize("gene_expr_bar_category",
-                                           "Select Category",
+                                           "Select Category:",
                                            list(sh.categoricals_dict.keys()),
                                            )
 
@@ -146,7 +146,7 @@ app_ui = ui.page_navbar(
                         ui.h4("Subset and download gene expression data"),
                         ui.input_action_button("gene_expr_query_run", "Run", style=RUN_STYLE),
                         ui.input_selectize("gene_expr_query_genes",
-                                           "Select Genes",
+                                           "Select Genes:",
                                            [],
                                            multiple=True,
                                            options = {"server":True}),
@@ -166,7 +166,7 @@ app_ui = ui.page_navbar(
                                             multiple=True,
                                             selected=sh.archetypes),
                         ui.input_selectize("query_transform",
-                                            "Select Transformation:",
+                                            "Select TPM Transformation:",
                                             choices=["Raw", "Log2"],
                                             selected="Log2")
                     ),
@@ -211,7 +211,7 @@ app_ui = ui.page_navbar(
                                             multiple=True,
                                             selected=sh.archetypes),
                         ui.input_selectize("corr_transform",
-                                            "Select Transformation:",
+                                            "Select TPM Transformation:",
                                             choices=["Raw", "Log2"],
                                             selected="Log2"),
                         ui.input_selectize("corr_method_input",
@@ -225,10 +225,9 @@ app_ui = ui.page_navbar(
             ),
 
             ui.nav_panel("Categorical Correlation Comparison",
-                ui.h3("Functionality Coming Soon."),
+                ui.h3("\"One vs. All\" gene correlation analysis within a chosen category"),
                 ui.layout_sidebar(
                         ui.sidebar(
-                            ui.h4("Explore the correlation of genes between two chosen categories."),
                             #ui.input_action_button("corr_run", "Run",style=RUN_STYLE),
 
                             ui.input_selectize("corr_cat_gene_input",
@@ -236,8 +235,18 @@ app_ui = ui.page_navbar(
                                                 [],
                                                 multiple=False,
                                                 options = {'server':True}),
+                            ui.input_selectize("corr_cat_category_input",
+                                               "Select Category:",
+                                               choices=list(sh.categorical_choices.keys())),
+                            ui.input_selectize("corr_cat_category_opts",
+                                               "Select Subcategories:",
+                                               choices = [],
+                                               multiple=True),
+                            ui.input_slider("corr_cat_slider", "Select Correlation Coefficient Range", min=-1,max=1, value = (0,1), step=.1),
+                            ui.input_action_button("corr_cat_run", "Run", style=RUN_STYLE),
+                                        
                         ),
-                    ui.card("Test")
+                    ui.output_data_frame("corr_cat_gene_correlations")
                     )
             )
         ),
@@ -260,7 +269,7 @@ app_ui = ui.page_navbar(
                                         sh.compartments
                                         ),
                         ui.input_selectize("pancan_umap_transformation",
-                                        "Choose Transformation:",
+                                        "Select TPM Transformation:",
                                         ["Raw", "Log2"],
                                         multiple= False,
                                         selected= "Log2")
@@ -497,7 +506,7 @@ def server(input, output, session):
 
         return fig
     
-    #@render.data_frame
+
     @reactive.calc
     @reactive.event(input.gene_expr_query_run)
     def gene_expr_query_backend():
@@ -528,12 +537,6 @@ def server(input, output, session):
         df.to_csv(csv_buffer, index=False)
         yield csv_buffer.getvalue()
 
-
-
-
-
-
-
     @render_widget
     @reactive.event(input.corr_run)
     def gene_correlation_heatmap():
@@ -548,6 +551,23 @@ def server(input, output, session):
 
         return corr.gene_correlation_heatmap(genes, indications, method, compartments, archetypes, tissues, transform)
     
+    @render.data_frame
+    @reactive.event(input.corr_cat_run)
+    def corr_cat_gene_correlations():
+        genes = input.corr_cat_gene_input()
+        category = input.corr_cat_category_input()
+        categories = input.corr_cat_category_opts()
+        range = input.corr_cat_slider()
+
+        df = corr.categorical_correlation_table(genes, category, categories, range)
+
+        return df        
+
+
+    @reactive.effect
+    def corr_cat_update_choices():
+        choices = input.corr_cat_category_input()
+        ui.update_selectize("corr_cat_category_opts", choices=sh.categorical_choices[choices])
     
     @render_widget
     @reactive.event(input.gene_factor_run)
