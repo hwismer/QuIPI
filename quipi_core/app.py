@@ -15,6 +15,8 @@ import box_viol_expression_plot as bv
 import pancan_plots as pp
 import correlation_analysis as corr
 
+import time
+
 RUN_STYLE="background-color: #AFE1AF; color: black;"
 
 TAG_STYLE="""
@@ -42,10 +44,24 @@ TAG_STYLE="""
             }
             """
 
+tabs_mapped_to_gene_inputs = {"Box/Violin Plots" : ["box_viol_gene_input"],
+                              "Gene Expresssion Bar Plots" : ["gene_expr_bar_genes"],
+                              "Correlation Matrix" : ["corr_gene_input"],
+                              "PanCan UMAP Gene Expression" : ["pancan_gene_input"],
+                              "PanCan Gene-Signature Overlay" : ["gene_factor_genes"],
+                              "Feature Score Ranked DGE" : ["dge_highlight_genes"],
+                              "Gene-Signature Score Ranked DGE" : ["fs_dge_genes","fs_dge_highlight_genes"]
+
+
+
+
+
+    }
+
 # Define the UI
 app_ui = ui.page_navbar(
 
-        ui.nav_panel("Home",
+    ui.nav_panel("Home",
         ui.head_content(
             ui.tags.style(
                 TAG_STYLE
@@ -74,7 +90,7 @@ app_ui = ui.page_navbar(
                                        Nota Bene: Unclassified patients do not have Feature Scores assigned to them.
                                        Any calculations involving a feature score are subset to include archetyped patients only.
                                        """)),
-            width=.5)
+            width=.5),
         ),
 
         # Box/Violin plot where the user selects a gene and can group by custom categories
@@ -105,7 +121,8 @@ app_ui = ui.page_navbar(
                                             multiple= False,
                                             selected= "Log2")),
                 output_widget("expression_box_viol")
-                )
+                ),
+                
             ),
             ui.nav_panel("Gene Expresssion Bar Plots",
                 ui.layout_sidebar(
@@ -387,12 +404,16 @@ app_ui = ui.page_navbar(
         ),
 
     ),
+    id = "quipi_top_nav",
     title = "QuIPI - Querying IPI",
     theme=theme.lumen,
-    bg= '#85aad4'
+    bg= '#85aad4',
 )
 
 def server(input, output, session):
+
+    tabs_visited = []
+
     @render_widget
     def cancer_glossary():
         return sh.plot_cancer_glossary_table()
@@ -568,13 +589,30 @@ def server(input, output, session):
         df.to_csv(csv_buffer, index=False)
         yield csv_buffer.getvalue()
 
-        
+    
+    @reactive.effect
+    def test():
+        current_tab = input.quipi_top_nav()  # Read the active tab
+        if current_tab not in tabs_visited:
+            tabs_visited.append(current_tab)
+            if current_tab in tabs_mapped_to_gene_inputs:
+                for id in tabs_mapped_to_gene_inputs[current_tab]:
+                    ui.update_selectize(
+                        id,
+                        choices=sh.genes,
+                        selected=[],
+                        server=True,
+                    )
+
+        print(f"Current tab: {current_tab}")
 
     # Gene selection drop down inputs to make them computer server-side
     # otherwise the app takes an extremely long time to launch.
-
+    
+    '''
     @reactive.effect
     def _():
+        start_time = time.time()
         input_select_ids = ["box_viol_gene_input","corr_gene_input","pancan_gene_input","gene_factor_genes","fs_dge_genes",
                         "corr_cat_gene_input","fs_dge_highlight_genes","dge_highlight_genes","gene_expr_bar_genes",]
         for id in input_select_ids:
@@ -584,6 +622,9 @@ def server(input, output, session):
                 selected=[],
                 server=True,
             )
+        end_time = time.time()
+        print(f"Updated selectize inputs in {end_time - start_time} seconds.")
+    '''
 
 # Create the Shiny app
 app = App(app_ui, server)
