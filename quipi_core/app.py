@@ -47,15 +47,12 @@ TAG_STYLE="""
 tabs_mapped_to_gene_inputs = {"Box/Violin Plots" : ["box_viol_gene_input"],
                               "Gene Expresssion Bar Plots" : ["gene_expr_bar_genes"],
                               "Correlation Matrix" : ["corr_gene_input"],
+                              "Categorical Correlation Comparison" : ["corr_cat_gene_input"],
                               "PanCan UMAP Gene Expression" : ["pancan_gene_input"],
                               "PanCan Gene-Signature Overlay" : ["gene_factor_genes"],
                               "Feature Score Ranked DGE" : ["dge_highlight_genes"],
-                              "Gene-Signature Score Ranked DGE" : ["fs_dge_genes","fs_dge_highlight_genes"]
-
-
-
-
-
+                              "Gene-Signature Score Ranked DGE" : ["fs_dge_genes","fs_dge_highlight_genes"],
+                              "Query Gene Expression" : ["gene_expr_query_genes"]
     }
 
 # Define the UI
@@ -140,8 +137,43 @@ app_ui = ui.page_navbar(
                                            )
 
 
-                    )
+                    ),
                 )          
+            ),
+            ui.nav_panel("Query Gene Expression",
+                ui.layout_sidebar(
+                    ui.sidebar(
+                        ui.h4("Subset and download gene expression data"),
+                        ui.input_action_button("gene_expr_query_run", "Run", style=RUN_STYLE),
+                        ui.input_selectize("gene_expr_query_genes",
+                                           "Select Genes",
+                                           [],
+                                           multiple=True,
+                                           options = {"server":True}),
+                        ui.input_selectize("query_indication",
+                                            "Select Indications:",
+                                            choices=sh.indications,
+                                            selected=sh.indications,
+                                            multiple = True),
+                        ui.input_selectize("query_compartment",
+                                            "Select Compartments:",
+                                            choices=sh.compartments,
+                                            selected=sh.compartments,
+                                            multiple=True),
+                        ui.input_selectize("query_archetype",
+                                            "Select Archetypes:",
+                                            choices=sh.archetypes,
+                                            multiple=True,
+                                            selected=sh.archetypes),
+                        ui.input_selectize("query_transform",
+                                            "Select Transformation:",
+                                            choices=["Raw", "Log2"],
+                                            selected="Log2")
+                    ),
+                    ui.download_button("download_query_table", "Download CSV"),
+                    ui.output_data_frame("gene_expr_query")
+                ),
+
             )
         ),
 
@@ -464,6 +496,42 @@ def server(input, output, session):
         fig = bv.box_viol_exprn(transform, x_cat, gene, group, plot_type)
 
         return fig
+    
+    #@render.data_frame
+    @reactive.calc
+    @reactive.event(input.gene_expr_query_run)
+    def gene_expr_query_backend():
+        genes = input.gene_expr_query_genes()
+        indications = input.query_indication()
+        compartments = input.query_compartment()
+        archetypes = input.query_archetype()
+        transform = input.query_transform()
+
+        if transform == "Raw":
+            df = pd.read_feather("./data/quipi_raw_tpm.feather", columns=sh.non_genes + list(genes))
+        elif transform == "Log2":
+            df = pd.read_feather("./data/quipi_log2_tpm.feather", columns=sh.non_genes + list(genes))
+
+        subset = df[(df["indication"].isin(indications)) & (df["compartment"].isin(compartments)) & (df["archetype"].isin(archetypes))]
+        subset = subset[["patient","indication","sample_type","compartment","archetype"] + list(genes)]
+
+        return subset
+    
+    @render.data_frame
+    def gene_expr_query():
+        return gene_expr_query_backend()
+    
+    @render.download(filename="quipi_query.csv")
+    def download_query_table():
+        df = gene_expr_query_backend()
+        csv_buffer = StringIO()
+        df.to_csv(csv_buffer, index=False)
+        yield csv_buffer.getvalue()
+
+
+
+
+
 
 
     @render_widget
@@ -591,7 +659,7 @@ def server(input, output, session):
 
     
     @reactive.effect
-    def test():
+    def populate_gene_selections():
         current_tab = input.quipi_top_nav()  # Read the active tab
         if current_tab not in tabs_visited:
             tabs_visited.append(current_tab)
@@ -603,28 +671,6 @@ def server(input, output, session):
                         selected=[],
                         server=True,
                     )
-
-        print(f"Current tab: {current_tab}")
-
-    # Gene selection drop down inputs to make them computer server-side
-    # otherwise the app takes an extremely long time to launch.
-    
-    '''
-    @reactive.effect
-    def _():
-        start_time = time.time()
-        input_select_ids = ["box_viol_gene_input","corr_gene_input","pancan_gene_input","gene_factor_genes","fs_dge_genes",
-                        "corr_cat_gene_input","fs_dge_highlight_genes","dge_highlight_genes","gene_expr_bar_genes",]
-        for id in input_select_ids:
-            ui.update_selectize(
-                id,
-                choices=sh.genes,
-                selected=[],
-                server=True,
-            )
-        end_time = time.time()
-        print(f"Updated selectize inputs in {end_time - start_time} seconds.")
-    '''
 
 # Create the Shiny app
 app = App(app_ui, server)
