@@ -15,7 +15,8 @@ import box_viol_expression_plot as bv
 import pancan_plots as pp
 import correlation_analysis as corr
 
-import time
+import asyncio
+import scipy
 
 RUN_STYLE="background-color: #AFE1AF; color: black;"
 
@@ -551,9 +552,11 @@ def server(input, output, session):
 
         return corr.gene_correlation_heatmap(genes, indications, method, compartments, archetypes, tissues, transform)
     
+    '''
+    @output
     @render.data_frame
     @reactive.event(input.corr_cat_run)
-    def corr_cat_gene_correlations():
+    async def corr_cat_gene_correlations():
         genes = input.corr_cat_gene_input()
         category = input.corr_cat_category_input()
         categories = input.corr_cat_category_opts()
@@ -561,7 +564,24 @@ def server(input, output, session):
 
         df = corr.categorical_correlation_table(genes, category, categories, range)
 
-        return df        
+        return df  
+    '''
+
+    @render.data_frame
+    @reactive.event(input.corr_cat_run)  
+    async def corr_cat_gene_correlations(): 
+
+        
+        with ui.Progress(min=1, max = len(sh.quipi_all_columns)) as p:
+            p.set(message="Calculating", detail="Please Wait")
+            genes = input.corr_cat_gene_input()
+            category = input.corr_cat_category_input()
+            categories = input.corr_cat_category_opts()
+            range = input.corr_cat_slider()
+
+            df = corr.categorical_correlation_table(genes, category, categories, range,p)
+                
+            return df
 
 
     @reactive.effect

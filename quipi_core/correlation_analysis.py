@@ -4,6 +4,9 @@ import pandas as pd
 import plotly.express as px
 import scipy
 
+from shiny import ui
+import asyncio
+
 
 def gene_correlation_heatmap(genes, indications, method, compartments, archetypes, tissues, transform):
 
@@ -60,7 +63,34 @@ def gene_corr_df():
 
     return input_arr
 
-def categorical_correlation_table(gene,category,categories,range):
+def categorical_correlation_table(gene,category,categories,range,progress):
+
+
+    log2_df = pd.read_feather("./data/quipi_log2_tpm.feather")
+    log2_df = log2_df[log2_df[sh.categoricals_dict[category]].isin(categories)][sh.genes]
+
+    df = pd.DataFrame()
+    genes,corrs,p_values = [],[],[]
+
+    for count, gene2 in enumerate(log2_df.columns):
+        if gene != gene2:
+            corr, p_value = scipy.stats.spearmanr(log2_df[gene].astype("float32"), log2_df[gene2].astype("float32"), nan_policy="omit")
+            if corr >= range[0] and corr <= range[1]:
+                genes.append(gene2)
+                corrs.append(corr)
+                p_values.append(p_value)
+        progress.set(count, message = "Calculating")
+
+    df['Gene'] = genes
+    df['Spearman R'] = corrs
+    df['P-Value'] = p_values
+
+            
+    return df.sort_values(["Spearman R"], ascending=False) 
+
+
+
+
 
     
     log2_df = pd.read_feather("./data/quipi_log2_tpm.feather")
@@ -69,17 +99,23 @@ def categorical_correlation_table(gene,category,categories,range):
     df = pd.DataFrame()
     genes,corrs,p_values = [],[],[]
 
-    for gene2 in log2_df.columns:
-        if gene != gene2:
-            corr, p_value = scipy.stats.spearmanr(log2_df[gene], log2_df[gene2])
-            if corr >= range[0] and corr <= range[1]:
-                genes.append(gene2)
-                corrs.append(corr)
-                p_values.append(p_value)
+    with ui.Progress(min=1, max = len(log2_df.columns)) as p:
+        p.set(message="Calculating", detail="Please Wait")
+        for count, gene2 in enumerate(log2_df.columns):
+            if gene != gene2:
+                corr, p_value = scipy.stats.spearmanr(log2_df[gene].astype("float32"), log2_df[gene2].astype("float32"), nan_policy="omit")
+                if corr >= range[0] and corr <= range[1]:
+                    genes.append(gene2)
+                    corrs.append(corr)
+                    p_values.append(p_value)
+
+        if count % 15 == 0:
+            p.set(count, message = "Processing")
 
     df['Gene'] = genes
     df['Spearman R'] = corrs
     df['P-Value'] = p_values
+
     
     return df.sort_values(["Spearman R"], ascending=False)
         
