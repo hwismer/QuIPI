@@ -87,35 +87,4 @@ def categorical_correlation_table(gene,category,categories,range,progress):
 
             
     return df.sort_values(["Spearman R"], ascending=False) 
-
-
-
-
-
-    
-    log2_df = pd.read_feather("./data/quipi_log2_tpm.feather")
-    log2_df = log2_df[log2_df[sh.categoricals_dict[category]].isin(categories)][sh.genes]
-
-    df = pd.DataFrame()
-    genes,corrs,p_values = [],[],[]
-
-    with ui.Progress(min=1, max = len(log2_df.columns)) as p:
-        p.set(message="Calculating", detail="Please Wait")
-        for count, gene2 in enumerate(log2_df.columns):
-            if gene != gene2:
-                corr, p_value = scipy.stats.spearmanr(log2_df[gene].astype("float32"), log2_df[gene2].astype("float32"), nan_policy="omit")
-                if corr >= range[0] and corr <= range[1]:
-                    genes.append(gene2)
-                    corrs.append(corr)
-                    p_values.append(p_value)
-
-        if count % 15 == 0:
-            p.set(count, message = "Processing")
-
-    df['Gene'] = genes
-    df['Spearman R'] = corrs
-    df['P-Value'] = p_values
-
-    
-    return df.sort_values(["Spearman R"], ascending=False)
         
