@@ -48,12 +48,13 @@ TAG_STYLE="""
 tabs_mapped_to_gene_inputs = {"Box/Violin Plots" : ["box_viol_gene_input"],
                               "Gene Expresssion Bar Plots" : ["gene_expr_bar_genes"],
                               "Correlation Matrix" : ["corr_gene_input"],
-                              "Categorical Correlation Comparison" : ["corr_cat_gene_input"],
+                              "Compartment Correlation Matrix" : ["comp_corr_mat_genes"],
+                              "One-Vs-All Correlation Table" : ["corr_cat_gene_input"],
                               "PanCan UMAP Gene Expression" : ["pancan_gene_input"],
                               "PanCan Gene-Signature Overlay" : ["gene_factor_genes"],
                               "Feature Score Ranked DGE" : ["dge_highlight_genes"],
                               "Gene-Signature Score Ranked DGE" : ["fs_dge_genes","fs_dge_highlight_genes"],
-                              "Query Gene Expression" : ["gene_expr_query_genes"]
+                              "Query Gene Expression" : ["gene_expr_query_genes"],
     }
 
 # Define the UI
@@ -225,7 +226,54 @@ app_ui = ui.page_navbar(
                 )
             ),
 
-            ui.nav_panel("Categorical Correlation Comparison",
+            ui.nav_panel("Compartment Correlation Matrix",
+                ui.layout_sidebar(
+                    ui.sidebar(
+                        ui.h4("Calculate correlation across compartments."),
+                        ui.input_action_button("comp_corr_mat_run", "Run", style=RUN_STYLE),
+                        ui.input_selectize("comp_corr_mat_genes",
+                                           "Select Genes:",
+                                           [],
+                                           multiple=True,
+                                           options = {"server":True}),
+                        ui.input_selectize("comp_corr_mat_compartment1",
+                                            "Select Compartment A:",
+                                            choices=sh.compartments),
+                        ui.input_selectize("comp_corr_mat_compartment2",
+                                           "Select Compartment B:",
+                                           choices=sh.compartments),
+                        ui.input_selectize("comp_corr_mat_method",
+                                           "Select Correlation Method:",
+                                           choices = ["Pearson", "Spearman"],
+                                           selected="Spearman"),
+                        ui.input_selectize("comp_corr_mat_transform",
+                                            "Select TPM Transformation:",
+                                            choices=["Raw", "Log2"],
+                                            selected="Log2"),
+                        ui.input_selectize("comp_corr_mat_indication",
+                                        "Select Indications:",
+                                        choices=sh.indications,
+                                        selected=sh.indications,
+                                        multiple = True),
+                        ui.input_selectize("comp_corr_mat_tissue",
+                                            "Select Tissue:",
+                                            choices=["Tumor", "Normal"],
+                                            selected = ["Tumor", "Normal"],
+                                            multiple = True),
+                        ui.input_selectize("comp_corr_mat_archetype",
+                                            "Select Archetypes:",
+                                            choices=sh.archetypes,
+                                            multiple=True,
+                                            selected=sh.archetypes),
+                    ),
+                ui.card(ui.card_body(output_widget("comp_corr_mat")),
+                        ui.card_footer("Click button in the bottom right for fullscreen view."),
+                        full_screen=True)
+                )
+            ),
+
+
+            ui.nav_panel("One-Vs-All Correlation Table",
                 ui.h3("\"One vs. All\" gene correlation analysis within a chosen category"),
                 ui.layout_sidebar(
                         ui.sidebar(
@@ -552,25 +600,26 @@ def server(input, output, session):
 
         return corr.gene_correlation_heatmap(genes, indications, method, compartments, archetypes, tissues, transform)
     
-    '''
-    @output
-    @render.data_frame
-    @reactive.event(input.corr_cat_run)
-    async def corr_cat_gene_correlations():
-        genes = input.corr_cat_gene_input()
-        category = input.corr_cat_category_input()
-        categories = input.corr_cat_category_opts()
-        range = input.corr_cat_slider()
+    @render_widget
+    @reactive.event(input.comp_corr_mat_run)
+    def comp_corr_mat():
+        genes = list(input.comp_corr_mat_genes())
+        comp1 = input.comp_corr_mat_compartment1()
+        comp2 = input.comp_corr_mat_compartment2()
+        transform = input.comp_corr_mat_transform()
+        method = input.comp_corr_mat_method()
 
-        df = corr.categorical_correlation_table(genes, category, categories, range)
+        indications = input.comp_corr_mat_indication()
+        tissues = [sh.tissue_dict[tis] for tis in input.comp_corr_mat_tissue()]
+        archetypes = input.comp_corr_mat_archetype()
 
-        return df  
-    '''
+        fig = corr.compartment_correlation_heatmap(genes, comp1,comp2,transform,method,indications,tissues,archetypes)
+
+        return fig
 
     @render.data_frame
     @reactive.event(input.corr_cat_run)  
     async def corr_cat_gene_correlations(): 
-
         
         with ui.Progress(min=1, max = len(sh.quipi_all_columns)) as p:
             p.set(message="Calculating", detail="Please Wait")

@@ -4,8 +4,8 @@ import pandas as pd
 import plotly.express as px
 import scipy
 
-from shiny import ui
-import asyncio
+#from shiny import ui
+#import asyncio
 
 
 def gene_correlation_heatmap(genes, indications, method, compartments, archetypes, tissues, transform):
@@ -32,12 +32,84 @@ def gene_correlation_heatmap(genes, indications, method, compartments, archetype
         corr_lower_tri = corr_lower_tri.dropna(axis=0, how = "all")
         corr_lower_tri = corr_lower_tri.dropna(axis=1, how = "all")
 
+        print(corr_lower_tri)
+
         fig = px.imshow(corr_lower_tri.fillna(""),
                         zmin = -1, zmax =1,
                         color_continuous_scale = "RdBu_r",
                         text_auto=True)
         
         fig.update_layout(template='simple_white',autosize=True)
+        fig.update_xaxes(showgrid=False, showline=False)
+        fig.update_yaxes(showgrid=False, showline=False)
+
+        return fig
+
+def compartment_correlation_heatmap(genes, compartment1, compartment2, transform, method, indications, tissues, archetypes):
+
+    if transform == "Raw":
+        input_arr = pd.read_feather("./data/quipi_raw_tpm.feather", columns=sh.non_genes + list(genes))
+    elif transform == "Log2":
+        input_arr = pd.read_feather("./data/quipi_log2_tpm.feather", columns=sh.non_genes + list(genes))
+
+    input_arr = input_arr[input_arr["indication"].isin(indications)]
+    input_arr = input_arr[input_arr["archetype"].isin(archetypes)]
+    input_arr = input_arr[input_arr["sample_type_cat"].isin(tissues)]
+
+    comp1 = input_arr[input_arr["compartment"] == compartment1]
+    comp2 = input_arr[input_arr["compartment"] == compartment2]
+
+    comp1 = comp1[np.logical_not(comp1.duplicated(subset="sample_name",keep="last"))]
+    comp2 = comp2[np.logical_not(comp2.duplicated(subset="sample_name",keep="last"))]
+
+    comp1_samples = comp1["sample_name"]
+    comp2_samples = comp2["sample_name"]
+
+    merged_samples = pd.merge(comp1_samples, comp2_samples, on=['sample_name'], how='inner')
+
+    comp1_sub = comp1[comp1["sample_name"].isin(merged_samples["sample_name"])].sort_values("sample_name").reset_index(drop=True)
+    comp2_sub = comp2[comp2["sample_name"].isin(merged_samples["sample_name"])].sort_values("sample_name").reset_index(drop=True)
+
+    if (comp1_sub["sample_name"] == comp2_sub["sample_name"]).all():
+        comp1_sub_genes = comp1_sub[genes]
+        comp2_sub_genes = comp2_sub[genes]
+        
+        df = pd.DataFrame()
+        feat1s = []
+        feat2s = []
+        corrs = []
+        p_values = []
+        
+        for gene1 in genes:
+            for gene2 in genes:
+                feat1s.append(gene1)
+                feat2s.append(gene2)
+                if method == "Spearman":
+                    corr, p_value = scipy.stats.spearmanr(comp1_sub_genes[gene1], comp2_sub_genes[gene2])
+                elif method == "Pearson":
+                    corr, p_value = scipy.stats.pearsonr(comp1_sub_genes[gene1], comp2_sub_genes[gene2])
+                corrs.append(corr)
+                p_values.append(p_value)
+        
+        df['Feature_1'] = feat1s
+        df['Feature_2'] = feat2s
+        df['Correlation'] = corrs
+        df['p_value'] = p_values
+
+        corr_df = df.pivot(index='Feature_1', columns='Feature_2', values="Correlation")
+        mask = np.logical_not(np.tri(N=len(corr_df),dtype=bool))
+        corr_df = corr_df.mask(mask)
+
+        corr_df = corr_df.dropna(axis=0, how = "all")
+        corr_df = corr_df.dropna(axis=1, how = "all")
+        
+        fig = px.imshow(corr_df.fillna(""),
+                zmin = -1, zmax =1,
+                color_continuous_scale = "RdBu_r",
+                text_auto=True,
+                )
+        
+        fig.update_layout(template='simple_white',autosize=True,xaxis_title="",yaxis_title="")
         fig.update_xaxes(showgrid=False, showline=False)
         fig.update_yaxes(showgrid=False, showline=False)
 
