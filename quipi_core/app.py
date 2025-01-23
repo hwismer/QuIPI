@@ -181,11 +181,10 @@ app_ui = ui.page_navbar(
 
         # Pairwise correlation plot between user-defined genes.
         ui.nav_menu("Correlation Plots",
-
             ui.nav_panel("Correlation Matrix",
+                ui.h4("Explore the correlation of genes across the entire IPI dataset."),
                 ui.layout_sidebar(
                     ui.sidebar(
-                        ui.h4("Explore the correlation of selected genes."),
                         ui.input_action_button("corr_run", "Run",style=RUN_STYLE),
                         ui.input_selectize("corr_gene_input",
                                             "Select Genes:",
@@ -227,9 +226,9 @@ app_ui = ui.page_navbar(
             ),
 
             ui.nav_panel("Compartment Correlation Matrix",
+                ui.h4("Explore the correlation of chosen genes across two compartments."),
                 ui.layout_sidebar(
                     ui.sidebar(
-                        ui.h4("Calculate correlation across compartments."),
                         ui.input_action_button("comp_corr_mat_run", "Run", style=RUN_STYLE),
                         ui.input_selectize("comp_corr_mat_genes",
                                            "Select Genes:",
@@ -274,7 +273,7 @@ app_ui = ui.page_navbar(
 
 
             ui.nav_panel("One-Vs-All Correlation Table",
-                ui.h3("\"One vs. All\" gene correlation analysis within a chosen category"),
+                ui.h3("One-Vs-All correlation analysis within a chosen category."),
                 ui.layout_sidebar(
                         ui.sidebar(
                             #ui.input_action_button("corr_run", "Run",style=RUN_STYLE),
