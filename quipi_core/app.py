@@ -1,4 +1,5 @@
 from shiny import App, render, ui, reactive
+from shiny.types import ImgData
 from shinyswatch import theme
 import plotly.express as px
 from shinywidgets import output_widget, render_widget 
@@ -14,6 +15,7 @@ import gene_factor as gf
 import box_viol_expression_plot as bv
 import pancan_plots as pp
 import correlation_analysis as corr
+from pathlib import Path
 
 import asyncio
 import scipy
@@ -57,16 +59,22 @@ tabs_mapped_to_gene_inputs = {"Box/Violin Plots" : ["box_viol_gene_input"],
                               "Query Gene Expression" : ["gene_expr_query_genes"],
     }
 
+
 # Define the UI
 app_ui = ui.page_navbar(
 
-    ui.nav_panel("Home",
+    
+    
+    #ui.img(src="/Users/hwismer/Desktop/quipi.png", height="200px", style="display: block; margin: auto;"),
+
+    ui.nav_panel(
+        "Home",
         ui.head_content(
             ui.tags.style(
                 TAG_STYLE
             )
         ),
-            ui.panel_title("Welcome to QuIPI"), 
+            ui.panel_title("Welcome to QuIPI"),
             ui.p("Here are some useful references."),
             ui.layout_column_wrap(
                 ui.card(ui.card_header("Cancer Indication Breakdown"),
@@ -494,7 +502,8 @@ app_ui = ui.page_navbar(
 
     ),
     id = "quipi_top_nav",
-    title = "QuIPI - Querying IPI",
+    title = ui.div(ui.tags.a(ui.img(src="quipi.png", height="100px"))),
+    #title = "QuIPI - Querying IPI",
     theme=theme.lumen,
     bg= '#85aad4',
 )
@@ -502,6 +511,11 @@ app_ui = ui.page_navbar(
 def server(input, output, session):
 
     tabs_visited = []
+
+    @render.image
+    def quipi_logo():
+        img: ImgData = {"src": "/Users/hwismer/Desktop/quipi.png", "width": "50px"}
+        return img
 
     @render_widget
     def cancer_glossary():
@@ -761,7 +775,8 @@ def server(input, output, session):
                     )
 
 # Create the Shiny app
-app = App(app_ui, server)
+app_dir = Path(__file__).parent
+app = App(app_ui, server,static_assets= app_dir / "www")
 
 
 
