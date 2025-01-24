@@ -43,7 +43,7 @@ TAG_STYLE="""
 
             /* Optional: Add padding for better spacing */
             .nav-link {
-                padding: 10px 15px;
+                padding: 20px;
             }
             """
 
@@ -494,7 +494,7 @@ app_ui = ui.page_navbar(
     ui.nav_spacer(),
     ui.nav_control(
         ui.tags.a(
-        ui.tags.i(class_="fa fa-github", style="font-size: 36px; color: black; justify-content: center;"),
+        ui.tags.i(class_="fa fa-github", style="font-size: 40px; color: black; justify-content: center; margin-top: 8px"),
         href="https://github.com/HarrisonWismer/QuIPI",  # The URL to navigate to
         target="_blank",  # Opens in a new tab
         style="text-decoration: none; margin-left: 0px; justify-content: center;",  # Optional styling
@@ -502,8 +502,7 @@ app_ui = ui.page_navbar(
 
     ),
     id = "quipi_top_nav",
-    title = ui.div(ui.tags.a(ui.img(src="quipi.png", height="70px"))),
-    #title = "QuIPI - Querying IPI",
+    title = ui.div(ui.tags.a(ui.img(src="quipi.png", height="65px"))),
     theme=theme.lumen,
     bg= '#85aad4',
 )
