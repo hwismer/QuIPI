@@ -57,6 +57,7 @@ tabs_mapped_to_gene_inputs = {"Box/Violin Plots" : ["box_viol_gene_input"],
                               "Feature Score Ranked DGE" : ["dge_highlight_genes"],
                               "Gene-Signature Score Ranked DGE" : ["fs_dge_genes","fs_dge_highlight_genes"],
                               "Query Gene Expression" : ["gene_expr_query_genes"],
+                              "Cross-Compartment Correlation Table": ["cross_comp_corr_cat_gene_input"]
     }
 
 
@@ -303,6 +304,39 @@ app_ui = ui.page_navbar(
                                         
                         ),
                     ui.output_data_frame("corr_cat_gene_correlations")
+                    )
+            ),
+            
+            ui.nav_panel("Cross-Compartment Correlation Table",
+                ui.h3("Cross-Compartment correlation for a chosen gene."),
+                ui.layout_sidebar(
+                        ui.sidebar(
+
+                            ui.input_selectize("cross_comp_corr_cat_gene_input",
+                                                "Select Gene:",
+                                                [],
+                                                multiple=True,
+                                                options = {'server':True}),
+                            ui.input_selectize("cross_comp_corr_comp1_input",
+                                               "Select Compartment 1:",
+                                               choices=list(sh.compartments)),
+                            ui.input_selectize("cross_comp_corr_comp2_input",
+                                               "Select Compartment 2",
+                                               choices = list(sh.compartments),
+                                               multiple=True),
+                            ui.input_slider("cross_comp_corr_cat_slider", "Select Correlation Coefficient Range", min=-1,max=1, value = (0,1), step=.1),
+                            ui.input_selectize("cross_comp_corr_mat_method",
+                                           "Select Correlation Method:",
+                                           choices = ["Pearson", "Spearman"],
+                                           selected="Spearman"),
+                            ui.input_selectize("cross_comp_corr_mat_transform",
+                                            "Select TPM Transformation:",
+                                            choices=["Raw", "Log2"],
+                                            selected="Log2"),
+                            ui.input_action_button("cross_comp_corr_cat_run", "Run", style=RUN_STYLE),
+                                        
+                        ),
+                    ui.output_data_frame("cross_comp_corr_cat_gene_correlations")
                     )
             )
         ),
@@ -643,6 +677,29 @@ def server(input, output, session):
             df = corr.categorical_correlation_table(genes, category, categories, range,p)
                 
             return df
+        
+    @render.data_frame
+    @reactive.event(input.cross_comp_corr_cat_run)
+    async def cross_comp_corr_cat_gene_correlations():
+
+        
+
+        genes = input.cross_comp_corr_cat_gene_input()
+        comp1 = input.cross_comp_corr_comp1_input()
+        comp2 = input.cross_comp_corr_comp2_input()
+        range_slider = input.cross_comp_corr_cat_slider()
+        method = input.cross_comp_corr_mat_method()
+        transform = input.cross_comp_corr_mat_transform()
+
+        print(genes)
+
+        with ui.Progress(min=0, max = len(sh.quipi_all_columns) * len(genes)) as p:
+            p.set(message="Calculating - I'm Accurate!", detail="This could take a while.")
+
+            df = corr.cross_compartment_correlation_table(genes, comp1, comp2, range_slider, transform, method, p)
+
+            return df
+
 
 
     @reactive.effect
