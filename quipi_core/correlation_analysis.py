@@ -212,8 +212,8 @@ def cross_compartment_correlation_table(genes, compartment1, compartment2, range
     df["Compartment1"] = compartments1
     df["Gene2"] = genes2
     df["Compartment2"] = compartments2
-    df[method + 'R'] = corrs
+    df[method + ' R'] = corrs
     df['P-Value'] = p_values
 
-    return df .sort_values([method + "R"], ascending=False)
+    return df .sort_values([method + " R"], ascending=False)
         

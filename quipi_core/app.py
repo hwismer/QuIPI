@@ -64,10 +64,6 @@ tabs_mapped_to_gene_inputs = {"Box/Violin Plots" : ["box_viol_gene_input"],
 # Define the UI
 app_ui = ui.page_navbar(
 
-    
-    
-    #ui.img(src="/Users/hwismer/Desktop/quipi.png", height="200px", style="display: block; margin: auto;"),
-
     ui.nav_panel(
         "Home",
         ui.head_content(
@@ -536,7 +532,7 @@ app_ui = ui.page_navbar(
 
     ),
     id = "quipi_top_nav",
-    title = ui.div(ui.tags.a(ui.img(src="quipi.png", height="65px"))),
+    title = ui.div(ui.tags.a(ui.img(src="quipi.png", height="50px"))),
     theme=theme.lumen,
     bg= '#85aad4',
 )
