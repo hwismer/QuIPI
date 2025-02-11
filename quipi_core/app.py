@@ -532,7 +532,7 @@ app_ui = ui.page_navbar(
 
     ),
     id = "quipi_top_nav",
-    title = ui.div(ui.tags.a(ui.img(src="quipi.png", height="50px"))),
+    title = ui.div(ui.tags.a(ui.img(src="quipi.png", height="65px"))),
     theme=theme.lumen,
     bg= '#85aad4',
 )
