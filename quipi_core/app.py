@@ -111,41 +111,22 @@ app_ui = ui.page_navbar(
                                             "Select Genes:",
                                             [],
                                             multiple=True),
+                        ui.output_ui("box_viol_multiple_genes"),
                         ui.input_selectize("box_viol_x_category",
                                             "Select X-Axis Category:",
                                             list(sh.categoricals_dict.keys()),
                                             selected = "Compartment"),
                         ui.input_selectize("box_viol_groupby",
                                             "Group by:",
-                                            list(sh.categoricals_dict.keys()),
-                                            selected="Archetype"),
+                                            ["---"] + list(sh.categoricals_dict.keys()),
+                                            selected="---"),
                         ui.input_selectize("box_viol_transformation",
                                             "Select TPM Transformation: ",
                                             ["TPM", "Log2(TPM)"],
                                             multiple= False,
                                             selected= "Log2(TPM)")),
                 output_widget("expression_box_viol")
-                ),
-                
-            ),
-            ui.nav_panel("Gene Expresssion Bar Plots",
-                ui.layout_sidebar(
-                    ui.sidebar(
-                        ui.h4("Compare gene expression between categories."),
-                        ui.input_action_button("gene_expr_bar_run", "Run", style=RUN_STYLE),
-                        ui.input_selectize("gene_expr_bar_genes",
-                                           "Select Genes:",
-                                           [],
-                                           multiple=True,
-                                           options = {"server":True}),
-                        ui.input_selectize("gene_expr_bar_category",
-                                           "Select Category:",
-                                           list(sh.categoricals_dict.keys()),
-                                           )
-
-
-                    ),
-                )          
+                ),      
             ),
             ui.nav_panel("Query Gene Expression",
                 ui.layout_sidebar(
@@ -583,6 +564,28 @@ def server(input, output, session):
         return fig
 
 
+    ###### BOX / VIOL PLOTS
+
+    # Reactive calculation where if multiple genes are selected, make the user choose a compartment for factor score calculation.
+    @reactive.calc
+    def box_viol_multi_options():
+        if len(input.box_viol_gene_input()) > 1:
+            choices = sh.compartments
+        else:
+            choices = []
+        return choices
+        
+    @render.ui
+    def box_viol_multiple_genes():
+        choices = box_viol_multi_options()
+        if len(choices) > 1:
+            return ui.input_selectize("box_viol_multiple_compartment", 
+                                      "**Multiple genes selected. Choose compartment for factor score calculation.**", 
+                                      choices,
+                                      multiple=True)
+        else:
+            return None
+    
     @render_widget
     @reactive.event(input.box_viol_run)
     def expression_box_viol():
@@ -593,10 +596,16 @@ def server(input, output, session):
         group = input.box_viol_groupby()
         plot_type = input.box_viol_plot()
 
-        fig = bv.box_viol_exprn(transform, x_cat, gene, group, plot_type)
+        if len(gene) > 1:
+            compartment_multiple = input.box_viol_multiple_compartment()
+        else:
+            compartment_multiple = None
+
+        fig = bv.box_viol_exprn(transform, x_cat, gene, group, plot_type, compartment_multiple)
 
         return fig
     
+    ##### GENE EXPRESSION QUERY
 
     @reactive.calc
     @reactive.event(input.gene_expr_query_run)
@@ -628,6 +637,10 @@ def server(input, output, session):
         df.to_csv(csv_buffer, index=False)
         yield csv_buffer.getvalue()
 
+
+    ##########  CORRELATION PLOTS
+
+    ##### CORRELATION HEATMAP
     @render_widget
     @reactive.event(input.corr_run)
     def gene_correlation_heatmap():
@@ -642,6 +655,8 @@ def server(input, output, session):
 
         return corr.gene_correlation_heatmap(genes, indications, method, compartments, archetypes, tissues, transform)
     
+
+    ##### CROSS-COMPARTMENT CORRELATION HEATMAP
     @render_widget
     @reactive.event(input.comp_corr_mat_run)
     def comp_corr_mat():
@@ -659,6 +674,9 @@ def server(input, output, session):
 
         return fig
 
+
+    ##### CATEGORICAL CORRELATION
+
     @render.data_frame
     @reactive.event(input.corr_cat_run)  
     async def corr_cat_gene_correlations(): 
@@ -674,20 +692,18 @@ def server(input, output, session):
                 
             return df
         
+
+    ##### CROSS COMPARTMENT CATEGORICAL
+
     @render.data_frame
     @reactive.event(input.cross_comp_corr_cat_run)
     async def cross_comp_corr_cat_gene_correlations():
-
-        
-
         genes = input.cross_comp_corr_cat_gene_input()
         comp1 = input.cross_comp_corr_comp1_input()
         comp2 = input.cross_comp_corr_comp2_input()
         range_slider = input.cross_comp_corr_cat_slider()
         method = input.cross_comp_corr_mat_method()
         transform = input.cross_comp_corr_mat_transform()
-
-        print(genes)
 
         with ui.Progress(min=0, max = len(sh.quipi_all_columns) * len(genes)) as p:
             p.set(message="Calculating - I'm Accurate!", detail="This could take a while.")
@@ -696,13 +712,14 @@ def server(input, output, session):
 
             return df
 
-
-
     @reactive.effect
     def corr_cat_update_choices():
         choices = input.corr_cat_category_input()
         ui.update_selectize("corr_cat_category_opts", choices=sh.categorical_choices[choices])
     
+
+    ##### PANCAN GENE-SIGNATURE OVERLAY
+
     @render_widget
     @reactive.event(input.gene_factor_run)
     def gene_factor_analysis():
@@ -725,7 +742,8 @@ def server(input, output, session):
     
 
 
-    # DGE by COMPARTMENT score
+    ##### DGE BY COMPARTMENT SCORE
+
     @reactive.calc
     @reactive.event(input.dge_run)
     def feature_ranked_dge_reactive():
@@ -766,7 +784,8 @@ def server(input, output, session):
         yield csv_buffer.getvalue()
 
 
-    # DGE by FACTOR score
+
+    ##### DGE BY GENE-SIGNATURE
     @reactive.calc
     @reactive.event(input.fs_dge_run)
     def factor_ranked_dge_reactive():
@@ -781,8 +800,6 @@ def server(input, output, session):
                                                         list(input.fs_dge_highlight_genes()))
 
             return fig, sig_pos, sig_neg, highlight_boxplot
-        
-
     
     @render_widget
     def gfs_ranked_dge():
@@ -812,6 +829,8 @@ def server(input, output, session):
         yield csv_buffer.getvalue()
 
     
+
+    ## HELPER: Populate individual gene selection boxes to avoid long startup.
     @reactive.effect
     def populate_gene_selections():
         current_tab = input.quipi_top_nav()  # Read the active tab
