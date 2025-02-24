@@ -10,9 +10,9 @@ import scipy
 
 def gene_correlation_heatmap(genes, indications, method, compartments, archetypes, tissues, transform):
 
-        if transform == "Raw":
+        if transform == "TPM":
             input_arr = pd.read_feather("./data/quipi_raw_tpm.feather", columns=sh.non_genes + list(genes))
-        elif transform == "Log2":
+        elif transform == "Log2(TPM)":
             input_arr = pd.read_feather("./data/quipi_log2_tpm.feather", columns=sh.non_genes + list(genes))
 
         input_arr = input_arr[input_arr["indication"].isin(indications)]
@@ -45,9 +45,9 @@ def gene_correlation_heatmap(genes, indications, method, compartments, archetype
 
 def compartment_correlation_heatmap(genes, compartment1, compartment2, transform, method, indications, tissues, archetypes):
 
-    if transform == "Raw":
+    if transform == "TPM":
         input_arr = pd.read_feather("./data/quipi_raw_tpm.feather", columns=sh.non_genes + list(genes))
-    elif transform == "Log2":
+    elif transform == "Log2(TPM)":
         input_arr = pd.read_feather("./data/quipi_log2_tpm.feather", columns=sh.non_genes + list(genes))
 
     input_arr = input_arr[input_arr["indication"].isin(indications)]
@@ -161,9 +161,9 @@ def categorical_correlation_table(gene,category,categories,range,progress):
 
 def cross_compartment_correlation_table(genes, compartment1, compartment2, range, transform, method, progress):
 
-    if transform == "Raw":
+    if transform == "TPM":
         input_arr = pd.read_feather("./data/quipi_raw_tpm.feather")
-    elif transform == "Log2":
+    elif transform == "Log2(TPM)":
         input_arr = pd.read_feather("./data/quipi_log2_tpm.feather")
 
     comp1 = input_arr[input_arr["compartment"] == compartment1]

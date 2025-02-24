@@ -121,9 +121,9 @@ app_ui = ui.page_navbar(
                                             selected="Archetype"),
                         ui.input_selectize("box_viol_transformation",
                                             "Select TPM Transformation: ",
-                                            ["Raw", "Log2"],
+                                            ["TPM", "Log2(TPM)"],
                                             multiple= False,
-                                            selected= "Log2")),
+                                            selected= "Log2(TPM)")),
                 output_widget("expression_box_viol")
                 ),
                 
@@ -174,8 +174,8 @@ app_ui = ui.page_navbar(
                                             selected=sh.archetypes),
                         ui.input_selectize("query_transform",
                                             "Select TPM Transformation:",
-                                            choices=["Raw", "Log2"],
-                                            selected="Log2")
+                                            choices=["TPM", "Log2(TPM)"],
+                                            selected="Log2(TPM)")
                     ),
                     ui.download_button("download_query_table", "Download CSV"),
                     ui.output_data_frame("gene_expr_query")
@@ -218,8 +218,8 @@ app_ui = ui.page_navbar(
                                             selected=sh.archetypes),
                         ui.input_selectize("corr_transform",
                                             "Select TPM Transformation:",
-                                            choices=["Raw", "Log2"],
-                                            selected="Log2"),
+                                            choices=["TPM", "Log2(TPM)"],
+                                            selected="Log2(TPM)"),
                         ui.input_selectize("corr_method_input",
                                             "Select Method:",
                                             choices=["Pearson", "Spearman"],
@@ -252,8 +252,8 @@ app_ui = ui.page_navbar(
                                            selected="Spearman"),
                         ui.input_selectize("comp_corr_mat_transform",
                                             "Select TPM Transformation:",
-                                            choices=["Raw", "Log2"],
-                                            selected="Log2"),
+                                            choices=["TPM", "Log2(TPM)"],
+                                            selected="Log2(TPM)"),
                         ui.input_selectize("comp_corr_mat_indication",
                                         "Select Indications:",
                                         choices=sh.indications,
@@ -327,8 +327,8 @@ app_ui = ui.page_navbar(
                                            selected="Spearman"),
                             ui.input_selectize("cross_comp_corr_mat_transform",
                                             "Select TPM Transformation:",
-                                            choices=["Raw", "Log2"],
-                                            selected="Log2"),
+                                            choices=["TPM", "Log2(TPM)"],
+                                            selected="Log2(TPM)"),
                             ui.input_action_button("cross_comp_corr_cat_run", "Run", style=RUN_STYLE),
                                         
                         ),
@@ -356,9 +356,9 @@ app_ui = ui.page_navbar(
                                         ),
                         ui.input_selectize("pancan_umap_transformation",
                                         "Select TPM Transformation:",
-                                        ["Raw", "Log2"],
+                                        ["TPM", "Log2(TPM)"],
                                         multiple= False,
-                                        selected= "Log2")
+                                        selected= "Log2(TPM)")
                         ),
                         output_widget("pancan_subplots")
                 ),
@@ -607,9 +607,9 @@ def server(input, output, session):
         archetypes = input.query_archetype()
         transform = input.query_transform()
 
-        if transform == "Raw":
+        if transform == "TPM":
             df = pd.read_feather("./data/quipi_raw_tpm.feather", columns=sh.non_genes + list(genes))
-        elif transform == "Log2":
+        elif transform == "Log2(TPM)":
             df = pd.read_feather("./data/quipi_log2_tpm.feather", columns=sh.non_genes + list(genes))
 
         subset = df[(df["indication"].isin(indications)) & (df["compartment"].isin(compartments)) & (df["archetype"].isin(archetypes))]
