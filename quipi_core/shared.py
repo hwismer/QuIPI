@@ -65,7 +65,7 @@ categorical_data = pd.read_feather("./data/quipi_raw_tpm.feather", columns=cats)
 # Cleaned categories for user mapped to underlying data column names
 categoricals_dict = {"Patient" : "patient",
                      "Indication" : "indication", 
-                     "Tissue" : "sample_type_cat",
+                     "Sample Type" : "sample_type",
                      "Compartment" : "compartment", 
                      "Archetype" : "archetype"}
 

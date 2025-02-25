@@ -32,8 +32,6 @@ def box_viol_exprn(transform, x_cat, genes, groupby, plot_type, compartment_mult
             fig = px.violin(input_arr, x = x_cat, y ="factor_score", color = group,
                             color_discrete_sequence=px.colors.qualitative.D3,
                             labels=new_cats)
-            
-        #fig.update_layout(title_text= "Gene-Signature Score across " + " ".join(genes), title_x=0.5)
         return fig
 
     elif len(genes) == 1:
