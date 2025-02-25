@@ -10,7 +10,7 @@ import shared as sh
 import gene_factor as gf
 
 
-def box_viol_exprn(transform, x_cat, genes, groupby, plot_type, compartment_multiple):
+def box_viol_exprn(transform, x_cat, x_cat_filts, genes, groupby, plot_type, compartment_multiple):
 
 
     if groupby in sh.categoricals_dict:
@@ -21,16 +21,19 @@ def box_viol_exprn(transform, x_cat, genes, groupby, plot_type, compartment_mult
     new_cats = dict(sh.categoricals_dict_reversed)
     new_cats.update(factor_score="Gene-Signature Score")
 
+    color = sh.color_dict[group]
+
     if len(genes) > 1 and len(compartment_multiple) != 0:
         input_arr = gf.calculate_gene_factor_score_all_patients(list(genes), compartment_multiple)
+        input_arr = input_arr[input_arr[x_cat].isin(x_cat_filts)]
         
         if plot_type == "Boxplot":
             fig = px.box(input_arr, x = x_cat, y = "factor_score", color = group,
-                        color_discrete_sequence=px.colors.qualitative.D3,
+                        color_discrete_map=color,
                         labels=new_cats)
         else:
             fig = px.violin(input_arr, x = x_cat, y ="factor_score", color = group,
-                            color_discrete_sequence=px.colors.qualitative.D3,
+                            color_discrete_map=color,
                             labels=new_cats)
         return fig
 
@@ -44,11 +47,11 @@ def box_viol_exprn(transform, x_cat, genes, groupby, plot_type, compartment_mult
 
             if plot_type == "Boxplot":
                 fig = px.box(input_arr, x = x_cat,y = genes[0],color = group,
-                            color_discrete_sequence=px.colors.qualitative.D3,
+                            color_discrete_map=color,
                             labels=sh.categoricals_dict_reversed)
             else:
                 fig = px.violin(input_arr, x = x_cat, y = genes[0], color = group,
-                                color_discrete_sequence=px.colors.qualitative.D3,
+                                color_discrete_map=color,
                                 labels=sh.categoricals_dict_reversed)
                 
             fig.update_layout(title_text= transform + genes[0], title_x=0.5)

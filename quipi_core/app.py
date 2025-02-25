@@ -116,6 +116,10 @@ app_ui = ui.page_navbar(
                                             "Select X-Axis Category:",
                                             list(sh.categoricals_dict.keys()),
                                             selected = "Compartment"),
+                        ui.input_selectize("box_viol_x_cat_filter",
+                                           "**Subset X-Axis Categories.**",
+                                           [],
+                                           multiple=True),
                         ui.input_selectize("box_viol_groupby",
                                             "Group by:",
                                             ["---"] + list(sh.categoricals_dict.keys()),
@@ -125,7 +129,9 @@ app_ui = ui.page_navbar(
                                             ["TPM", "Log2(TPM)"],
                                             multiple= False,
                                             selected= "Log2(TPM)")),
-                output_widget("expression_box_viol")
+                ui.card(ui.card_body(output_widget("expression_box_viol")),
+                        ui.card_footer("Click button in the bottom right for fullscreen view."),
+                        full_screen=True)
                 ),      
             ),
             ui.nav_panel("Query Gene Expression",
@@ -585,6 +591,13 @@ def server(input, output, session):
                                       multiple=True)
         else:
             return None
+        
+    @reactive.effect
+    @reactive.event(input.box_viol_x_category)  # Trigger when category changes
+    def update_box_viol_selectize():
+        x_cat = input.box_viol_x_category()
+        new_options = sh.categorials_opts_dict[x_cat]
+        ui.update_selectize("box_viol_x_cat_filter", choices=new_options, selected=new_options)
     
     @render_widget
     @reactive.event(input.box_viol_run)
@@ -592,6 +605,7 @@ def server(input, output, session):
 
         transform = input.box_viol_transformation()
         x_cat = sh.categoricals_dict[input.box_viol_x_category()]
+        x_cat_filts = input.box_viol_x_cat_filter()
         gene = input.box_viol_gene_input()
         group = input.box_viol_groupby()
         plot_type = input.box_viol_plot()
@@ -601,7 +615,7 @@ def server(input, output, session):
         else:
             compartment_multiple = None
 
-        fig = bv.box_viol_exprn(transform, x_cat, gene, group, plot_type, compartment_multiple)
+        fig = bv.box_viol_exprn(transform, x_cat, x_cat_filts, gene, group, plot_type, compartment_multiple)
 
         return fig
     

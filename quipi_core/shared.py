@@ -63,11 +63,15 @@ genes = list(set(quipi_all_columns) - set(non_genes))
 categorical_data = pd.read_feather("./data/quipi_raw_tpm.feather", columns=cats)
 
 # Cleaned categories for user mapped to underlying data column names
-categoricals_dict = {"Patient" : "patient",
-                     "Indication" : "indication", 
+categoricals_dict = {"Indication" : "indication", 
                      "Sample Type" : "sample_type",
                      "Compartment" : "compartment", 
                      "Archetype" : "archetype"}
+
+categorials_opts_dict = {"Indication" : indications,
+                         "Sample Type" : ["T1", "T2", "N1", "N2"],
+                         "Compartment" : compartments,
+                         "Archetype" : archetypes}
 
 categoricals_dict_reversed = {y:x for x,y in categoricals_dict.items()}
 
@@ -93,6 +97,7 @@ feature_scores = {"Myeloid Score" : "Myelo_score",
 
 # Colors for each PanCan archetype
 colors_pancan = {
+    'Unclassified' : '#d6d893',
     'IR CD8 Mac' : '#ed1e21',
     'IR CD8 Mono' : '#f06ba8',
     'IR CD4 Mac' : '#7e1515',
@@ -129,6 +134,12 @@ cancer_glossary_df = pd.DataFrame.from_dict(cancer_glossary,
                                             orient = "index",
                                             columns = ["Elaborated"],)
 cancer_glossary_df["Abbreviation"] = cancer_glossary_df.index
+
+color_dict = {"indication" : indic_to_color,
+              "sample_type" : None,
+              "compartment" : None,
+              "archetype" : colors_pancan
+              }
 
 
 def plot_cancer_glossary_table():

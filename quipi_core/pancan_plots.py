@@ -61,7 +61,7 @@ def plot_pancan_exprn_subplots(transform, genes, compartment):
 
 def plot_pancan_archetypes():
 
-    fig = px.scatter(sh.categorical_data, x = "x_umap1", y="x_umap2", 
+    fig = px.scatter(sh.categorical_data[sh.categorical_data["archetype"] != "Unclassified"], x = "x_umap1", y="x_umap2", 
                          color="archetype", color_discrete_map=sh.colors_pancan)
     fig.update_traces(marker=dict(size=12))
     fig.update_layout(legend_title_text = "Archetype",)
