@@ -27,22 +27,22 @@ categorical_choices = {"Compartment":compartments,
                        "Archetype": archetypes, 
                        "Indication": indications}
 
-indic_to_color = {'LUNG':'rgb(102, 197, 204)',
-                  'HEP':'rgb(246, 207, 113)', 
-                  'ADR':'rgb(248, 156, 116)', 
-                  'GBM':'rgb(102, 197, 204)', 
-                  'CRC':'rgb(135, 197, 95)',
-                  'BRC':'rgb(158, 185, 243)',
-                  'KID':'rgb(254, 136, 177)',
-                  'MEL':'rgb(201, 219, 116)',
-                  'PNET':'rgb(139, 224, 164)',
-                  'GYN':'rgb(180, 151, 231)',
-                  'HNSC':'rgb(179, 179, 179)',
-                  'SI':'rgb(220, 176, 242)',
-                  'SRC':'rgb(248, 156, 116)',
-                  'GALL':'rgb(246, 207, 113)',
-                  'PDAC':'rgb(220, 176, 242)',
-                  'BLAD':'rgb(135, 197, 95)'}
+indic_to_color = {'LUNG':'rgb(15, 8, 58)',
+                  'HEP':'rgb(55, 77, 161)', 
+                  'ADR':'rgb(248, 156, 116)', ####
+                  'GBM':'rgb(69, 70, 75)', 
+                  'CRC':'rgb(74, 135, 145)',
+                  'BRC':'rgb(158, 185, 243)', ####
+                  'KID':'rgb(124, 20, 20)',
+                  'MEL':'rgb(15, 2, 2)',
+                  'PNET':'rgb(82, 26, 113)',
+                  'GYN':'rgb(153, 99, 87)',
+                  'HNSC':'rgb(39, 111, 36)',
+                  'SI':'rgb(220, 176, 242)', ####
+                  'SRC':'rgb(281, 23, 110)',
+                  'GALL':'rgb(246, 207, 113)', ####
+                  'PDAC':'rgb(165, 171, 44)',
+                  'BLAD':'rgb(212, 160, 64)'}
 
 
 # Open the file in read mode
@@ -148,19 +148,12 @@ def plot_cancer_glossary_table():
 
     fig = go.Figure(data=[
         go.Table(
-            header=dict(
-                    values=[""] * 2,  # Empty header
-                    fill_color="white",      # Make header background white (or transparent)
-                    line_color="white"),
-            #header=dict(values=list(df.columns),
-            #            fill_color='white',
-            #            font = dict(color = "black",size = 18),
-            #            align='center'),
             cells=dict(values=[df[col] for col in df.columns],
                     fill_color=[colors],  # Apply row colors
                     align='center',
                     height=28,
-                    font = dict(color = 'black', size = 16)))
+                    line=dict(color='white', width=2),
+                    font = dict(color = 'white', size = 16)))
     ])
     
     fig.update_layout(autosize=True,)
