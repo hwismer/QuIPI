@@ -95,7 +95,7 @@ def server(input, output, session):
     @reactive.event(input.box_x_cat)  # Trigger when category changes
     def update_box_viol_selectize():
         x_cat = input.box_x_cat()
-        flow_df = pd.read_feather("/Users/hwismer/Documents/QuIPI/quipi_humu/quipi_humu_data/quipi_humu_flow_table.feather", columns=[x_cat])
+        flow_df = pd.read_feather("./quipi_humu_data/quipi_humu_flow_table.feather", columns=[x_cat])
         cats = list(flow_df[x_cat].unique())
         ui.update_selectize("box_x_cat_filter", choices=cats, selected=cats)
         
