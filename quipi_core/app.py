@@ -43,7 +43,11 @@ app_ui = ui.page_fluid(
         body { background-color: #b8d1d6; }  /* Background color */
         .nav-link { font-size: 20px; }
     """),
-
+    ui.head_content(
+        ui.tags.link(
+            rel="icon", type="image/png", sizes="64x64", href="favicon-32x32.png"
+        ),
+    ),
     ui.tags.div(
         ui.tags.div(
             ui.tags.img(src="quipi.png", style="height: 100px; margin-left: 10px; padding-top: 10px"),  # Left-aligned image
