@@ -35,7 +35,6 @@ tabs_mapped_to_gene_inputs = {"Box/Violin Plots" : ["box_viol_gene_input"],
 
 panel_color = "#f0f0f0"
 
-
 # Define the UI
 app_ui = ui.page_fluid(
 
@@ -60,7 +59,7 @@ app_ui = ui.page_fluid(
     ui.page_navbar(
 
         ui.nav_panel("Home",
-            ui.panel_title("QuIPI - Querying Immunoprofiler"),
+            ui.panel_title("QuIPI - Querying IPI"),
             ui.p("Here are some useful references."),
             ui.layout_column_wrap(
                 ui.card(ui.card_header("Cancer Indication Breakdown"),
