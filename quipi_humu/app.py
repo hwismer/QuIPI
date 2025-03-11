@@ -18,6 +18,8 @@ import scipy
 
 RUN_STYLE="background-color: #AFE1AF; color: black;"
 
+panel_color = "#f0f0f0"
+
 
 # Define the UI
 app_ui = ui.page_fluid(
@@ -55,12 +57,15 @@ app_ui = ui.page_fluid(
                     ui.input_selectize("box_x_cat", "Select X-Axis Category", ["Species", "Group"]),
                     ui.input_selectize("box_x_cat_filter", "**Subset X-Axis Categories.**", [], multiple=True),
                     ui.input_selectize("box_group", "Group By:",  ["---"] + sh.flow_cats, selected="---"),
-                    ui.input_action_button("box_run", "RUN")     
+                    ui.input_action_button("box_run", "RUN"),
+                    bg=panel_color
                 ),
-            ui.card(ui.card_body(output_widget("expression_box_viol")),
-                    ui.card_footer("Click button in the bottom right for fullscreen view."),
-                    full_screen=True)
+                ui.card(ui.card_body(output_widget("expression_box_viol")),
+                        ui.card_footer("Click button in the bottom right for fullscreen view."),
+                        full_screen=True),
+                bg=panel_color,
             )
+        
         ),
 
         ui.nav_panel("Violin Plots",
@@ -69,7 +74,9 @@ app_ui = ui.page_fluid(
                 ui.sidebar(
                     ui.input_selectize("viol_genes", "Choose Genes to plot:", sh.adata_vars),
                     #ui.input_selectize("")
-                )
+                    bg=panel_color
+                ),
+                bg=panel_color
 
             )       
         ),
