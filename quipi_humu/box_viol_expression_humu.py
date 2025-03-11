@@ -22,7 +22,6 @@ def box_humu(score1, score2, x_cat, x_cat_filts, group):
         flow_table[col_name] = np.log2(flow_table[score1] / flow_table[score2])
         fig = px.box(flow_table, x = x_cat , y = col_name, color = group)
     else:
-        print(flow_table, x_cat, score1, group)
         fig = px.box(flow_table, x = x_cat, y = score1, color = group )
 
     return fig
