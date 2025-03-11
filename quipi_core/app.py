@@ -478,7 +478,7 @@ app_ui = ui.page_fluid(
                                         value=1),
                         bg=panel_color
                     ),
-                    output_widget("gfs_ranked_dge"),
+                    ui.card(output_widget("gfs_ranked_dge")),
                     ui.layout_column_wrap(
                         ui.card(ui.card_header("Negative DGEs"),
                                 ui.card_body(ui.output_data_frame("gfs_ranked_dge_bot")),
