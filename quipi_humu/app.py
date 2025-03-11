@@ -23,21 +23,24 @@ panel_color = "#f0f0f0"
 
 # Define the UI
 app_ui = ui.page_fluid(
+
     ui.tags.style("""
         body { background-color: #e5e7f8; }  /* Background color */
         .nav-link { font-size: 20px; }
     """),
-
+    ui.head_content(
+        ui.tags.link(
+            rel="icon", type="image/png", sizes="64x64", href="favicon-32x32.png"
+        ),
+    ),
     ui.tags.div(
         ui.tags.div(
-            ui.tags.img(src="humu_edit2.png", style="width: 100px; margin-left: 10px; padding-top: 10px"),  # Left-aligned image
+            ui.tags.img(src="humu.png", style="width: 100px; margin-left: 10px; padding-top: 10px"),  # Left-aligned image
             ui.tags.span("QuIPI - HuMu", style="font-size: 50px; font-weight: bold;"),
             style="display: flex; align-items: flex-end; gap: 10px;" # Flexbox for horizontal alignment
         ),
         style="padding-bottom: 5px;"
     ),
-
-    #ui.a("Return to QuIPI", href="https://quipi.org/app/quipi", target="_blank", class_="nav-link"),
 
     ui.page_navbar(
         ui.nav_panel(
@@ -81,13 +84,11 @@ app_ui = ui.page_fluid(
             )       
         ),
         ui.nav_spacer(),
-        #ui.input_action_button("go_to_site", "Visit Website", class_="btn-primary"),
-        #ui.nav_panel("Return to QuIPI"),
         ui.nav_control(ui.a("Return to QuIPI", href="https://quipi.org/app/quipi", target="_blank", class_="nav-link")),
         id = "quipi_top_nav",
         theme=theme.cosmo,
         bg= '#1a1807',
-    )
+    ),
 )   
 
 def server(input, output, session):
