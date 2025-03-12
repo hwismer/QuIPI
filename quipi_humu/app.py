@@ -1,22 +1,22 @@
 from shiny import App, render, ui, reactive
-from shiny.types import ImgData
 from shinyswatch import theme
 import plotly.express as px
 from shinywidgets import output_widget, render_widget 
 
 import shared as sh
-import box_viol_expression_humu as bh
+import quipi_humu.flow_boxplot as bh
+import gex_violin as gv
 
 import numpy as np
 import pandas as pd
-from io import StringIO
 
 from pathlib import Path
 
-import asyncio
-import scipy
+tabs_mapped_to_gene_inputs = {"Violin Plots" : ["gex_viol_gene"],
+}
 
-RUN_STYLE="background-color: #AFE1AF; color: black;"
+
+#RUN_STYLE="background-color: #AFE1AF; color: black;"
 
 panel_color = "#f0f0f0"
 
@@ -75,12 +75,16 @@ app_ui = ui.page_fluid(
             ui.h4("Explore gene expression"),
             ui.layout_sidebar(
                 ui.sidebar(
-                    ui.input_selectize("viol_genes", "Choose Genes to plot:", sh.adata_vars),
-                    #ui.input_selectize("")
+                    ui.input_selectize("gex_viol_gene", "Choose Gene to plot:", []),
+                    ui.input_selectize("gex_viol_x_cat", "Choose X-Axis Category:", sh.categoricals_opts),
+                    ui.input_selectize("gex_viol_cat_subset", "Subset Categories:", [], multiple=True),
+                    ui.input_selectize("gex_viol_groupby", "Group by:", ["---"] + sh.categoricals_opts, selected="---"),
+                    ui.input_selectize("gex_viol_splitby", "Split by:", ["---"] + sh.categoricals_opts, selected="---"),
+                    ui.input_action_button("gene_viol_run", "RUN"),
                     bg=panel_color
                 ),
+                ui.card(output_widget("gex_viol"), full_screen=True),
                 bg=panel_color
-
             )       
         ),
         ui.nav_spacer(),
@@ -92,6 +96,8 @@ app_ui = ui.page_fluid(
 )   
 
 def server(input, output, session):
+
+    ##### FLOW BOX PLOTS
 
     @reactive.effect
     @reactive.event(input.box_x_cat)  # Trigger when category changes
@@ -109,10 +115,48 @@ def server(input, output, session):
         x_cat = input.box_x_cat()
         x_cat_filter = input.box_x_cat_filter()
         group = input.box_group()
-
-        fig = bh.box_humu(score1, score2, x_cat, x_cat_filter, group)
-
+        fig = bh.box_humu_flow(score1, score2, x_cat, x_cat_filter, group)
         return fig
+    
+    ##### GEX Violin Plots
+    @render_widget
+    @reactive.event(input.gene_viol_run)
+    def gex_viol():
+        gene = input.gex_viol_gene()
+        x_cat = input.gex_viol_x_cat()
+        x_sub = input.gex_viol_cat_subset()
+        group = input.gex_viol_groupby()
+        split = input.gex_viol_splitby()
+
+        fig = gv.plot_sc_violin(gene,x_cat,x_sub,group,split)
+        return fig
+
+    @reactive.effect
+    @reactive.event(input.gex_viol_x_cat)  # Trigger when category changes
+    def update_box_viol_selectize():
+        x_cat = input.gex_viol_x_cat()
+        cat_opts = list(pd.read_feather("./quipi_humu_data/quipi_humu_adata_clean_full_PROC.feather", columns=[x_cat])[x_cat].unique())
+        ui.update_selectize("gex_viol_cat_subset", choices=cat_opts, selected=cat_opts)
+    
+
+
+    ##### HELPER 
+
+    tabs_visited = []
+    ## HELPER: Populate individual gene selection boxes to avoid long startup.
+    @reactive.effect
+    def populate_gene_selections():
+        current_tab = input.quipi_top_nav()  # Read the active tab
+        if current_tab not in tabs_visited:
+            tabs_visited.append(current_tab)
+            if current_tab in tabs_mapped_to_gene_inputs:
+                for id in tabs_mapped_to_gene_inputs[current_tab]:
+                    ui.update_selectize(
+                        id,
+                        choices=sh.genes,
+                        selected=[],
+                        server=True,
+                    )
 
 # Create the Shiny app
 app_dir = Path(__file__).parent

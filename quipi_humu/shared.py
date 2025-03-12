@@ -1,9 +1,6 @@
 import pandas as pd
-import plotly.graph_objects as go
-import plotly.express as px
+import pyarrow.feather as feather
 import csv
-import scanpy as sc
-
 
 flow_cats = ["Species", "Group"]
 flow_scores = ['CD45_Live', 'Tcells_Live','Myeloid_Live', 'Stroma_Live', 
@@ -11,6 +8,12 @@ flow_scores = ['CD45_Live', 'Tcells_Live','Myeloid_Live', 'Stroma_Live',
                'Monocytes_Myeloid', 'cDC1_Myeloid', 'cDC2_Myeloid', 'Ki67_Tumor', 
                'NKcells_Live', 'Bcells_Live','Neutrophiles_Live', 'Exhaustion_CD8']
 
-adata_vars = list(pd.read_feather("./quipi_humu_data/quipi_humu_vars.feather", columns=["gene"])["gene"])
-categoricals = ["Tumor_Line", "Experiment", "Compartment","PanCan_Compartment","Coarse_Annot","Fine_Annot"]
-#adata = sc.read_h5ad("./quipi_humu_data/250305_Tumor_Combined_clean_HuMu.h5ad", backed="r")
+categoricals = ['orig.ident','nCount_RNA','nFeature_RNA','Tumor_Line','Experiment','Age','Drink',
+                      'Diet','Drink_Diet','Microbiota','Housing','Tumor_site','PanCan_Compartment',
+                      'Coarse_Annot', 'Fine_Annot']
+
+categoricals_opts = ['Tumor_Line','Experiment','PanCan_Compartment','Coarse_Annot', 'Fine_Annot']
+
+# Get all the gene names
+with open("./quipi_humu_data/quipi_humu_genes.csv", "r") as f:
+    genes = next(csv.reader(f))

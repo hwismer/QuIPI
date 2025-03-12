@@ -7,7 +7,7 @@ import pandas as pd
 import shared as sh
 
 
-def box_humu(score1, score2, x_cat, x_cat_filts, group):
+def box_humu_flow(score1, score2, x_cat, x_cat_filts, group):
     cols = set([col for col in [score1, score2, x_cat, group] if col in sh.flow_cats + sh.flow_scores])
     flow_table = pd.read_feather("./quipi_humu_data/quipi_humu_flow_table.feather", columns=cols)
     flow_table = flow_table[flow_table[x_cat].isin(x_cat_filts)]
@@ -25,3 +25,4 @@ def box_humu(score1, score2, x_cat, x_cat_filts, group):
         fig = px.box(flow_table, x = x_cat, y = score1, color = group )
 
     return fig
+
