@@ -31,7 +31,7 @@ tabs_mapped_to_gene_inputs = {"Box/Violin Plots" : ["box_viol_gene_input"],
                               "Gene-Signature Score Ranked DGE" : ["fs_dge_genes","fs_dge_highlight_genes"],
                               "Query Gene Expression" : ["gene_expr_query_genes"],
                               "Cross-Compartment Correlation Table": ["cross_comp_corr_cat_gene_input"]
-    }
+}
 
 panel_color = "#f0f0f0"
 
