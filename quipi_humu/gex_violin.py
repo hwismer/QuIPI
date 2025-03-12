@@ -11,6 +11,13 @@ def plot_sc_violin(gene, x_cat, x_cat_subset, groupby, splitby):
     splitby = splitby if splitby != "---" else None
     groupby = groupby if groupby != "---" else None
 
-    fig = px.violin(input_arr, x = x_cat, y = gene, color = groupby, facet_col=splitby, facet_col_wrap=3)
+    fig = px.violin(input_arr, x = x_cat, y = gene, color = groupby, facet_col=splitby, 
+                    facet_col_wrap=3,
+                    points = False,
+                    )
+    
+    fig.update_layout(xaxis_tickangle=-45)
+    fig.update_traces(width=.95)
+    #fig.update_traces(spanmode="hard")
 
     return fig

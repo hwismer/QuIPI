@@ -4,7 +4,7 @@ import plotly.express as px
 from shinywidgets import output_widget, render_widget 
 
 import shared as sh
-import quipi_humu.flow_boxplot as bh
+import flow_boxplot as bh
 import gex_violin as gv
 
 import numpy as np
@@ -26,7 +26,12 @@ app_ui = ui.page_fluid(
 
     ui.tags.style("""
         body { background-color: #e5e7f8; }  /* Background color */
-        .nav-link { font-size: 20px; }
+        .nav-link { font-size: 20px;
+                    color: white;
+        }
+        .navbar-nav .nav-link.active {
+            color: white !important;  /* Keep text white when selected */
+        }
     """),
     ui.head_content(
         ui.tags.link(
