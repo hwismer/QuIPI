@@ -40,7 +40,12 @@ app_ui = ui.page_fluid(
 
     ui.tags.style("""
         body { background-color: #b8d1d6; }  /* Background color */
-        .nav-link { font-size: 20px; }
+        .nav-link { font-size: 20px;
+                    color: white;
+        }
+        .navbar-nav .nav-link.active {
+            color: white !important;  /* Keep text white when selected */
+        }
     """),
     ui.head_content(
         ui.tags.link(
