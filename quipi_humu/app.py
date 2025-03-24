@@ -5,7 +5,7 @@ from shinywidgets import output_widget, render_widget
 
 import shared as sh
 import flow_boxplot as bh
-import quipi_humu.gex_plots as gp
+import gex_plots as gp
 
 import numpy as np
 import pandas as pd
@@ -99,11 +99,12 @@ app_ui = ui.page_fluid(
                 ui.sidebar(
                     ui.input_selectize("gex_dot_gene", "Choose Genes to plot:", [], multiple=True),
                     ui.input_selectize("gex_dot_groupby", "Group by:", sh.categoricals_opts, selected="---"),
+                    ui.input_selectize("gex_dot_splitby", "Split by:", ["---"] + sh.categoricals_opts, selected="---"),
                     ui.input_switch("gex_dot_swap", "Swap Axes"),
                     ui.input_action_button("gex_dot_run", "RUN"),
                     bg=panel_color
                 ),
-            ui.card(ui.output_plot("gex_dotplot", height="700px"), full_screen=True)
+            ui.card(ui.output_plot("gex_dotplot"), min_height="750px", full_screen=True)
             )       
         ),
 
@@ -165,9 +166,10 @@ def server(input, output, session):
     def gex_dotplot():
         genes = list(input.gex_dot_gene())
         groupby = input.gex_dot_groupby()
+        splitby = input.gex_dot_splitby()
         swap = input.gex_dot_swap()
 
-        fig = gp.plot_sc_dotplot(genes, groupby, swap)
+        fig = gp.plot_sc_dotplot(genes, groupby, splitby, swap)
         
         return fig
 
