@@ -12,10 +12,11 @@ def plot_sc_box(gene, x_cat, x_cat_subset, groupby, splitby):
     splitby = splitby if splitby != "---" else None
     groupby = groupby if groupby != "---" else None
 
+    print(input_arr)
+
     fig = px.box(input_arr, x = x_cat, y = gene, color = groupby, facet_col=splitby, 
-                    facet_col_wrap=4,
+                    facet_col_wrap=3,
                     points = False,
-                    boxmode="group",
                     facet_col_spacing=0,
                     facet_row_spacing=0,
                     )
