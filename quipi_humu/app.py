@@ -5,14 +5,15 @@ from shinywidgets import output_widget, render_widget
 
 import shared as sh
 import flow_boxplot as bh
-import gex_violin as gv
+import quipi_humu.gex_plots as gp
 
 import numpy as np
 import pandas as pd
 
 from pathlib import Path
 
-tabs_mapped_to_gene_inputs = {"Violin Plots" : ["gex_viol_gene"],
+tabs_mapped_to_gene_inputs = {"Gene Expression Box Plots" : ["gex_box_gene"],
+                              "Gene Expression Dotplots" : ["gex_dot_gene"]
 }
 
 
@@ -76,22 +77,36 @@ app_ui = ui.page_fluid(
         
         ),
 
-        ui.nav_panel("Violin Plots",
+        ui.nav_panel("Gene Expression Box Plots",
             ui.h4("Explore gene expression"),
             ui.layout_sidebar(
                 ui.sidebar(
-                    ui.input_selectize("gex_viol_gene", "Choose Gene to plot:", []),
-                    ui.input_selectize("gex_viol_x_cat", "Choose X-Axis Category:", sh.categoricals_opts),
-                    ui.input_selectize("gex_viol_cat_subset", "Subset Categories:", [], multiple=True),
-                    ui.input_selectize("gex_viol_groupby", "Group by:", ["---"] + sh.categoricals_opts, selected="---"),
-                    ui.input_selectize("gex_viol_splitby", "Split by:", ["---"] + sh.categoricals_opts, selected="---"),
-                    ui.input_action_button("gene_viol_run", "RUN"),
+                    ui.input_selectize("gex_box_gene", "Choose Gene to plot:", []),
+                    ui.input_selectize("gex_box_x_cat", "Choose X-Axis Category:", sh.categoricals_opts),
+                    ui.input_selectize("gex_box_cat_subset", "Subset Categories:", [], multiple=True),
+                    ui.input_selectize("gex_box_groupby", "Group by:", ["---"] + sh.categoricals_opts, selected="---"),
+                    ui.input_selectize("gex_box_splitby", "Split by:", ["---"] + sh.categoricals_opts, selected="---"),
+                    ui.input_action_button("gene_box_run", "RUN"),
                     bg=panel_color
                 ),
-                ui.card(output_widget("gex_viol"), full_screen=True),
+                ui.card(output_widget("gex_box"), full_screen=True),
                 bg=panel_color
             )       
         ),
+
+        ui.nav_panel("Gene Expression Dotplots",
+            ui.layout_sidebar(
+                ui.sidebar(
+                    ui.input_selectize("gex_dot_gene", "Choose Genes to plot:", [], multiple=True),
+                    ui.input_selectize("gex_dot_groupby", "Group by:", sh.categoricals_opts, selected="---"),
+                    ui.input_switch("gex_dot_swap", "Swap Axes"),
+                    ui.input_action_button("gex_dot_run", "RUN"),
+                    bg=panel_color
+                ),
+            ui.card(ui.output_plot("gex_dotplot", height="700px"), full_screen=True)
+            )       
+        ),
+
         ui.nav_spacer(),
         ui.nav_control(ui.a("Return to QuIPI", href="https://quipi.org/app/quipi", target="_blank", class_="nav-link")),
         id = "quipi_top_nav",
@@ -125,23 +140,37 @@ def server(input, output, session):
     
     ##### GEX Violin Plots
     @render_widget
-    @reactive.event(input.gene_viol_run)
-    def gex_viol():
-        gene = input.gex_viol_gene()
-        x_cat = input.gex_viol_x_cat()
-        x_sub = input.gex_viol_cat_subset()
-        group = input.gex_viol_groupby()
-        split = input.gex_viol_splitby()
+    @reactive.event(input.gene_box_run)
+    def gex_box():
+        gene = input.gex_box_gene()
+        x_cat = input.gex_box_x_cat()
+        x_sub = input.gex_box_cat_subset()
+        group = input.gex_box_groupby()
+        split = input.gex_box_splitby()
 
-        fig = gv.plot_sc_violin(gene,x_cat,x_sub,group,split)
+        fig = gp.plot_sc_box(gene,x_cat,x_sub,group,split)
         return fig
 
     @reactive.effect
-    @reactive.event(input.gex_viol_x_cat)  # Trigger when category changes
+    @reactive.event(input.gex_box_x_cat)  # Trigger when category changes
     def update_box_viol_selectize():
-        x_cat = input.gex_viol_x_cat()
+        x_cat = input.gex_box_x_cat()
         cat_opts = list(pd.read_feather("./quipi_humu_data/quipi_humu_adata_clean_full_PROC.feather", columns=[x_cat])[x_cat].unique())
-        ui.update_selectize("gex_viol_cat_subset", choices=cat_opts, selected=cat_opts)
+        ui.update_selectize("gex_box_cat_subset", choices=cat_opts, selected=cat_opts)
+    
+    ##### GEX DOTPLOTS
+
+    @render.plot
+    @reactive.event(input.gex_dot_run)
+    def gex_dotplot():
+        genes = list(input.gex_dot_gene())
+        groupby = input.gex_dot_groupby()
+        swap = input.gex_dot_swap()
+
+        fig = gp.plot_sc_dotplot(genes, groupby, swap)
+        
+        return fig
+
     
 
 
