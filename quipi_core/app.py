@@ -518,7 +518,7 @@ app_ui = ui.page_fluid(
             
     ),
         ui.nav_spacer(),
-        ui.nav_control(ui.a("QuIPI HuMu", href="https://quipi.org/app/quipi_humu", target="_blank", class_="nav-link")),
+        ui.nav_control(ui.a("QuIPI HuMu", href="https://quipi.org/app/quipi_humu", class_="nav-link")),
         #ui.nav_control(
         #    ui.tags.a(
         #    ui.tags.i(class_="fa fa-github", style="font-size: 40px; color: black; justify-content: center; margin-top: 8px"),
