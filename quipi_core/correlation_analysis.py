@@ -46,9 +46,9 @@ def gene_correlation_heatmap(genes, indications, method, compartments, archetype
 def compartment_correlation_heatmap(genes, compartment1, compartment2, transform, method, indications, tissues, archetypes):
 
     if transform == "TPM":
-        input_arr = pd.read_feather("./data/quipi_raw_tpm.feather", columns=sh.non_genes + list(genes))
+        input_arr = pd.read_feather("./quipi_data/quipi_raw_tpm.feather", columns=sh.non_genes + list(genes))
     elif transform == "Log2(TPM)":
-        input_arr = pd.read_feather("./data/quipi_log2_tpm.feather", columns=sh.non_genes + list(genes))
+        input_arr = pd.read_feather("./quipi_data/quipi_log2_tpm.feather", columns=sh.non_genes + list(genes))
 
     input_arr = input_arr[input_arr["indication"].isin(indications)]
     input_arr = input_arr[input_arr["archetype"].isin(archetypes)]
@@ -137,7 +137,7 @@ def gene_corr_df():
 def categorical_correlation_table(gene,category,categories,range,progress):
 
 
-    log2_df = pd.read_feather("./data/quipi_log2_tpm.feather")
+    log2_df = pd.read_feather("./quipi_data/quipi_log2_tpm.feather")
     log2_df = log2_df[log2_df[sh.categoricals_dict[category]].isin(categories)][sh.genes]
 
     df = pd.DataFrame()
@@ -162,9 +162,9 @@ def categorical_correlation_table(gene,category,categories,range,progress):
 def cross_compartment_correlation_table(genes, compartment1, compartment2, range, transform, method, progress):
 
     if transform == "TPM":
-        input_arr = pd.read_feather("./data/quipi_raw_tpm.feather")
+        input_arr = pd.read_feather("./quipi_data/quipi_raw_tpm.feather")
     elif transform == "Log2(TPM)":
-        input_arr = pd.read_feather("./data/quipi_log2_tpm.feather")
+        input_arr = pd.read_feather("./quipi_data/quipi_log2_tpm.feather")
 
     comp1 = input_arr[input_arr["compartment"] == compartment1]
     comp1 = comp1[np.logical_not(comp1.duplicated(subset="sample_name",keep="last"))]
