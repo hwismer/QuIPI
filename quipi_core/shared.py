@@ -46,12 +46,12 @@ indic_to_color = {'LUNG':'rgb(15, 8, 58)',
 
 
 # Open the file in read mode
-with open("./data/quipi_raw_cols.csv", 'r') as file:
+with open("./quipi_data/quipi_raw_cols.csv", 'r') as file:
     reader = csv.reader(file)
     # Read the first row only (header)
     quipi_all_columns= next(reader)
 
-with open("./data/quipi_flow_score_cols.csv", 'r') as file:
+with open("./quipi_data/quipi_flow_score_cols.csv", 'r') as file:
     reader = csv.reader(file)
     # Read the first row only (header)
     quipi_flow_columns= next(reader)
@@ -60,7 +60,7 @@ cats = ('patient','sample_name','indication', 'archetype', 'sample_type', 'sampl
 non_cats = tuple(set(quipi_flow_columns) - set(cats))
 genes = list(set(quipi_all_columns) - set(non_genes))
 
-categorical_data = pd.read_feather("./data/quipi_raw_tpm.feather", columns=cats)
+categorical_data = pd.read_feather("./quipi_data/quipi_raw_tpm.feather", columns=cats)
 
 # Cleaned categories for user mapped to underlying data column names
 categoricals_dict = {"Indication" : "indication", 

@@ -38,7 +38,7 @@ def highlight_boxplot(top_data,bot_data,highlight_genes):
 def factor_ranked_dge(gfs_genes, gfs_compartment, quantile, dge_compartment,fc_threshold=1, p_val_thresh=0.000001, highlight_genes=[]):
    
    gfs = gf.calculate_gene_factor_score(gfs_genes, gfs_compartment)
-   quipi_raw = pd.read_feather("./data/quipi_raw_tpm.feather")
+   quipi_raw = pd.read_feather("./quipi_data/quipi_raw_tpm.feather")
 
    top_data, bot_data = rank_using_score(gfs, quipi_raw,"factor_score", quantile, dge_compartment)
    change_df = do_dge(top_data, bot_data)
@@ -57,8 +57,8 @@ def feature_ranked_dge(feature_score,compartment,quantile, fc_threshold= 1, p_va
    comp = compartment
    quantile = quantile
    
-   flow_df = pd.read_feather("./data/quipi_flow_scores.feather",columns=["sample_name", sh.feature_scores[feature_score]])
-   quipi_raw = pd.read_feather("./data/quipi_raw_tpm.feather")
+   flow_df = pd.read_feather("./quipi_data/quipi_flow_scores.feather",columns=["sample_name", sh.feature_scores[feature_score]])
+   quipi_raw = pd.read_feather("./quipi_data/quipi_raw_tpm.feather")
    
    top_data, bot_data = rank_using_score(flow_df, quipi_raw, rank_cat, quantile, comp)
    change_df = do_dge(top_data, bot_data)

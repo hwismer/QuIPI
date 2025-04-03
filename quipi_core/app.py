@@ -22,6 +22,7 @@ import scipy
 
 tabs_mapped_to_gene_inputs = {"Box/Violin Plots" : ["box_viol_gene_input"],
                               "Gene Expresssion Bar Plots" : ["gene_expr_bar_genes"],
+                              "Dotplots" : ["gex_dot_genes"],
                               "Correlation Matrix" : ["corr_gene_input"],
                               "Compartment Correlation Matrix" : ["comp_corr_mat_genes"],
                               "One-Vs-All Correlation Table" : ["corr_cat_gene_input"],
@@ -62,7 +63,6 @@ app_ui = ui.page_fluid(
     ),
 
     ui.page_navbar(
-
         ui.nav_panel("Home",
             ui.panel_title("QuIPI - Querying IPI"),
             ui.p("Here are some useful references."),
@@ -93,6 +93,7 @@ app_ui = ui.page_fluid(
 
         # Box/Violin plot where the user selects a gene and can group by custom categories
         ui.nav_menu("Gene Expression",
+                    
             ui.nav_panel("Box/Violin Plots",
                 ui.layout_sidebar(
                     ui.sidebar(
@@ -130,6 +131,27 @@ app_ui = ui.page_fluid(
                         full_screen=True),
                 bg=panel_color
                 ),
+            ),
+
+            ui.nav_panel("Dotplots",
+                ui.layout_sidebar(
+                    ui.sidebar(
+                        ui.input_selectize("gex_dot_genes", "Choose Genes to plot:", [], multiple=True),
+                        ui.card(
+                            ui.input_selectize("gex_dot_groupby", "Group by:", list(sh.categorical_choices.keys())),
+                            ui.input_selectize("gex_dot_groupby_subset", "Subset Groupby Categories:", [], multiple=True),
+                        ),
+                        ui.card(
+                            ui.input_selectize("gex_dot_splitby", "Split by:", ["---"] + list(sh.categorical_choices.keys()), selected="---"),
+                            ui.input_selectize("gex_dot_splitby_subset", "Subset Splitby Categories:", [], multiple=True), 
+                        ),
+                        ui.input_selectize("gex_dot_transform", "Select TPM Transformation:", ["Log2(TPM)", "TPM"], selected = "TPM"),
+                        ui.input_switch("gex_dot_swap", "Swap Axes"),
+                        ui.input_action_button("gex_dot_run", "RUN"),
+                        bg=panel_color
+                    ),
+                    ui.card(ui.output_plot("gex_dotplot", fill=True), full_screen=True)   
+                )
             ),
 
             ui.nav_panel("Query Gene Expression",
@@ -519,15 +541,6 @@ app_ui = ui.page_fluid(
     ),
         ui.nav_spacer(),
         ui.nav_control(ui.a("QuIPI HuMu", href="https://quipi.org/app/quipi_humu", class_="nav-link")),
-        #ui.nav_control(
-        #    ui.tags.a(
-        #    ui.tags.i(class_="fa fa-github", style="font-size: 40px; color: black; justify-content: center; margin-top: 8px"),
-        #    href="https://github.com/HarrisonWismer/QuIPI",  # The URL to navigate to
-        #    target="_blank",  # Opens in a new tab
-        #    style="text-decoration: none; margin-left: 0px; justify-content: center;",  # Optional styling
-        #    ),
-        #
-        #),
         id = "quipi_top_nav",
         theme=theme.cosmo,
         bg = "#1a1807"
@@ -629,6 +642,42 @@ def server(input, output, session):
 
         return fig
     
+    ##### DOTPLOTS
+    
+    @reactive.effect
+    @reactive.event(input.gex_dot_groupby)  # Trigger when category changes
+    def update_dotplot_group_selectize():
+        x_cat = input.gex_dot_groupby()
+        cat_opts = sh.categorical_choices[x_cat]
+        ui.update_selectize("gex_dot_groupby_subset", choices=cat_opts, selected=cat_opts)
+
+
+    @reactive.effect
+    @reactive.event(input.gex_dot_splitby)  # Trigger when category changes
+    def update_dotplot_group_selectize():
+        split_cat = input.gex_dot_splitby()
+        if split_cat != "---":
+            cat_opts = sh.categorical_choices[split_cat]
+            ui.update_selectize("gex_dot_splitby_subset", choices=cat_opts, selected=cat_opts)
+        else:
+            ui.update_selectize("gex_dot_splitby_subset", choices=[])
+
+    @render.plot
+    @reactive.event(input.gex_dot_run)
+    def gex_dotplot():
+        with reactive.isolate():
+            genes = list(input.gex_dot_genes())
+            groupby = input.gex_dot_groupby()
+            groups = input.gex_dot_groupby_subset()
+            splitby = input.gex_dot_splitby()
+            splits = input.gex_dot_splitby_subset()
+            transform = input.gex_dot_transform()
+            swap = input.gex_dot_swap()
+
+            return bv.dotplot(genes, groupby, groups, splitby, splits, transform, swap)
+
+        
+    
     ##### GENE EXPRESSION QUERY
 
     @reactive.calc
@@ -641,9 +690,9 @@ def server(input, output, session):
         transform = input.query_transform()
 
         if transform == "TPM":
-            df = pd.read_feather("./data/quipi_raw_tpm.feather", columns=sh.non_genes + list(genes))
+            df = pd.read_feather("./quipi_data/quipi_raw_tpm.feather", columns=sh.non_genes + list(genes))
         elif transform == "Log2(TPM)":
-            df = pd.read_feather("./data/quipi_log2_tpm.feather", columns=sh.non_genes + list(genes))
+            df = pd.read_feather("./quipi_data/quipi_log2_tpm.feather", columns=sh.non_genes + list(genes))
 
         subset = df[(df["indication"].isin(indications)) & (df["compartment"].isin(compartments)) & (df["archetype"].isin(archetypes))]
         subset = subset[["patient","indication","sample_type","compartment","archetype"] + list(genes)]

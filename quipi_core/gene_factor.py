@@ -5,7 +5,7 @@ import shared as sh
 
 def calculate_gene_factor_score(gene_set,compartment):
 
-    input_arr = pd.read_feather("./data/quipi_log2_tpm.feather", columns=sh.non_genes + gene_set)
+    input_arr = pd.read_feather("./quipi_data/quipi_log2_tpm.feather", columns=sh.non_genes + gene_set)
     log2_subset = input_arr[input_arr["archetype"] != "Unclassified"][input_arr["compartment"] == compartment][sh.non_genes+gene_set]
 
     z_subset = log2_subset[gene_set].apply(zscore)
@@ -16,7 +16,7 @@ def calculate_gene_factor_score(gene_set,compartment):
 
 def calculate_gene_factor_score_all_patients(gene_set,compartments):
 
-    input_arr = pd.read_feather("./data/quipi_log2_tpm.feather", columns=sh.non_genes + gene_set)
+    input_arr = pd.read_feather("./quipi_data/quipi_log2_tpm.feather", columns=sh.non_genes + gene_set)
     
     input_arr = input_arr[input_arr["compartment"].isin(compartments)]
     z_subset = input_arr[gene_set].apply(zscore)

@@ -2,7 +2,9 @@ import pandas as pd
 import plotly.express as px
 import scanpy as sc
 import matplotlib.pyplot as plt
-#sc.settings.autoshow = False
+import matplotlib
+matplotlib.use('Agg')
+sc.settings.autoshow = False
 
 def plot_sc_box(gene, x_cat, x_cat_subset, groupby, splitby):
     cols = {gene, x_cat, groupby, splitby} - {"---"}
@@ -21,16 +23,26 @@ def plot_sc_box(gene, x_cat, x_cat_subset, groupby, splitby):
 
     return fig
 
-def plot_sc_dotplot(genes, groupby, splitby, swap):
+def plot_sc_dotplot(genes, groupby, groups, splitby, splits, swap):
+
+    if len(splits) == 0:
+        splitby=groupby
+        splits = groups
+
     adata = sc.read_h5ad("./quipi_humu_data/quipi_humu_adata_clean_full.h5ad", backed="r")
 
-    fig, ax = plt.subplots()
+    fig, ax = matplotlib.pyplot.subplots()
+    if splitby != "---":
+        adata = adata[adata.obs[splitby].isin(splits) & (adata.obs[groupby].isin(groups))]
+    else:
+        adata = adata[adata.obs[groupby].isin(groups)]
+    
 
     if groupby == splitby:
         vars = groupby
     else:
         vars = [groupby, splitby] if splitby != "---" else groupby
-    
+    print("here")
     if swap:
         sc.pl.DotPlot(adata, var_names=genes, groupby=vars, ax=ax).swap_axes().make_figure()
     else:

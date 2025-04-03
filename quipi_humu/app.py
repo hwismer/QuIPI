@@ -98,13 +98,15 @@ app_ui = ui.page_fluid(
             ui.layout_sidebar(
                 ui.sidebar(
                     ui.input_selectize("gex_dot_gene", "Choose Genes to plot:", [], multiple=True),
-                    ui.input_selectize("gex_dot_groupby", "Group by:", sh.categoricals_opts, selected="---"),
-                    ui.input_selectize("gex_dot_splitby", "Split by:", ["---"] + sh.categoricals_opts, selected="---"),
+                    ui.input_selectize("gex_dot_groupby", "Group By:", sh.categoricals_opts, selected="---"),
+                    ui.input_selectize("gex_dot_groups", "Subset Groupby Categories:", [], multiple=True),
+                    ui.input_selectize("gex_dot_splitby", "Split By:", ["---"] + sh.categoricals_opts, selected="---"),
+                    ui.input_selectize('gex_dot_splits', "Subset Splitby Categories:", [], multiple=True),
                     ui.input_switch("gex_dot_swap", "Swap Axes"),
                     ui.input_action_button("gex_dot_run", "RUN"),
                     bg=panel_color
                 ),
-            ui.card(ui.output_plot("gex_dotplot"), min_height="750px", full_screen=True)
+            ui.card(ui.output_plot("plot_gex_dotplot"), min_height="750px", full_screen=True)
             )       
         ),
 
@@ -160,18 +162,41 @@ def server(input, output, session):
         ui.update_selectize("gex_box_cat_subset", choices=cat_opts, selected=cat_opts)
     
     ##### GEX DOTPLOTS
+    @reactive.effect
+    @reactive.event(input.gex_dot_groupby)
+    def update_dotplot_groupby():
+        x_cat = input.gex_dot_groupby()
+        cat_opts = sh.categorial_opts_dict[x_cat]
+        ui.update_selectize("gex_dot_groups", choices=cat_opts, selected=cat_opts)
 
+    @reactive.effect
+    @reactive.event(input.gex_dot_splitby)  # Trigger when category changes
+    def update_dotplot_splitby():
+        split_cat = input.gex_dot_splitby()
+        if split_cat != "---":
+            cat_opts = sh.categorial_opts_dict[split_cat]
+            ui.update_selectize("gex_dot_splits", choices=cat_opts, selected=[])
+        else:
+            ui.update_selectize("gex_dot_splits", choices=[],)
+    
     @render.plot
     @reactive.event(input.gex_dot_run)
-    def gex_dotplot():
-        genes = list(input.gex_dot_gene())
-        groupby = input.gex_dot_groupby()
-        splitby = input.gex_dot_splitby()
-        swap = input.gex_dot_swap()
+    def plot_gex_dotplot():
 
-        fig = gp.plot_sc_dotplot(genes, groupby, splitby, swap)
-        
-        return fig
+        with reactive.isolate():
+            genes = list(input.gex_dot_gene())
+            if len(genes) > 0:
+                groupby = input.gex_dot_groupby()
+                groups = input.gex_dot_groups()
+                splitby = input.gex_dot_splitby()
+                splits = input.gex_dot_splits()
+                swap = input.gex_dot_swap()
+
+                fig = gp.plot_sc_dotplot(genes, groupby, groups, splitby, splits, swap)
+                
+                return fig
+            else:
+                return None
 
     
 

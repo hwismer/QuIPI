@@ -11,9 +11,9 @@ import scipy
 def gene_correlation_heatmap(genes, indications, method, compartments, archetypes, tissues, transform):
 
         if transform == "TPM":
-            input_arr = pd.read_feather("./data/quipi_raw_tpm.feather", columns=sh.non_genes + list(genes))
+            input_arr = pd.read_feather("./quipi_data/quipi_raw_tpm.feather", columns=sh.non_genes + list(genes))
         elif transform == "Log2(TPM)":
-            input_arr = pd.read_feather("./data/quipi_log2_tpm.feather", columns=sh.non_genes + list(genes))
+            input_arr = pd.read_feather("./quipi_data/quipi_log2_tpm.feather", columns=sh.non_genes + list(genes))
 
         input_arr = input_arr[input_arr["indication"].isin(indications)]
         input_arr = input_arr[input_arr["compartment"].isin(compartments)]
