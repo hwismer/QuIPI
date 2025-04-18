@@ -42,7 +42,6 @@ def plot_sc_dotplot(genes, groupby, groups, splitby, splits, swap):
         vars = groupby
     else:
         vars = [groupby, splitby] if splitby != "---" else groupby
-    print("here")
     if swap:
         sc.pl.DotPlot(adata, var_names=genes, groupby=vars, ax=ax).swap_axes().make_figure()
     else:
