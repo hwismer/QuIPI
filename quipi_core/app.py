@@ -57,6 +57,9 @@ app_ui = ui.page_fluid(
             .my-image {
                 border: 3px solid #333; /* Adjust border width, style, and color as needed */
             }
+            .navbar { /* This targets the navset_bar */
+                background-color: #1a1807;
+            }
     """),
 
     ui.navset_bar(
