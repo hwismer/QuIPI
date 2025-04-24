@@ -4,7 +4,6 @@ import plotly.express as px
 import csv
 
 
-
 # All categorial columns for the underlying data minus the UMAP coordinates
 categoricals = ["patient", "sample_name",
              "indication", "sample_type","sample_type_cat",

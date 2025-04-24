@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from scipy.stats import zscore
-import shared as sh
+import quipi_shared as sh
 
 def calculate_gene_factor_score(gene_set,compartment):
 

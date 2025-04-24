@@ -2,7 +2,7 @@ import plotly.express as px
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 
-import shared as sh
+import quipi_core.quipi_shared as sh
 
 import numpy as np
 import pandas as pd

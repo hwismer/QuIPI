@@ -3,7 +3,7 @@ import pandas as pd
 import scanpy as sc
 import matplotlib.pyplot as plt
 
-import shared as sh
+import quipi_shared as sh
 import gene_factor as gf
 
 

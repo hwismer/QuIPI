@@ -1,4 +1,4 @@
-import shared as sh
+import quipi_shared as sh
 
 import plotly.express as px
 import plotly.graph_objects as go
