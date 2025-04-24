@@ -556,12 +556,8 @@ app_ui = ui.page_fluid(
                 id = "quipi_top_nav",
                 theme=theme.cosmo,
                 bg = "#1a1807"
-            )
+            ),
         ),
-
-
-
-
 
 
 
@@ -656,7 +652,9 @@ app_ui = ui.page_fluid(
             )
         ),
     title = "",
-    )
+    ),
+    theme=theme.cosmo,
+    bg = "#1a1807"
 )
 
 def server(input, output, session):

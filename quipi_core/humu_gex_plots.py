@@ -60,19 +60,9 @@ def humu_box_comparison(human_gene, mouse_gene):
 
     ax1 = px.box(human_arr, x = "compartment", y = human_gene)
     ax2 = px.box(humu_arr, x = "PanCan_Compartment", y = mouse_gene)
-    #print(human_arr, quipi_arr)
     fig.add_trace(px.box(human_arr, x = "compartment", y = human_gene,).data[0], row=1,col=1)
     fig.add_trace(px.box(humu_arr, x = "PanCan_Compartment", y = mouse_gene).data[0], row=1, col=2)
 
-    #fig.add_trace(px.box(df, x='category1', y='value1',
-    #                 labels={'category1': 'Category 1', 'value1': 'Value 1'}).data[0],
-    #          row=1, col=1)
-
-    # Add the second boxplot to the second subplot (row=1, col=2)
-    #fig.add_trace(px.box(df, x='category2', y='value2',
-    #                    labels={'category2': 'Category 2', 'value2': 'Value 2'}).data[0],
-    #            row=1, col=2)
-    
     return fig
 
     
