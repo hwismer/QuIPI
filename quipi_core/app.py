@@ -37,9 +37,9 @@ quipi_tabs_mapped_to_gene_inputs = {"Box/Violin Plots" : ["box_viol_gene_input"]
 
 }
 
-humu_tabs_mapped_to_gene_inputs = {"Mouse Gene Expression Box Plots" : [["humu_gex_box_gene", "Mouse"]],
-                                   "Mouse Gene Expression Dotplots" : [["humu_gex_dot_gene", "Mouse"]],
-                                   "HuMu Gene Expression Comparison" : [["humu_box_comp_human_genes", "Human"],["humu_box_comp_mu_genes", "Mouse"]],
+humu_tabs_mapped_to_gene_inputs = {"Violin Plots" : [["humu_gex_box_gene", "Mouse"]],
+                                   "Dotplots" : [["humu_gex_dot_gene", "Mouse"]],
+                                   "HuMu Expression Comparison" : [["humu_box_comp_human_genes", "Human"],["humu_box_comp_mu_genes", "Mouse"]],
 }
 
 panel_color = "#f0f0f0"
@@ -609,7 +609,7 @@ app_ui = ui.page_fluid(
 
                 ui.nav_menu("Mouse Gene Expression",
 
-                    ui.nav_panel("Mouse Gene Expression Box Plots",
+                    ui.nav_panel("Violin Plots",
                         ui.layout_sidebar(
                             ui.sidebar(
                                 ui.input_selectize("humu_gex_box_gene", "Choose Gene to plot:", []),
@@ -625,7 +625,7 @@ app_ui = ui.page_fluid(
                         )       
                     ),
 
-                    ui.nav_panel("Mouse Gene Expression Dotplots",
+                    ui.nav_panel("Dotplots",
                         ui.layout_sidebar(
                             ui.sidebar(
                                 ui.input_selectize("humu_gex_dot_gene", "Choose Genes to plot:", [], multiple=True),
