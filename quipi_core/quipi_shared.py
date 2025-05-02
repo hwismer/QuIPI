@@ -18,9 +18,10 @@ non_genes = ["patient", "sample_name",
 
 indications = ['LUNG', 'HEP', 'ADR', 'GBM', 'CRC', 'BRC', 'KID', 'MEL', 'PNET', 'GYN', 'HNSC', 'SI', 'SRC', 'GALL', 'PDAC', 'BLAD']
 compartments = ['Live', 'Tumor', 'Treg', 'Myeloid', 'Stroma', 'T_cell']
-archetypes = ['Unclassified', 'ID Mono', 'ID CD8 Mac', 'IR CD8 Mono', 
-              'MC DC2', 'IS CD8', 'TC Mac', 'TC DC', 'IR CD4 Mac', 
-              'IR CD8 Mac', 'ID CD4 Mac', 'MC DC1', 'IS CD4']
+archetypes = ['IR CD8 Mac', 'IR CD8 Mono', 'IR CD4 Mac']
+
+archetypes = ['Unclassified', 'IR CD8 Mac', 'IR CD8 Mono', 'IR CD4 Mac', 'IS CD8','IS CD4',
+    'TC Mac','TC DC','MC DC2','MC DC1','ID CD4 Mac','ID Mono','ID CD8 Mac']
 
 categorical_choices = {"Compartment":compartments, 
                        "Archetype": archetypes, 

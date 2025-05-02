@@ -15,11 +15,12 @@ def plot_sc_box(gene, x_cat, x_cat_subset, groupby, splitby):
     splitby = splitby if splitby != "---" else None
     groupby = groupby if groupby != "---" else None
 
-    fig = px.box(input_arr, x = x_cat, y = gene, color = groupby, facet_col=splitby, 
-                    facet_col_wrap=3,
-                    points = False,
-                    facet_col_spacing=0,
-                    facet_row_spacing=0,
+    fig = px.violin(input_arr, x = x_cat, y = gene, color = groupby, facet_col=splitby, 
+                    facet_col_wrap=2,
+                    #violinmode="overlay",
+                    #points = "all",
+                    facet_col_spacing=0.001,
+                    facet_row_spacing=0.03,
                     )
 
     return fig

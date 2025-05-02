@@ -569,23 +569,80 @@ app_ui = ui.page_fluid(
 
         ui.nav_panel("QuIPI HuMu",
             ui.tags.div(
-                ui.tags.img(src="humu.png", style="width: 90px; margin-left: 10px; margin-top: 21px; margin-bottom: 10px",class_="my-image"),  # Left-aligned image
-                ui.tags.span("QuIPI HuMu", style="font-size: 40px; font-weight: bold;"),
+                ui.tags.img(src="humu.png", style="width: 90px; margin-left: 10px; margin-top: 18px; margin-bottom: 8px",class_="my-image"),  # Left-aligned image
+                ui.tags.span("HuMu", style="font-size: 35px; font-weight: bold;"),
                 style="display: flex; align-items: flex-end; gap: 10px;" # Flexbox for horizontal alignment
             ),
             ui.page_navbar(
                 ui.nav_panel("Home",
                     ui.layout_column_wrap(
                         ui.card(
-                            ui.h4("The Human-to-Mouse Cancer Translator Project (HuMu) aims to immuno-profile a series of common and exceptional models of cancer in mice to benchmark them against the diversity of TMEs in Human cancer (i.e immune archetypes described in Combes, Samad, et al. Cell 2022). The HuMu dataset contains high-dimensional cytometry data (CyTOF) of 15 murine models that we use to study high level tumor-immune composition, as well as single-cell sequencing data from 9 of these models that we use to dissect more granular gene expression profiles across populations and tumor models"),
+                            ui.card(
+                            ui.h3(ui.HTML("The Human-to-Mouse Cancer Translator Project (HuMu) aims to immuno-profile a series of \
+                                       common and exceptional models of cancer in mice to benchmark them against the diversity of \
+                                       TMEs in Human cancer (i.e immune archetypes described in Combes, Samad, et al. Cell 2022)."), 
+                                       style="text-align:center; font-weight: bold; align-items: center;justify-content: center"),
+                            ),
+                            ui.card(ui.h3(ui.HTML("The HuMu dataset contains high-dimensional cytometry data (CyTOF) of 15 murine models that \
+                                       we use to study high level tumor-immune composition, as well as single-cell sequencing data \
+                                       from 9 of these models that we use to dissect more granular gene expression profiles across \
+                                       populations and tumor models."), style = "text-align:center; font-weight: bold; align-items: center; justify-content: center"))
+
                         ),
                         ui.card(
-                            ui.tags.img(src="quipi_humu_reference.png",style="width: 750px; margin-left: 10px; margin-top: 21px; margin-bottom: 10px"),  # Left-aligned image
+                            ui.tags.img(src="quipi_humu_reference.png",)#style=" margin-left: 10px; margin-top: 21px; margin-bottom: 0px"),  # Left-aligned image
                         )
                     )
                 ),
+                ui.nav_panel("HuMu Expression Comparison",
+                        ui.layout_sidebar(
+                            ui.sidebar(
+                                ui.input_selectize("humu_box_comp_human_genes", "Choose Human Gene", []),
+                                ui.input_selectize("humu_box_comp_mu_genes", "Choose Murine Gene", []),
+                                ui.input_action_button("humu_box_comp_run", "RUN"),
+                            bg=panel_color
+                            ),
+                            ui.card(output_widget("humu_gene_comparision")),
+                            bg=panel_color
+                        )
+                ),
 
-                ui.nav_panel("Flow Boxplots",
+                ui.nav_menu("Mouse Gene Expression",
+
+                    ui.nav_panel("Mouse Gene Expression Box Plots",
+                        ui.layout_sidebar(
+                            ui.sidebar(
+                                ui.input_selectize("humu_gex_box_gene", "Choose Gene to plot:", []),
+                                ui.input_selectize("humu_gex_box_x_cat", "Choose X-Axis Category:", hsh.categoricals_opts),
+                                ui.input_selectize("humu_gex_box_cat_subset", "Subset Categories:", [], multiple=True, remove_button=True,options={"plugins": ["clear_button"]}),
+                                ui.input_selectize("humu_gex_box_groupby", "Group by:", ["---"] + hsh.categoricals_opts, selected="---"),
+                                ui.input_selectize("humu_gex_box_splitby", "Split by:", ["---"] + hsh.categoricals_opts, selected="---"),
+                                ui.input_action_button("humu_gene_box_run", "RUN"),
+                                bg=panel_color
+                            ),
+                            ui.card(output_widget("gex_box"), full_screen=True),
+                            bg=panel_color
+                        )       
+                    ),
+
+                    ui.nav_panel("Mouse Gene Expression Dotplots",
+                        ui.layout_sidebar(
+                            ui.sidebar(
+                                ui.input_selectize("humu_gex_dot_gene", "Choose Genes to plot:", [], multiple=True),
+                                ui.input_selectize("humu_gex_dot_groupby", "Group By:", hsh.categoricals_opts, selected="---"),
+                                ui.input_selectize("humu_gex_dot_groups", "Subset Groupby Categories:", [], multiple=True),
+                                ui.input_selectize("humu_gex_dot_splitby", "Split By:", ["---"] + hsh.categoricals_opts, selected="---"),
+                                ui.input_selectize('humu_gex_dot_splits', "Subset Splitby Categories:", [], multiple=True),
+                                ui.input_switch("humu_gex_dot_swap", "Swap Axes"),
+                                ui.input_action_button("humu_gex_dot_run", "RUN"),
+                                bg=panel_color
+                            ),
+                        ui.card(ui.output_plot("humu_plot_gex_dotplot"), min_height="750px", full_screen=True)
+                        )       
+                    ),
+                ),
+
+                 ui.nav_panel("Flow-Score Boxplots",
                     #ui.h4("Explore gene expression by category"),
                     ui.layout_sidebar(
                         ui.sidebar(
@@ -602,51 +659,6 @@ app_ui = ui.page_fluid(
                                 full_screen=True),
                         bg=panel_color,
                     )
-                ),
-
-                ui.nav_panel("HuMu Gene Expression Comparison",
-                    ui.layout_sidebar(
-                        ui.sidebar(
-                            ui.input_selectize("humu_box_comp_human_genes", "Choose Human Gene", []),
-                            ui.input_selectize("humu_box_comp_mu_genes", "Choose Murine Gene", []),
-                            ui.input_action_button("humu_box_comp_run", "RUN"),
-                        bg=panel_color
-                        ),
-                        ui.card(output_widget("humu_gene_comparision")),
-                        bg=panel_color
-                    )
-                ),
-
-                ui.nav_panel("Mouse Gene Expression Box Plots",
-                    ui.layout_sidebar(
-                        ui.sidebar(
-                            ui.input_selectize("humu_gex_box_gene", "Choose Gene to plot:", []),
-                            ui.input_selectize("humu_gex_box_x_cat", "Choose X-Axis Category:", hsh.categoricals_opts),
-                            ui.input_selectize("humu_gex_box_cat_subset", "Subset Categories:", [], multiple=True),
-                            ui.input_selectize("humu_gex_box_groupby", "Group by:", ["---"] + hsh.categoricals_opts, selected="---"),
-                            ui.input_selectize("humu_gex_box_splitby", "Split by:", ["---"] + hsh.categoricals_opts, selected="---"),
-                            ui.input_action_button("humu_gene_box_run", "RUN"),
-                            bg=panel_color
-                        ),
-                        ui.card(output_widget("gex_box"), full_screen=True),
-                        bg=panel_color
-                    )       
-                ),
-
-                ui.nav_panel("Mouse Gene Expression Dotplots",
-                    ui.layout_sidebar(
-                        ui.sidebar(
-                            ui.input_selectize("humu_gex_dot_gene", "Choose Genes to plot:", [], multiple=True),
-                            ui.input_selectize("humu_gex_dot_groupby", "Group By:", hsh.categoricals_opts, selected="---"),
-                            ui.input_selectize("humu_gex_dot_groups", "Subset Groupby Categories:", [], multiple=True),
-                            ui.input_selectize("humu_gex_dot_splitby", "Split By:", ["---"] + hsh.categoricals_opts, selected="---"),
-                            ui.input_selectize('humu_gex_dot_splits', "Subset Splitby Categories:", [], multiple=True),
-                            ui.input_switch("humu_gex_dot_swap", "Swap Axes"),
-                            ui.input_action_button("humu_gex_dot_run", "RUN"),
-                            bg=panel_color
-                        ),
-                    ui.card(ui.output_plot("humu_plot_gex_dotplot"), min_height="750px", full_screen=True)
-                    )       
                 ),
             ui.nav_spacer(),
             id = "humu_top_nav",
