@@ -7,7 +7,7 @@ import quipi_shared as sh
 import gene_factor as gf
 
 
-def box_viol_exprn(transform, x_cat, x_cat_filts, genes, groupby, plot_type, compartment_multiple):
+def box_viol_exprn(transform, x_cat, x_cat_filts, genes, groupby, compartment_multiple):
 
 
     if groupby in sh.categoricals_dict:
@@ -26,6 +26,7 @@ def box_viol_exprn(transform, x_cat, x_cat_filts, genes, groupby, plot_type, com
     new_cats = dict(sh.categoricals_dict_reversed)
     new_cats.update(factor_score="Gene-Signature Score")
 
+    #print(group)
     color = sh.color_dict[group]
 
     if len(genes) > 1 and len(compartment_multiple) != 0:
@@ -55,6 +56,7 @@ def box_viol_exprn(transform, x_cat, x_cat_filts, genes, groupby, plot_type, com
                 
             fig.update_layout(title_text= transform + genes[0], title_x=0.5)
             return fig
+        
         
 def dotplot(genes, groupby, groups, splitby, splits, transform, swap):
     adata = sc.read_h5ad("./quipi_data/quipi_adata.h5ad", backed="r")

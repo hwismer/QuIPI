@@ -1,13 +1,12 @@
 from shiny import App, render, ui, reactive
-from shiny.types import ImgData
 from shinyswatch import theme
 import plotly.express as px
+
+px.defaults.template = "simple_white"
 from shinywidgets import output_widget, render_widget 
 
 import quipi_shared as qsh
 import humu_shared as hsh
-
-import numpy as np
 import pandas as pd
 from io import StringIO
 
@@ -37,7 +36,7 @@ quipi_tabs_mapped_to_gene_inputs = {"Box/Violin Plots" : ["box_viol_gene_input"]
 
 }
 
-humu_tabs_mapped_to_gene_inputs = {"Violin Plots" : [["humu_gex_box_gene", "Mouse"]],
+humu_tabs_mapped_to_gene_inputs = {"Boxplots" : [["humu_gex_box_gene", "Mouse"]],
                                    "Dotplots" : [["humu_gex_dot_gene", "Mouse"]],
                                    "HuMu Expression Comparison" : [["humu_box_comp_human_genes", "Human"],["humu_box_comp_mu_genes", "Mouse"]],
 }
@@ -116,9 +115,6 @@ app_ui = ui.page_fluid(
 
                                 ui.h4("Explore gene expression by category"),
                                 ui.input_action_button("box_viol_run", "Run"),
-                                ui.input_selectize("box_viol_plot",
-                                                    "Select Plot Type:",
-                                                    ["Boxplot","Violin Plot"]),
                                 ui.input_selectize("box_viol_gene_input",
                                                     "Select Genes:",
                                                     [],
@@ -131,7 +127,8 @@ app_ui = ui.page_fluid(
                                 ui.input_selectize("box_viol_x_cat_filter",
                                                 "**Subset X-Axis Categories.**",
                                                 [],
-                                                multiple=True),
+                                                multiple=True,
+                                                remove_button=True,options={"plugins": ["clear_button"]}),
                                 ui.input_selectize("box_viol_groupby",
                                                     "Group by:",
                                                     ["---"] + list(qsh.categoricals_dict.keys()),
@@ -157,11 +154,11 @@ app_ui = ui.page_fluid(
                                 ui.input_selectize("gex_dot_genes", "Choose Genes to plot:", [], multiple=True),
                                 ui.card(
                                     ui.input_selectize("gex_dot_groupby", "Group by:", list(qsh.categorical_choices.keys())),
-                                    ui.input_selectize("gex_dot_groupby_subset", "Subset Groupby Categories:", [], multiple=True),
+                                    ui.input_selectize("gex_dot_groupby_subset", "Subset Groupby Categories:", [], multiple=True,remove_button=True,options={"plugins": ["clear_button"]}),
                                 ),
                                 ui.card(
                                     ui.input_selectize("gex_dot_splitby", "Split by:", ["---"] + list(qsh.categorical_choices.keys()), selected="---"),
-                                    ui.input_selectize("gex_dot_splitby_subset", "Subset Splitby Categories:", [], multiple=True), 
+                                    ui.input_selectize("gex_dot_splitby_subset", "Subset Splitby Categories:", [], multiple=True,remove_button=True,options={"plugins": ["clear_button"]}), 
                                 ),
                                 ui.input_selectize("gex_dot_transform", "Select TPM Transformation:", ["Log2(TPM)", "TPM"], selected = "TPM"),
                                 ui.input_switch("gex_dot_swap", "Swap Axes"),
@@ -187,17 +184,20 @@ app_ui = ui.page_fluid(
                                                     "Select Indications:",
                                                     choices=qsh.indications,
                                                     selected=qsh.indications,
-                                                    multiple = True),
+                                                    multiple = True,
+                                                    remove_button=True,options={"plugins": ["clear_button"]}),
                                 ui.input_selectize("query_compartment",
                                                     "Select Compartments:",
                                                     choices=qsh.compartments,
                                                     selected=qsh.compartments,
-                                                    multiple=True),
+                                                    multiple=True,
+                                                    remove_button=True,options={"plugins": ["clear_button"]}),
                                 ui.input_selectize("query_archetype",
                                                     "Select Archetypes:",
                                                     choices=qsh.archetypes,
                                                     multiple=True,
-                                                    selected=qsh.archetypes),
+                                                    selected=qsh.archetypes,
+                                                    remove_button=True,options={"plugins": ["clear_button"]}),
                                 ui.input_selectize("query_transform",
                                                     "Select TPM Transformation:",
                                                     choices=["TPM", "Log2(TPM)"],
@@ -228,22 +228,26 @@ app_ui = ui.page_fluid(
                                                     "Select Indications:",
                                                     choices=qsh.indications,
                                                     selected=qsh.indications,
-                                                    multiple = True),
+                                                    multiple = True,
+                                                    remove_button=True,options={"plugins": ["clear_button"]}),
                                 ui.input_selectize("corr_tissue",
                                                     "Select Tissue:",
                                                     choices=["Tumor", "Normal"],
                                                     selected = ["Tumor", "Normal"],
-                                                    multiple = True),
+                                                    multiple = True,
+                                                    remove_button=True,options={"plugins": ["clear_button"]}),
                                 ui.input_selectize("corr_compartment",
                                                     "Select Compartments:",
                                                     choices=qsh.compartments,
                                                     selected=qsh.compartments,
-                                                    multiple=True),
+                                                    multiple=True,
+                                                    remove_button=True,options={"plugins": ["clear_button"]}),
                                 ui.input_selectize("corr_archetype",
                                                     "Select Archetypes:",
                                                     choices=qsh.archetypes,
                                                     multiple=True,
-                                                    selected=qsh.archetypes),
+                                                    selected=qsh.archetypes,
+                                                    remove_button=True,options={"plugins": ["clear_button"]}),
                                 ui.input_selectize("corr_transform",
                                                     "Select TPM Transformation:",
                                                     choices=["TPM", "Log2(TPM)"],
@@ -273,7 +277,8 @@ app_ui = ui.page_fluid(
                                                 options = {"server":True}),
                                 ui.input_selectize("comp_corr_mat_compartment1",
                                                     "Select Compartment A:",
-                                                    choices=qsh.compartments),
+                                                    choices=qsh.compartments,
+                                                    ),
                                 ui.input_selectize("comp_corr_mat_compartment2",
                                                 "Select Compartment B:",
                                                 choices=qsh.compartments),
@@ -597,19 +602,54 @@ app_ui = ui.page_fluid(
                 ui.nav_panel("HuMu Expression Comparison",
                         ui.layout_sidebar(
                             ui.sidebar(
-                                ui.input_selectize("humu_box_comp_human_genes", "Choose Human Gene", []),
-                                ui.input_selectize("humu_box_comp_mu_genes", "Choose Murine Gene", []),
+                                ui.card(
+                                    ui.input_selectize("humu_box_comp_human_genes", "Choose Human Gene", [], multiple=True),
+                                    ui.output_ui("humu_box_viol_multiple_genes"),
+                                    ui.input_selectize("humu_box_comp_x_cat",
+                                                    "Select Human X-Axis Category:",
+                                                    list(qsh.categoricals_dict.keys()),
+                                                    selected = "Compartment"),
+                                    ui.input_selectize("humu_box_comp_x_cat_filter",
+                                                       "**Subset X-Axis Categories.**",
+                                                       [],
+                                                       multiple=True,
+                                                       remove_button=True,options={"plugins": ["clear_button"]}),
+                                    ui.input_selectize("humu_box_comp_groupby",
+                                                        "Group by:",
+                                                        ["---"] + list(qsh.categoricals_dict.keys()),
+                                                        selected="---",
+                                                        remove_button=True,options={"plugins": ["clear_button"]}),
+                                    ui.input_selectize("humu_box_comp_transformation",
+                                                        "Select TPM Transformation: ",
+                                                        ["TPM", "Log2(TPM)"],
+                                                        multiple= False,
+                                                        selected= "Log2(TPM)"),
+                                ),
+                                ui.card(
+                                    ui.input_selectize("humu_box_comp_mu_genes", "Choose Murine Gene", []),
+                                    ui.input_selectize("humu_box_comp_x_cat_mouse", "Choose X-Axis Category",hsh.categoricals_opts),
+                                    ui.input_selectize("humu_box_comp_cat_mouse_subset", "Subset Categories:",[], multiple=True, remove_button=True,options={"plugins": ["clear_button"]}),
+                                    ui.input_selectize("humu_box_comp_groupby_mouse", "Group by:", ["---"] + hsh.categoricals_opts, selected="---"),
+                                    ui.input_selectize("humu_box_comp_splitby_mouse", "Split by:", ["---"] + hsh.categoricals_opts, selected="---")
+                                ),
                                 ui.input_action_button("humu_box_comp_run", "RUN"),
                             bg=panel_color
                             ),
-                            ui.card(output_widget("humu_gene_comparision")),
+                            ui.card(
+                                ui.card(ui.card_header("Human"),
+                                        output_widget("humu_gene_comparison_human")),
+                                ui.card(ui.card_header("Mouse"),
+                                        output_widget("humu_gene_comparison_mouse")),
+                                full_screen=True
+                            ),
                             bg=panel_color
                         )
+
                 ),
 
                 ui.nav_menu("Mouse Gene Expression",
 
-                    ui.nav_panel("Violin Plots",
+                    ui.nav_panel("Boxplots",
                         ui.layout_sidebar(
                             ui.sidebar(
                                 ui.input_selectize("humu_gex_box_gene", "Choose Gene to plot:", []),
@@ -744,6 +784,7 @@ def server(input, output, session):
         x_cat = input.box_viol_x_category()
         new_options = qsh.categorials_opts_dict[x_cat]
         ui.update_selectize("box_viol_x_cat_filter", choices=new_options, selected=new_options)
+
     
     @render_widget
     @reactive.event(input.box_viol_run)
@@ -754,14 +795,13 @@ def server(input, output, session):
         x_cat_filts = input.box_viol_x_cat_filter()
         gene = input.box_viol_gene_input()
         group = input.box_viol_groupby()
-        plot_type = input.box_viol_plot()
 
         if len(gene) > 1:
             compartment_multiple = input.box_viol_multiple_compartment()
         else:
             compartment_multiple = None
 
-        fig = bv.box_viol_exprn(transform, x_cat, x_cat_filts, gene, group, plot_type, compartment_multiple)
+        fig = bv.box_viol_exprn(transform, x_cat, x_cat_filts, gene, group, compartment_multiple)
 
         return fig
     
@@ -1107,13 +1147,77 @@ def server(input, output, session):
     
     @render_widget
     @reactive.event(input.humu_box_comp_run)
-    def humu_gene_comparision():
+    def humu_gene_comparison_human():
         human_gene = input.humu_box_comp_human_genes()
-        mouse_gene = input.humu_box_comp_mu_genes()
+        human_x = qsh.categoricals_dict[input.humu_box_comp_x_cat()]
+        human_x_filter = input.humu_box_comp_x_cat_filter()
+        human_groupby = input.humu_box_comp_groupby()
+        human_transform = input.humu_box_comp_transformation()
 
-        fig = hxp.humu_box_comparison(human_gene, mouse_gene)
+        if len(human_gene) > 1:
+            compartment_multiple = input.humu_box_viol_multiple_compartment()
+            if len(compartment_multiple) == 0:
+                return None
+        else:
+            compartment_multiple = None
+
+        fig = hxp.humu_box_comparison_human(human_gene, human_x, human_x_filter, human_groupby, human_transform, compartment_multiple)
 
         return fig
+    
+    @render_widget
+    @reactive.event(input.humu_box_comp_run)
+    def humu_gene_comparison_mouse():
+        mouse_gene = input.humu_box_comp_mu_genes()
+        mouse_x_cat = input.humu_box_comp_x_cat_mouse()
+        mouse_x_cat_filter = input.humu_box_comp_cat_mouse_subset()
+        mouse_groupby = input.humu_box_comp_groupby_mouse()
+        mouse_splitby = input.humu_box_comp_splitby_mouse()
+
+        fig = hxp.plot_sc_box(mouse_gene, mouse_x_cat, mouse_x_cat_filter, mouse_groupby, mouse_splitby)
+
+        return fig
+
+    
+    @reactive.effect
+    @reactive.event(input.humu_box_comp_x_cat)  # Trigger when category changes
+    def update_box_viol_selectize():
+        x_cat = input.humu_box_comp_x_cat()
+        new_options = qsh.categorials_opts_dict[x_cat]
+        ui.update_selectize("humu_box_comp_x_cat_filter", choices=new_options, selected=new_options)
+
+    
+    @reactive.calc
+    def humu_box_viol_multi_options():
+        if len(input.humu_box_comp_human_genes()) > 1:
+            choices = qsh.compartments
+        else:
+            choices = []
+        return choices
+    
+    @render.ui
+    def humu_box_viol_multiple_genes():
+        choices = humu_box_viol_multi_options()
+        if len(choices) > 1:
+            return ui.input_selectize("humu_box_viol_multiple_compartment", 
+                                      "**Multiple genes selected. Choose compartment for factor score calculation.**", 
+                                      choices,
+                                      multiple=True)
+        else:
+            return None
+        
+    @reactive.effect
+    @reactive.event(input.humu_box_comp_x_cat_mouse)
+    def humu_update_box_viol_selectize():
+        x_cat = input.humu_box_comp_x_cat_mouse()
+        cat_opts = list(pd.read_feather("./quipi_humu_data/quipi_humu_adata_clean_full_PROC.feather", columns=[x_cat])[x_cat].unique())
+        ui.update_selectize("humu_box_comp_cat_mouse_subset", choices=cat_opts, selected=cat_opts)
+    
+
+
+
+    
+
 
 
     
