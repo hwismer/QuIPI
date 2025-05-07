@@ -178,6 +178,7 @@ app_ui = ui.page_fluid(
             )
         ),
     ui.nav_spacer(),
+    ui.nav_control(ui.a("QuIPI HuMu", href="https://quipi.org/app/quipi", class_="nav-link")),
     id = "humu_top_nav",
     theme=theme.cosmo,
     bg = "#1a1807"

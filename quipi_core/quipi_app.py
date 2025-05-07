@@ -547,11 +547,15 @@ app_ui = ui.page_fluid(
                     assigned a gene-signature score depending on their expression of the input gene set.
 
                     """)
-        ), # END DGE MENU
+            ),  # END DGE MENU
+        #ui.nav_control(ui.a("QuIPI HuMu", href="https://quipi.org/app/quipi_humu", class_="nav-link")),
     ),
-        id = "quipi_top_nav",
-        theme=theme.cosmo,
-        bg = "#1a1807"
+    ui.nav_spacer(),
+    ui.nav_control(ui.a("QuIPI HuMu", href="https://quipi.org/app/quipi_humu", class_="nav-link")),
+    
+    id = "quipi_top_nav",
+    theme=theme.cosmo,
+    bg = "#1a1807"
     ),
 )   
 
@@ -904,19 +908,6 @@ def server(input, output, session):
         csv_buffer = StringIO()
         df.to_csv(csv_buffer, index=False)
         yield csv_buffer.getvalue()
-
-
-
-
-
-
-
-
-    
-
-
-
-    
 
     ## HELPER: Populate individual gene selection boxes to avoid long startup.
     @reactive.effect
