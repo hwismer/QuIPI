@@ -46,7 +46,7 @@ indic_to_color = {'LUNG':'rgb(15, 8, 58)',
 
 
 # Open the file in read mode
-with open("./quipi_data/quipi_raw_cols.csv", 'r') as file:
+with open("./quipi_data/quipi_cols.csv", 'r') as file:
     reader = csv.reader(file)
     # Read the first row only (header)
     quipi_all_columns= next(reader)
