@@ -9,20 +9,28 @@ import humu_shared as hsh
 
 import box_viol_expression_plot as hbv
 
-def plot_sc_box(gene, x_cat, x_cat_subset, groupby, splitby):
+def plot_sc_box(gene, x_cat, x_cat_subset, groupby, splitby, sort):
     cols = {gene, x_cat, groupby, splitby} - {"---"}
     input_arr = pd.read_feather("./quipi_humu_data/quipi_humu_adata_clean_full_PROC.feather", columns = cols)
     input_arr = input_arr[input_arr[x_cat].isin(x_cat_subset)]
 
     splitby = splitby if splitby != "---" else None
-    groupby = groupby if groupby != "---" else None
+    groupby = groupby if groupby != "---" else x_cat
+
+    colors = hsh.groupby_colors[groupby]
+
+    orders = hsh.humu_orders[groupby]
+
 
     fig = px.box(input_arr, x = x_cat, y = gene, color = groupby, facet_col=splitby, 
                     facet_col_wrap=2,
                     points = "outliers",
                     facet_col_spacing=0.001,
                     facet_row_spacing=0.03,
+                    color_discrete_map=colors,
+                    category_orders={x_cat:orders}
                     )
+    fig.update_traces(marker=dict(size=2), selector=dict(type='box'))
 
     return fig
 
@@ -32,7 +40,7 @@ def plot_sc_dotplot(genes, groupby, groups, splitby, splits, swap):
         splitby=groupby
         splits = groups
 
-    adata = sc.read_h5ad("./quipi_humu_data/quipi_humu_adata_clean_full.h5ad", backed="r")
+    adata = sc.read_h5ad("./quipi_humu_data/quipi_humu_adata.h5ad", backed="r")
 
     fig, ax = matplotlib.pyplot.subplots()
     if splitby != "---":
@@ -46,10 +54,11 @@ def plot_sc_dotplot(genes, groupby, groups, splitby, splits, swap):
     else:
         vars = [groupby, splitby] if splitby != "---" else groupby
     if swap:
-        sc.pl.DotPlot(adata, var_names=genes, groupby=vars, ax=ax).swap_axes().make_figure()
+        dp = sc.pl.DotPlot(adata, var_names=genes, groupby=vars, ax=ax).swap_axes().make_figure()
     else:
-        sc.pl.DotPlot(adata, var_names=genes, groupby=vars, ax=ax).make_figure()
+        dp =sc.pl.DotPlot(adata, var_names=genes, groupby=vars, ax=ax).make_figure()
 
+    
     return fig
 
 

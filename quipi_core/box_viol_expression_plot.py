@@ -4,6 +4,7 @@ import scanpy as sc
 import matplotlib.pyplot as plt
 
 import quipi_shared as sh
+import humu_shared as hsh
 import gene_factor as gf
 
 
@@ -15,18 +16,11 @@ def box_viol_exprn(transform, x_cat, x_cat_filts, genes, groupby, compartment_mu
     else:
         group = x_cat
 
-    if x_cat == "archetype":
-        orders = []
-        for arch in sh.archetypes:
-            if arch in x_cat_filts:
-                orders.append(arch)
-    else:
-        orders = x_cat_filts
+    orders = sh.quipi_orders[x_cat]
 
     new_cats = dict(sh.categoricals_dict_reversed)
     new_cats.update(factor_score="Gene-Signature Score")
 
-    #print(group)
     color = sh.color_dict[group]
 
     if len(genes) > 1 and len(compartment_multiple) != 0:

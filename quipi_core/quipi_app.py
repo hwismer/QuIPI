@@ -6,7 +6,7 @@ px.defaults.template = "simple_white"
 from shinywidgets import output_widget, render_widget 
 
 import quipi_shared as qsh
-import humu_shared as hsh
+#import humu_shared as hsh
 import pandas as pd
 from io import StringIO
 
@@ -17,8 +17,8 @@ import pancan_plots as pp
 import correlation_analysis as corr
 from pathlib import Path
 
-import humu_flow_boxplot as hfb
-import humu_gex_plots as hxp
+#import humu_flow_boxplot as hfb
+#import humu_gex_plots as hxp
 
 
 quipi_tabs_mapped_to_gene_inputs = {"Box/Violin Plots" : ["box_viol_gene_input"],

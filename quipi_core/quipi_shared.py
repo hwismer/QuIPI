@@ -5,10 +5,6 @@ import csv
 
 
 # All categorial columns for the underlying data minus the UMAP coordinates
-categoricals = ["patient", "sample_name",
-             "indication", "sample_type","sample_type_cat",
-             "compartment", "archetype"]
-
 
 # Everything that isn't a gene, including umap coordinates.
 non_genes = ["patient", "sample_name",
@@ -16,16 +12,28 @@ non_genes = ["patient", "sample_name",
              "compartment", "archetype", 
              "x_umap1", "x_umap2"]
 
+categoricals = ["patient", "sample_name", "indication", "sample_type","sample_type_cat", "compartment", "archetype"]
 indications = ['LUNG', 'HEP', 'ADR', 'GBM', 'CRC', 'BRC', 'KID', 'MEL', 'PNET', 'GYN', 'HNSC', 'SI', 'SRC', 'GALL', 'PDAC', 'BLAD']
-compartments = ['Live', 'Tumor', 'Treg', 'Myeloid', 'Stroma', 'T_cell']
-archetypes = ['IR CD8 Mac', 'IR CD8 Mono', 'IR CD4 Mac']
-
-archetypes = ['Unclassified', 'IR CD8 Mac', 'IR CD8 Mono', 'IR CD4 Mac', 'IS CD8','IS CD4',
-    'TC Mac','TC DC','MC DC2','MC DC1','ID CD4 Mac','ID Mono','ID CD8 Mac']
+compartments = ['Live', 'Tumor', 'T-Reg', 'Myeloid', 'Stroma', 'T Cell']
+archetypes = ['Unclassified', 'IR CD8 Mac', 'IR CD8 Mono', 'IR CD4 Mac', 'IS CD8','IS CD4', 'TC Mac','TC DC','MC DC2','MC DC1','ID CD4 Mac','ID Mono','ID CD8 Mac']
 
 categorical_choices = {"Compartment":compartments, 
                        "Archetype": archetypes, 
                        "Indication": indications}
+
+
+##### ORDERS
+compartment_order = ["Tumor", "T Cell", "T-Reg", "Myeloid", "Stroma", "Live"]
+indication_order = ['LUNG', 'HEP', 'ADR', 'GBM', 'CRC', 'BRC', 'KID', 'MEL', 'PNET', 'GYN', 'HNSC', 'SI', 'SRC', 'GALL', 'PDAC', 'BLAD']
+archetype_order = ['Unclassified', 'IR CD8 Mac', 'IR CD8 Mono', 'IR CD4 Mac', 'IS CD8','IS CD4', 'TC Mac','TC DC','MC DC2','MC DC1','ID CD4 Mac','ID Mono','ID CD8 Mac']
+sample_type_order = ["T1", "T2", "N1", "N2"]
+
+quipi_orders = {"indication" : indication_order,
+               "sample_type" : sample_type_order,
+               "archetype" : archetype_order,
+               "compartment" : compartment_order}
+
+##### COLORS
 
 indic_to_color = {'LUNG':'rgb(15, 8, 58)',
                   'HEP':'rgb(55, 77, 161)', 
@@ -43,6 +51,14 @@ indic_to_color = {'LUNG':'rgb(15, 8, 58)',
                   'GALL':'rgb(246, 207, 113)', ####
                   'PDAC':'rgb(165, 171, 44)',
                   'BLAD':'rgb(212, 160, 64)'}
+
+compartment_colors = {"T Cell": "#009292",
+                      "Myeloid" : "#FF6DB6",
+                      "Stroma" : "#006DDB",
+                      "Tumor" : "#DB6D00",
+                      "T-Reg" : "#B66DFF",
+                      "Live" : "#004949"}
+
 
 
 # Open the file in read mode
@@ -137,7 +153,7 @@ cancer_glossary_df["Abbreviation"] = cancer_glossary_df.index
 
 color_dict = {"indication" : indic_to_color,
               "sample_type" : None,
-              "compartment" : None,
+              "compartment" : compartment_colors,
               "archetype" : colors_pancan
               }
 

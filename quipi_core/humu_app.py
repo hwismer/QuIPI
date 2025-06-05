@@ -60,20 +60,17 @@ app_ui = ui.page_fluid(
         ui.nav_panel("Home",
             ui.layout_column_wrap(
                 ui.card(
-                    ui.card(
-                    ui.h3(ui.HTML("The Human-to-Mouse Cancer Translator Project (HuMu) aims to immuno-profile a series of \
+                    ui.h3("The Human-to-Mouse Cancer Translator Project (HuMu) aims to immuno-profile a series of \
                                 common and exceptional models of cancer in mice to benchmark them against the diversity of \
-                                TMEs in Human cancer (i.e immune archetypes described in Combes, Samad, et al. Cell 2022)."), 
-                                style="text-align:center; font-weight: bold; align-items: center;justify-content: center"),
-                    ),
-                    ui.card(ui.h3(ui.HTML("The HuMu dataset contains high-dimensional cytometry data (CyTOF) of 15 murine models that \
-                                we use to study high level tumor-immune composition, as well as single-cell sequencing data \
-                                from 9 of these models that we use to dissect more granular gene expression profiles across \
-                                populations and tumor models."), style = "text-align:center; font-weight: bold; align-items: center; justify-content: center"))
-
+                                TMEs in Human cancer (i.e immune archetypes described in Combes, Samad, et al. Cell 2022).")
                 ),
-                ui.card(
-                    ui.tags.img(src="quipi_humu_reference.png",)#style=" margin-left: 10px; margin-top: 21px; margin-bottom: 0px"),  # Left-aligned image
+
+                ui.card(ui.tags.img(src="quipi_humu_reference.png", width="575px")),
+
+                ui.card(ui.h3("The HuMu dataset contains high-dimensional cytometry data (CyTOF) of 15 murine models that \
+                    we use to study high level tumor-immune composition, as well as single-cell sequencing data \
+                    from 9 of these models that we use to dissect more granular gene expression profiles across \
+                    populations and tumor models."), style="display: flex; align-items: center; justify-content: center;"
                 )
             )
         ),
@@ -154,7 +151,7 @@ app_ui = ui.page_fluid(
                         ui.input_action_button("humu_gex_dot_run", "RUN"),
                         bg=panel_color
                     ),
-                ui.card(ui.output_plot("humu_plot_gex_dotplot"), min_height="750px", full_screen=True)
+                ui.card(ui.output_plot("humu_plot_gex_dotplot"), full_screen=True)
                 )       
             ),
         ),
@@ -163,9 +160,10 @@ app_ui = ui.page_fluid(
             #ui.h4("Explore gene expression by category"),
             ui.layout_sidebar(
                 ui.sidebar(
-                    ui.input_selectize("humu_box_score_1", "Choose First Score", hsh.flow_scores),
-                    ui.input_selectize("humu_box_score_2", "Choose Second Score if ratio desired", ["---"] + hsh.flow_scores, selected="---"),
-                    ui.input_selectize("humu_box_x_cat", "Select X-Axis Category", ["Species", "Group"]),
+                    ui.input_selectize("humu_box_score_1", "Choose Parameter", hsh.flow_scores),
+                    ui.input_selectize("humu_box_score_2", "Divide By Second Parameter (Optional)", ["---"] + hsh.flow_scores, selected="---"),
+                    ui.input_switch("humu_box_switch", "Sort X-Category On Value"),
+                    ui.input_selectize("humu_box_x_cat", "Select X-Axis Category", hsh.flow_cats),
                     ui.input_selectize("humu_box_x_cat_filter", "**Subset X-Axis Categories.**", [], multiple=True),
                     ui.input_selectize("humu_box_group", "Group By:",  ["---"] + hsh.flow_cats, selected="---"),
                     ui.input_action_button("humu_box_run", "RUN"),
@@ -207,7 +205,8 @@ def server(input, output, session):
         x_cat = input.humu_box_x_cat()
         x_cat_filter = input.humu_box_x_cat_filter()
         group = input.humu_box_group()
-        fig = hfb.box_humu_flow(score1, score2, x_cat, x_cat_filter, group)
+        sort = input.humu_box_switch()
+        fig = hfb.box_humu_flow(score1, score2, x_cat, x_cat_filter, group, sort)
         return fig
     
     ##### GEX Violin Plots
