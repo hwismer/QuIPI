@@ -142,8 +142,7 @@ app_ui = ui.page_fluid(
             ),
         ),
 
-        ui.nav_panel("Flow-Score Boxplots",
-            #ui.h4("Explore gene expression by category"),
+        ui.nav_panel("Flow Cytometry Proportions",
             ui.layout_sidebar(
                 ui.sidebar(
                     ui.input_selectize("humu_box_score_1", "Choose Parameter", hsh.flow_scores),
@@ -159,6 +158,16 @@ app_ui = ui.page_fluid(
                         ui.card_footer("Click button in the bottom right for fullscreen view."),
                         full_screen=True),
                 bg=panel_color,
+            )
+        ),
+        ui.nav_menu("Examples",
+            ui.nav_panel("HuMu Expression Comparison"
+            ),
+            ui.nav_panel("Mouse Boxplot"
+            ),
+            ui.nav_panel("Dotplot"
+            ),
+            ui.nav_panel("Flow Cytometry Proportions"
             )
         ),
     ui.nav_spacer(),
