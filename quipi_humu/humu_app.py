@@ -116,6 +116,7 @@ app_ui = ui.page_fluid(
                         ui.input_selectize("humu_gex_box_cat_subset", "Subset Categories:", [], multiple=True, remove_button=True,options={"plugins": ["clear_button"]}),
                         ui.input_selectize("humu_gex_box_groupby", "Group by:", ["---"] + hsh.categoricals_opts, selected="---"),
                         ui.input_selectize("humu_gex_box_splitby", "Split by:", ["---"] + hsh.categoricals_opts, selected="---"),
+                        ui.input_switch("humu_gex_box_sample_aggr", "Average Counts by Sample"),
                         ui.input_action_button("humu_gene_box_run", "RUN"),
                         bg=panel_color
                     ),
@@ -203,8 +204,9 @@ def server(input, output, session):
         x_sub = input.humu_gex_box_cat_subset()
         group = input.humu_gex_box_groupby()
         split = input.humu_gex_box_splitby()
+        sample_aggr = input.humu_gex_box_sample_aggr()
 
-        fig = hxp.plot_sc_box(gene,x_cat,x_sub,group,split)
+        fig = hxp.plot_sc_box(gene,x_cat,x_sub,group,split, sample_aggr)
         return fig
 
     @reactive.effect
