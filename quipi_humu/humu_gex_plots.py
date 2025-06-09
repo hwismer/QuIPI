@@ -66,9 +66,9 @@ def plot_sc_dotplot(genes, groupby, groups, splitby, splits, swap):
 def humu_box_comparison_human(human_gene, human_compartment_filters, human_transformation):
 
     if human_transformation == "TPM":
-            input_arr = pd.read_feather("./quipi_data/quipi_raw_tpm.feather", columns=hsh.quipi_cats + [human_gene])
+            input_arr = pd.read_feather("./quipi_humu_data/quipi_raw_tpm.feather", columns=hsh.quipi_cats + [human_gene])
     elif human_transformation == "Log2(TPM)":
-            input_arr = pd.read_feather("./quipi_data/quipi_log2_tpm.feather", columns=hsh.quipi_cats + [human_gene])
+            input_arr = pd.read_feather("./quipi_humu_data/quipi_log2_tpm.feather", columns=hsh.quipi_cats + [human_gene])
     
     input_arr = input_arr[input_arr["compartment"].isin(human_compartment_filters)]
 
@@ -81,18 +81,19 @@ def humu_box_comparison_human(human_gene, human_compartment_filters, human_trans
     return fig
 
 
-def humu_box_comparison_mouse(mouse_gene, mouse_compartment_filters):
+def humu_box_comparison_mouse(mouse_gene, mouse_compartment_filters, sample_aggr):
 
-    input_arr = pd.read_feather("./quipi_humu_data/quipi_humu_adata_clean_full_PROC.feather", columns = [mouse_gene, "Compartment"])
+    input_arr = pd.read_feather("./quipi_humu_data/quipi_humu_adata_clean_full_PROC.feather", columns = [mouse_gene, "Compartment", "Mouse"])
     input_arr = input_arr[input_arr["Compartment"].isin(mouse_compartment_filters)]
+    
+    if sample_aggr:
+        input_arr = input_arr.groupby(["Compartment", "Mouse"])[mouse_gene].mean().reset_index()
+         
 
     fig = px.box(input_arr, x = "Compartment", y = mouse_gene, 
-                 color = "Compartment", color_discrete_map=hsh.compartment_colors,
-                 category_orders={"Compartment" : hsh.humu_compartments})
+                color = "Compartment", color_discrete_map=hsh.compartment_colors,
+                category_orders={"Compartment" : hsh.humu_compartments})
 
-
-    #humu_arr = pd.read_feather("./quipi_humu_data/quipi_humu_adata_clean_full_PROC.feather", columns = hsh.categoricals + [mouse_gene])
-    #fig = px.box(humu_arr, x = "PanCan_Compartment", y = mouse_gene)
     return fig
 
     

@@ -32,7 +32,7 @@ quipi_compartments = ["Tumor", "T Cell", "T-Reg", "Myeloid", "Stroma", "Live"]
 
 
 
-with open("./quipi_data/quipi_cols.csv", 'r') as file:
+with open("./quipi_humu_data/quipi_cols.csv", 'r') as file:
     reader = csv.reader(file)
     # Read the first row only (header)
     quipi_all_columns= next(reader)

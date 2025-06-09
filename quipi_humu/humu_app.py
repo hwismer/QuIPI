@@ -90,6 +90,7 @@ app_ui = ui.page_fluid(
                     ui.card(
                         ui.input_selectize("humu_box_comp_mu_genes", "Choose Murine Gene", []),
                         ui.input_selectize("humu_box_comp_cat_mouse_subset", "Subset Categories:",hsh.humu_compartments, selected=hsh.humu_compartments, multiple=True, remove_button=True,options={"plugins": ["clear_button"]}),
+                        ui.input_switch("humu_box_comp_sample_aggr", "Average Counts by Sample")
                     ),
                     ui.input_action_button("humu_box_comp_run", "RUN"),
                 bg=panel_color
@@ -256,7 +257,7 @@ def server(input, output, session):
         human_gene = input.humu_box_comp_human_genes()
         human_x_filter = input.humu_box_comp_x_cat_filter()
         human_transform = input.humu_box_comp_transformation()
-        
+
         fig = hxp.humu_box_comparison_human(human_gene, human_x_filter, human_transform)
 
         return fig
@@ -266,18 +267,11 @@ def server(input, output, session):
     def humu_gene_comparison_mouse():
         mouse_gene = input.humu_box_comp_mu_genes()
         mouse_x_cat_filter = input.humu_box_comp_cat_mouse_subset()
+        mouse_sample_aggr = input.humu_box_comp_sample_aggr()
 
-        fig = hxp.humu_box_comparison_mouse(mouse_gene, mouse_x_cat_filter)
+        fig = hxp.humu_box_comparison_mouse(mouse_gene, mouse_x_cat_filter, mouse_sample_aggr)
 
         return fig
-
-    
-    #@reactive.effect
-    #@reactive.event(input.humu_box_comp_x_cat)  # Trigger when category changes
-    #def update_box_viol_selectize():
-    #    x_cat = input.humu_box_comp_x_cat()
-    #    new_options = qsh.categorials_opts_dict[x_cat]
-    #    ui.update_selectize("humu_box_comp_x_cat_filter", choices=new_options, selected=new_options)
 
         
     @reactive.effect
@@ -287,12 +281,6 @@ def server(input, output, session):
         cat_opts = list(pd.read_feather("./quipi_humu_data/quipi_humu_adata_clean_full_PROC.feather", columns=[x_cat])[x_cat].unique())
         ui.update_selectize("humu_box_comp_cat_mouse_subset", choices=cat_opts, selected=cat_opts)
     
-
-
-
-    
-
-
 
     @reactive.effect
     def populate_gene_selections():
