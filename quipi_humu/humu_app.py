@@ -323,7 +323,8 @@ app_ui = ui.page_fluid(
                         ui.input_action_button("humu_gex_dot_run_example", "RUN"),
                         bg=panel_color
                     ),
-                ui.card(ui.output_plot("humu_plot_gex_dotplot_example"), full_screen=True)
+                ui.card(ui.output_plot("humu_plot_gex_dotplot_example"), full_screen=True),
+                bg = panel_color
                 )
             ),
             ui.nav_panel("Flow Cytometry Proportions", # EXAMPLE
