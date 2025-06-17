@@ -33,7 +33,7 @@ panel_color = "#f0f0f0"
 app_ui = ui.page_fluid(
 
     ui.tags.style("""
-        body { background-color: #8CCDEB; }  /* Background color */
+        body { background-color: #a1aace; }  /* Background color */
         .nav-link { font-size: 20px;
                     color: white;
         }
@@ -44,6 +44,17 @@ app_ui = ui.page_fluid(
         .sidebar { /* This is a common class name for Shiny sidebars */
                   background-color: white !important; /* !important ensures it overrides other rules */
         }
+        .value-box-border {
+            border: 5px solid #FFFFFF; /* Example border: 2px solid blue-ish color */
+            padding: 0px; /* Add some padding inside the box */
+            border-radius: 5px; /* Slightly rounded corners */
+            margin: 2px; /* Add a small margin around the box for spacing */
+        }
+        .value-box-title {
+            font-size: 1.2e !important; /* Increase font size, e.g., 1.2 times the default */
+            font-weight: bold; /* Make it bold for emphasis */
+            color: #FFFFF; /* Optional: Change color slightly */
+        }          
     """),
     ui.head_content(
         ui.tags.link(
@@ -67,8 +78,9 @@ app_ui = ui.page_fluid(
                     "The Human-to-Mouse Cancer Translator Project (HuMu) aims to immuno-profile a series of \
                                     common and exceptional models of cancer in mice to benchmark them against the diversity of \
                                     TMEs in Human cancer (i.e immune archetypes described in Combes, Samad, et al. Cell 2022).",
-                    theme=ui.value_box_theme(bg="#0B1D51" , fg="#FFFFFF"),
+                    theme=ui.value_box_theme(bg="#A1CEC5" , fg="#FFFFFF"),
                     showcase_layout="top right",
+                    class_="value-box-border"
                 ),
 
                 ui.value_box(
@@ -76,16 +88,18 @@ app_ui = ui.page_fluid(
                     ui.tags.img(src="quipi_humu_reference.png",
                                 style="height: auto; border: 2px solid #ddd; border-radius: 10px; box-shadow: 5px 5px 15px rgba(0,0,0,0.3);"),
                                 #theme="bg-gradient-teal-yellow",
-                                theme=ui.value_box_theme(bg="#FFE3A9" , fg="#333333")
-                ),
+                                theme=ui.value_box_theme(bg="#da8590" , fg="#FFFFFF"),
+                    class_="value-box-border"
+                    ),
                 ui.value_box(
                     "HuMu Dataset",
                     "The HuMu dataset contains high-dimensional cytometry data (CyTOF) of 15 murine models that \
                         we use to study high level tumor-immune composition, as well as single-cell sequencing data \
                         from 9 of these models that we use to dissect more granular gene expression profiles across \
                         populations and tumor models.",
-                    theme=ui.value_box_theme(bg="#725CAD" , fg="#FFFFFF"),
+                    theme=ui.value_box_theme(bg="#C5A1CE" , fg="#FFFFFF"),
                     showcase_layout="top right",
+                    class_="value-box-border"
                 ),
             )
         ),
@@ -106,11 +120,13 @@ app_ui = ui.page_fluid(
                                             ["TPM", "Log2(TPM)"],
                                             multiple= False,
                                             selected= "Log2(TPM)"),
+                        ui.input_selectize("humu_box_comp_human_groupby", "Group by:", ["---"] + hsh.quipi_cats_opts, selected="---"),
                     ),
                     ui.card(
                         ui.card_header("Mouse Options"),
                         ui.input_selectize("humu_box_comp_mu_genes", "Choose Murine Gene", []),
                         ui.input_selectize("humu_box_comp_cat_mouse_subset", "Subset Compartments",hsh.humu_compartments, selected=hsh.humu_compartments, multiple=True, remove_button=True,options={"plugins": ["clear_button"]}),
+                        ui.input_selectize("humu_box_comp_mouse_groupby", "Group by:", ["---"] + hsh.categoricals_opts),
                         ui.input_switch("humu_box_comp_sample_aggr", "Average Counts by Sample")
                     ),
                     ui.input_action_button("humu_box_comp_run", "RUN"),
@@ -245,11 +261,14 @@ app_ui = ui.page_fluid(
                                                 ["TPM", "Log2(TPM)"],
                                                 multiple= False,
                                                 selected= "Log2(TPM)"),
+                            ui.input_selectize("humu_box_comp_human_groupby_example", "Group by:", ["---"] + hsh.quipi_cats_opts, selected="---")
+                            
                         ),
                         ui.card(
                             ui.card_header("Mouse Options"),
                             ui.input_selectize("humu_box_comp_mu_genes_example", "Choose Murine Gene", ["Ctla4", "Ccr5"], selected="Ctla4"),
                             ui.input_selectize("humu_box_comp_cat_mouse_subset_example", "Subset Categories:",hsh.humu_compartments, selected=hsh.humu_compartments, multiple=True, remove_button=True,options={"plugins": ["clear_button"]}),
+                            ui.input_selectize("humu_box_comp_mouse_groupby_example", "Group by:", ["---"] + hsh.categoricals_opts),
                             ui.input_switch("humu_box_comp_sample_aggr_example", "Average Counts by Sample")
                         ),
                         bg=panel_color
@@ -460,8 +479,9 @@ def server(input, output, session):
         human_gene = input.humu_box_comp_human_genes()
         human_x_filter = input.humu_box_comp_x_cat_filter()
         human_transform = input.humu_box_comp_transformation()
+        human_groupby = input.humu_box_comp_human_groupby()
 
-        fig = hxp.humu_box_comparison_human(human_gene, human_x_filter, human_transform)
+        fig = hxp.humu_box_comparison_human(human_gene, human_x_filter, human_transform, human_groupby)
 
         return fig
     
@@ -471,8 +491,9 @@ def server(input, output, session):
         mouse_gene = input.humu_box_comp_mu_genes()
         mouse_x_cat_filter = input.humu_box_comp_cat_mouse_subset()
         mouse_sample_aggr = input.humu_box_comp_sample_aggr()
+        mouse_groupby = input.humu_box_comp_mouse_groupby()
 
-        fig = hxp.humu_box_comparison_mouse(mouse_gene, mouse_x_cat_filter, mouse_sample_aggr)
+        fig = hxp.humu_box_comparison_mouse(mouse_gene, mouse_x_cat_filter, mouse_sample_aggr, mouse_groupby)
 
         return fig
 
@@ -488,7 +509,6 @@ def server(input, output, session):
 
     ##### EXAMPLES
 
-
     ## COMPARISON
     @render_widget
     @reactive.event(input.humu_box_comp_run_example)
@@ -496,9 +516,9 @@ def server(input, output, session):
         human_gene = input.humu_box_comp_human_genes_example()
         human_x_filter = input.humu_box_comp_x_cat_filter_example()
         human_transform = input.humu_box_comp_transformation_example()
+        human_groupby = input.humu_box_comp_human_groupby_example()
 
-
-        fig = hxp.humu_box_comparison_human(human_gene, human_x_filter, human_transform)
+        fig = hxp.humu_box_comparison_human(human_gene, human_x_filter, human_transform, human_groupby)
 
         return fig
     
@@ -508,8 +528,9 @@ def server(input, output, session):
         mouse_gene = input.humu_box_comp_mu_genes_example()
         mouse_x_cat_filter = input.humu_box_comp_cat_mouse_subset_example()
         mouse_sample_aggr = input.humu_box_comp_sample_aggr_example()
+        mouse_groupby = input.humu_box_comp_mouse_groupby_example()
 
-        fig = hxp.humu_box_comparison_mouse(mouse_gene, mouse_x_cat_filter, mouse_sample_aggr)
+        fig = hxp.humu_box_comparison_mouse(mouse_gene, mouse_x_cat_filter, mouse_sample_aggr, mouse_groupby)
 
         return fig
     
@@ -532,8 +553,6 @@ def server(input, output, session):
     def humu_update_box_viol_selectize():
         x_cat = input.humu_gex_box_x_cat_example()
         cat_opts = hsh.categorial_opts_dict[x_cat]
-        
-        #list(pd.read_feather("./quipi_humu_data/quipi_humu_adata_clean_full_PROC.feather", columns=[x_cat])[x_cat].unique())
         ui.update_selectize("humu_gex_box_cat_subset_example", choices=cat_opts, selected=cat_opts)
 
     ## FLOWPLOTS

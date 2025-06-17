@@ -30,7 +30,9 @@ categorial_opts_dict = {"Tumor Line": ['B16-F10', 'LLC', 'MC38', 'RENCA', '4T1',
 humu_compartments = ["Tumor", "T Cell", "T-Reg", "Myeloid", "Stroma"]
 quipi_compartments = ["Tumor", "T Cell", "T-Reg", "Myeloid", "Stroma", "Live"]
 
-
+quipi_cats = ["indication","compartment", "archetype"]
+quipi_cats_opts = ["Indication", "Compartment", "Archetype"]
+quipi_cats_dict = {"Indication" : "indication", "Compartment":"compartment", "Archetype" : "archetype", "---" : "compartment"}
 
 with open("./quipi_humu_data/quipi_cols.csv", 'r') as file:
     reader = csv.reader(file)
@@ -39,6 +41,8 @@ with open("./quipi_humu_data/quipi_cols.csv", 'r') as file:
 
 quipi_cats = ['patient','sample_name','indication', 'archetype', 'compartment', 'sample_type', 'sample_type_cat', 'x_umap1', 'x_umap2']
 quipi_genes = list(set(quipi_all_columns) - set(quipi_cats))
+
+
 
 ## COLORS
 
@@ -105,6 +109,11 @@ groupby_colors = {"Tumor Line" : mouse_colors,
                   "Compartment" : compartment_colors,
                   "Coarse Annotation": None,
                   "Fine Annotation": None}
+
+
+quipi_colors = {"compartment" : compartment_colors,
+                "indication" : indic_to_color,
+                "archetype" : colors_pancan}
 
 
 
