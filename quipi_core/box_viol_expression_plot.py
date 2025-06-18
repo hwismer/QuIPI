@@ -4,7 +4,6 @@ import scanpy as sc
 import matplotlib.pyplot as plt
 
 import quipi_shared as sh
-import humu_shared as hsh
 import gene_factor as gf
 
 
