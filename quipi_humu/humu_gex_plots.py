@@ -94,14 +94,23 @@ def humu_box_comparison_human(human_gene, human_compartment_filters, human_trans
 
 def humu_box_comparison_mouse(mouse_gene, mouse_compartment_filters, sample_aggr, mouse_groupby):
 
-    input_arr = pd.read_feather("./quipi_humu_data/quipi_humu_adata_clean_full_PROC.feather", columns = [mouse_gene] + hsh.categoricals_opts)
+    input_arr = pd.read_feather("./quipi_humu_data/quipi_humu_adata_clean_full_PROC.feather", columns = [mouse_gene,"Mouse"] + hsh.categoricals_opts)
     input_arr = input_arr[input_arr["Compartment"].isin(mouse_compartment_filters)]
-    
-    if sample_aggr:
-        input_arr = input_arr.groupby(["Compartment", "Mouse"])[mouse_gene].mean().reset_index()
+    groupby_cols = None
 
     if mouse_groupby == "---":
-         mouse_groupby = "Compartment"
+        mouse_groupby = "Compartment"
+
+
+    if sample_aggr:
+        if mouse_groupby == "Compartment":
+             groupby_cols = ["Compartment", "Mouse"]
+        else:
+             groupby_cols = ["Mouse", "Compartment", mouse_groupby]
+
+        input_arr = input_arr.groupby(groupby_cols)[mouse_gene].mean().reset_index()
+
+
     colors = hsh.groupby_colors[mouse_groupby]
 
     fig = px.box(input_arr, x = "Compartment", y = mouse_gene, 
