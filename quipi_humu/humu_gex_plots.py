@@ -15,7 +15,7 @@ def plot_sc_box(gene, x_cat, x_cat_subset, groupby, splitby, sample_aggr):
     input_arr = input_arr[input_arr[x_cat].isin(x_cat_subset)]
 
     if sample_aggr:
-        cats = [x_cat, groupby, splitby]
+        cats = list(set([x_cat, groupby, splitby]))
         keep_cats = []
         for cat in cats:
             if cat != "---":
