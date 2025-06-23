@@ -88,7 +88,7 @@ app_ui = ui.page_fluid(
                     ui.tags.img(src="quipi_humu_reference.png",
                                 style="height: auto; border: 2px solid #ddd; border-radius: 10px; box-shadow: 5px 5px 15px rgba(0,0,0,0.3);"),
                                 #theme="bg-gradient-teal-yellow",
-                                theme=ui.value_box_theme(bg="#da8590" , fg="#FFFFFF"),
+                                theme=ui.value_box_theme(bg="#EDB1C8" , fg="#FFFFFF"),
                     class_="value-box-border"
                     ),
                 ui.value_box(
@@ -101,6 +101,68 @@ app_ui = ui.page_fluid(
                     showcase_layout="top right",
                     class_="value-box-border"
                 ),
+            ),
+        ),
+        ui.nav_panel("FAQ / Terminology",
+            ui.card(ui.h1("Terminology"),
+                    ui.card(
+                        ui.h2("Mouse"),
+                        ui.layout_column_wrap(
+                            ui.card(ui.h4("Tumor Line"),
+                                    "Mouse tumor models used in the study",
+                                    #style="background-color: #d4e3fc; color: #333;"
+                            ),
+                            ui.card(ui.h4("Compartment"),
+                                    "TME compartments as defined in Combes, Samad et al. Cell 2022. \
+                                    These describe either pooled effector T cells (T cell), Tregs, pooled myeloid cells \
+                                    (Myeloid, containing monocytes, macrophages and dendritic cells), Stroma (fibroblasts \
+                                    sorted as CD45-CD44+CD90+ in human and defined in mouse as fibroblasts matching the human \
+                                    Stroma gene signature) or Tumor (sorted in human as CD45- non-Stroma and identified in mouse \
+                                    scRNAseq as bieng tumor cells according to their DEGs)",
+                                #style="background-color: ##C5A1CE; color: #333;"
+                                
+                            )
+                        ),
+                        ui.layout_column_wrap(
+                            ui.card(ui.h4("Coarse Annotation"),
+                                "Coarse level of annotations made on the mouse scRNAseq data. Describes high level populations.",
+                                #style="background-color: #d4e3fc; color: #333;"
+                            ),
+                            ui.card(ui.h4("Fine Annotation"),
+                                "Fine level of annotations made on the mouse scRNAseq data. Describes individual subsets of cells as shown in Figure S2.",
+                                #style="background-color: #d4e3fc; color: #333;"
+                            )
+                        ),
+                    style="background-color: #EDB1C8; color: #333;"
+                    ),
+                    ui.card(
+                        ui.h2("Human"),
+                        ui.layout_column_wrap(
+                            ui.card(ui.h4("Indication"),
+                                    "Tumor indication of ImmunoProfiler patients",
+                                    #style="background-color: #d4e3fc; color: #333;"
+                            ),
+                            ui.card(ui.h4("Archetype"),
+                                    "Tumor-immune archetypes as defined in Combes, Samad et al. Cell 2022",
+                                    ui.HTML(f'<a href="{"https://pubmed.ncbi.nlm.nih.gov/34963056/"}" target="_blank">Discovering dominant tumor immune archetypes in a pan-cancer census. Combes AJ, Samad B, Tsui J, et al. Cell. 2022</a>'),
+                                    #style="background-color: #d4e3fc; color: #333;"
+                            )
+                        ),
+                        ui.layout_column_wrap(
+                            ui.card(ui.h4("Compartment"),
+                                "TME compartments as defined in Combes, Samad et al. Cell 2022. \
+                                These describe either pooled effector T cells (T cell), Tregs, pooled myeloid cells \
+                                (Myeloid, containing monocytes, macrophages and dendritic cells), Stroma (fibroblasts \
+                                sorted as CD45-CD44+CD90+ in human and defined in mouse as fibroblasts matching the human \
+                                Stroma gene signature) or Tumor (sorted in human as CD45- non-Stroma and identified in mouse \
+                                scRNAseq as bieng tumor cells according to their DEGs)",
+                                #style="background-color: #d4e3fc; color: #333;"
+                            ),
+                        ),
+                    style="background-color: #EDB1C8"
+                    ),
+                style="background-color: #A1CEC5; color: #333;"
+                
             )
         ),
         ui.nav_panel("HuMu Expression Comparison",
