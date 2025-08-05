@@ -4,10 +4,8 @@ from plotly.subplots import make_subplots
 import scanpy as sc
 import matplotlib.pyplot as plt
 import matplotlib
-#import quipi_shared as qsh
 import humu_shared as hsh
-
-#import box_viol_expression_plot as hbv
+matplotlib.use('Agg')
 
 def plot_sc_box(gene, x_cat, x_cat_subset, groupby, splitby, sample_aggr):
     cols = {gene, x_cat, groupby, splitby, "Mouse"} - {"---"}
@@ -51,7 +49,7 @@ def plot_sc_dotplot(genes, groupby, groups, splitby, splits, swap):
 
     adata = sc.read_h5ad("./quipi_humu_data/quipi_humu_adata.h5ad", backed="r")
 
-    fig, ax = matplotlib.pyplot.subplots()
+    #fig, ax = matplotlib.pyplot.subplots()
     if splitby != "---":
         adata = adata[adata.obs[splitby].isin(splits) & (adata.obs[groupby].isin(groups))]
     else:
@@ -63,10 +61,13 @@ def plot_sc_dotplot(genes, groupby, groups, splitby, splits, swap):
     else:
         vars = [groupby, splitby] if splitby != "---" else groupby
     if swap:
-        dp = sc.pl.DotPlot(adata, var_names=genes, groupby=vars, ax=ax).swap_axes().make_figure()
+        dp = sc.pl.dotplot(adata,var_names=genes, groupby=vars, return_fig = True, swap_axes=True)
+        #dp = sc.pl.DotPlot(adata, var_names=genes, groupby=vars, ax=ax).swap_axes().make_figure()
     else:
-        dp =sc.pl.DotPlot(adata, var_names=genes, groupby=vars, ax=ax).make_figure()
-
+        dp = sc.pl.dotplot(adata,var_names=genes, groupby=vars, return_fig=True)
+        #dp =sc.pl.DotPlot(adata, var_names=genes, groupby=vars, ax=ax).make_figure()
+        
+    fig = dp.make_figure()
     
     return fig
 
