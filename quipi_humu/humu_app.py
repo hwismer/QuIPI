@@ -1,6 +1,7 @@
 from shiny import App, render, ui, reactive
 from shinyswatch import theme
 import plotly.express as px
+import asyncio
 
 px.defaults.template = "simple_white"
 from shinywidgets import output_widget, render_widget 
@@ -265,7 +266,8 @@ app_ui = ui.page_fluid(
                         ui.input_action_button("humu_gex_dot_run", "RUN"),
                         bg=panel_color
                     ),
-                ui.card(ui.output_plot("humu_plot_gex_dotplot"), full_screen=True),
+                #ui.card(ui.output_plot("humu_plot_gex_dotplot"), full_screen=True),
+                ui.card(ui.output_plot("show_humu_gex_dotplot"), full_screen=True),
                 bg = panel_color
                 ),       
             ),
@@ -404,7 +406,7 @@ app_ui = ui.page_fluid(
                         ui.input_action_button("humu_gex_dot_run_example", "RUN"),
                         bg=panel_color
                     ),
-                ui.card(ui.output_plot("humu_plot_gex_dotplot_example"), full_screen=True),
+                ui.card(ui.output_plot("show_humu_gex_dotplot_example"), full_screen=True),
                 bg = panel_color
                 )
             ),
@@ -514,23 +516,36 @@ def server(input, output, session):
         else:
             ui.update_selectize("humu_gex_dot_splits", choices=[],)
     
-    @render.plot
-    @reactive.event(input.humu_gex_dot_run)
-    def humu_plot_gex_dotplot():
 
-        genes = list(input.humu_gex_dot_gene())
+
+    @ui.bind_task_button(button_id="humu_gex_dot_run")
+    @reactive.extended_task
+    async def async_humu_plot_gex_dotplot(genes, groupby, groups, splitby, splits, swap):
+
         if len(genes) > 0:
-            groupby = input.humu_gex_dot_groupby()
-            groups = input.humu_gex_dot_groups()
-            splitby = input.humu_gex_dot_splitby()
-            splits = input.humu_gex_dot_splits()
-            swap = input.humu_gex_dot_swap()
-
             fig = hxp.plot_sc_dotplot(genes, groupby, groups, splitby, splits, swap)
-            
             return fig
         else:
             return None
+        
+    @reactive.effect
+    @reactive.event(input.humu_gex_dot_run)
+    def humu_gex_dotplot_click():
+        genes = list(input.humu_gex_dot_gene())
+        groupby = input.humu_gex_dot_groupby()
+        groups = input.humu_gex_dot_groups()
+        splitby = input.humu_gex_dot_splitby()
+        splits = input.humu_gex_dot_splits()
+        swap = input.humu_gex_dot_swap()
+
+        async_humu_plot_gex_dotplot(genes, groupby, groups, splitby, splits, swap)
+
+    @render.plot
+    def show_humu_gex_dotplot():
+        return async_humu_plot_gex_dotplot.result()
+
+
+    
         
 
     ##### HUMU COMPARISON BOXPLOTS   
@@ -656,7 +671,39 @@ def server(input, output, session):
             ui.update_selectize("humu_gex_dot_splits_example", choices=cat_opts, selected=cat_opts)
         else:
             ui.update_selectize("humu_gex_dot_splits_example", choices=[],)
-    
+
+
+
+    @ui.bind_task_button(button_id="humu_gex_dot_run_example")
+    @reactive.extended_task
+    async def async_humu_plot_gex_dotplot_example(genes, groupby, groups, splitby, splits, swap):
+
+        if len(genes) > 0:
+            fig = hxp.plot_sc_dotplot(genes, groupby, groups, splitby, splits, swap)
+            return fig
+        else:
+            return None
+        
+    @reactive.effect
+    @reactive.event(input.humu_gex_dot_run_example)
+    def humu_gex_dotplot_click():
+        genes = list(input.humu_gex_dot_gene_example())
+        groupby = input.humu_gex_dot_groupby_example()
+        groups = input.humu_gex_dot_groups_example()
+        splitby = input.humu_gex_dot_splitby_example()
+        splits = input.humu_gex_dot_splits_example()
+        swap = input.humu_gex_dot_swap_example()
+
+        async_humu_plot_gex_dotplot_example(genes, groupby, groups, splitby, splits, swap)
+
+    @render.plot
+    def show_humu_gex_dotplot_example():
+        return async_humu_plot_gex_dotplot_example.result()
+
+
+
+            
+    """
     @render.plot
     @reactive.event(input.humu_gex_dot_run_example)
     def humu_plot_gex_dotplot_example():
@@ -674,6 +721,7 @@ def server(input, output, session):
             return fig
         else:
             return None
+    """
 
 
 
@@ -702,6 +750,3 @@ def server(input, output, session):
 # Create the Shiny app
 app_dir = Path(__file__).parent
 app = App(app_ui, server,static_assets= app_dir / "www")
-
-
-

@@ -11,7 +11,7 @@ import humu_shared as hsh
 
 def plot_sc_box(gene, x_cat, x_cat_subset, groupby, splitby, sample_aggr):
     cols = {gene, x_cat, groupby, splitby, "Mouse"} - {"---"}
-    input_arr = pd.read_feather("./quipi_humu_data/quipi_humu_adata_clean_full_PROC.feather", columns = cols)
+    input_arr = pd.read_feather("./quipi_humu_data/quipi_humu_adata_clean_full_PROC.feather", columns = tuple(cols))
     input_arr = input_arr[input_arr[x_cat].isin(x_cat_subset)]
 
     if sample_aggr:
