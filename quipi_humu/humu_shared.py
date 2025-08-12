@@ -24,9 +24,14 @@ categorial_opts_dict = {"Tumor Line": ['B16-F10', 'LLC', 'MC38', 'RENCA', '4T1',
                         "Compartment" : ["Tumor", "T Cell", "T-Reg", "Myeloid", "Stroma"],
                         "Coarse Annotation" : ['CD8_T_cells','TAMs','Fibroblasts','CD4_Tconv','Tumor',
                                           'CD4_Treg','cDC','Mono_Mac','Monocytes','pDC','gdT_other_T_cells',],
-                        "Fine Annotation" : ['CD8_eff','Doublets_TAM_prolif–Tex','Fibro_3','CD4_Teff_aging','Tumor_1','CD4_Treg','TAM_C1q_Apoe','CD4_Teff','CD4_Teff_naive','CD8_naive','cDC1','MonoMac_Cd14_Ccr2_C1q','CD8_eff_ex','Mono_ISG','TAM_Mrc1_Cd163','Melano_1','Myofibro_1','Fibro_2','TAM_Ms4a7','cDC2','Mono_Cd14_Ccr2','cDC2_Mgl2','TAM_prolif','TAM_Atp6v0d2_Trm_like','DC_prolif','TAM_Arg1','Melano_2','cDC3','Mo_DC','Tumor_Prolif_2','CD4_Klf2','Tumor_2','DC_ISG','TAM_prolif_Mgl2_Cst3','MonoMac_ISG_C1q','pDC','Tumor_Prolif_1','TAM_prolif_matrix','Melano_Prolif','gdT_other','DC_Cst3']}
-
-#adata = sc.read_h5ad("./quipi_humu_data/quipi_humu_adata.h5ad", backed="r")
+                        "Fine Annotation" : ['CD8_eff','Doublets_TAM_prolif–Tex','Fibro_3','CD4_Teff_aging','Tumor_1',
+                                             'CD4_Treg','TAM_C1q_Apoe','CD4_Teff','CD4_Teff_naive','CD8_naive',
+                                             'cDC1','MonoMac_Cd14_Ccr2_C1q','CD8_eff_ex','Mono_ISG','TAM_Mrc1_Cd163',
+                                             'Melano_1','Myofibro_1','Fibro_2','TAM_Ms4a7','cDC2','Mono_Cd14_Ccr2',
+                                             'cDC2_Mgl2','TAM_prolif','TAM_Atp6v0d2_Trm_like','DC_prolif','TAM_Arg1',
+                                             'Melano_2','cDC3','Mo_DC','Tumor_Prolif_2','CD4_Klf2','Tumor_2','DC_ISG',
+                                             'TAM_prolif_Mgl2_Cst3','MonoMac_ISG_C1q','pDC',
+                                             'Tumor_Prolif_1','TAM_prolif_matrix','Melano_Prolif','gdT_other','DC_Cst3']}
 
 ## QUIPI
 

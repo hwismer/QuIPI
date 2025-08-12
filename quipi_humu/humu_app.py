@@ -79,7 +79,7 @@ app_ui = ui.page_fluid(
                     "The Human-to-Mouse Cancer Translator Project (HuMu) aims to immuno-profile a series of \
                                     common and exceptional models of cancer in mice to benchmark them against the diversity of \
                                     TMEs in Human cancer (i.e immune archetypes described in Combes, Samad, et al. Cell 2022).",
-                    theme=ui.value_box_theme(bg="#A1CEC5" , fg="#FFFFFF"),
+                    theme=ui.value_box_theme(bg="#cca9a3" , fg="#FFFFFF"),
                     showcase_layout="top right",
                     class_="value-box-border"
                 ),
@@ -89,7 +89,7 @@ app_ui = ui.page_fluid(
                     ui.tags.img(src="quipi_humu_reference.png",
                                 style="height: auto; border: 2px solid #ddd; border-radius: 10px; box-shadow: 5px 5px 15px rgba(0,0,0,0.3);"),
                                 #theme="bg-gradient-teal-yellow",
-                                theme=ui.value_box_theme(bg="#EDB1C8" , fg="#FFFFFF"),
+                                theme=ui.value_box_theme(bg="#a3c6cc" , fg="#FFFFFF"),
                     class_="value-box-border"
                     ),
                 ui.value_box(
@@ -98,7 +98,7 @@ app_ui = ui.page_fluid(
                         we use to study high level tumor-immune composition, as well as single-cell sequencing data \
                         from 9 of these models that we use to dissect more granular gene expression profiles across \
                         populations and tumor models.",
-                    theme=ui.value_box_theme(bg="#C5A1CE" , fg="#FFFFFF"),
+                    theme=ui.value_box_theme(bg="#c6cca3" , fg="#FFFFFF"),
                     showcase_layout="top right",
                     class_="value-box-border"
                 ),
@@ -134,7 +134,7 @@ app_ui = ui.page_fluid(
                                 #style="background-color: #d4e3fc; color: #333;"
                             )
                         ),
-                    style="background-color: #EDB1C8; color: #333;"
+                    style="background-color: #c6cca3; color: #333;"
                     ),
                     ui.card(
                         ui.h2("Human"),
@@ -160,9 +160,9 @@ app_ui = ui.page_fluid(
                                 #style="background-color: #d4e3fc; color: #333;"
                             ),
                         ),
-                    style="background-color: #EDB1C8"
+                    style="background-color: #c6cca3"
                     ),
-                style="background-color: #A1CEC5; color: #333;"
+                style="background-color: #a3c6cc; color: #333;"
                 
             )
         ),
@@ -401,7 +401,7 @@ app_ui = ui.page_fluid(
                             ),
                             ui.input_selectize("humu_gex_dot_splitby_example", "Split By:", ["---"] + hsh.categoricals_opts, selected="Tumor Line"),
                         ),
-                        ui.card(ui.input_switch("humu_gex_dot_swap_example", "Swap Axes", True)),
+                        ui.card(ui.input_switch("humu_gex_dot_swap_example", "Swap Axes", False)),
                         ui.input_action_button("humu_gex_dot_run_example", "RUN"),
                         bg=panel_color
                     ),

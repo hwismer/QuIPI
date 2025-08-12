@@ -5,6 +5,7 @@ import scanpy as sc
 import matplotlib.pyplot as plt
 import matplotlib
 import humu_shared as hsh
+import plotly.graph_objects as go
 
 def plot_sc_box(gene, x_cat, x_cat_subset, groupby, splitby, sample_aggr):
     cols = {gene, x_cat, groupby, splitby, "Mouse"} - {"---"}
@@ -40,36 +41,10 @@ def plot_sc_box(gene, x_cat, x_cat_subset, groupby, splitby, sample_aggr):
 
     return fig
 
-def plot_sc_dotplot(genes, groupby, groups, splitby, splits, swap):
-
-    if len(splits) == 0:
-        splitby=groupby
-        splits = groups
-
-    adata = sc.read_h5ad("./quipi_humu_data/quipi_humu_adata.h5ad", backed="r")
-
-    fig, ax = matplotlib.pyplot.subplots()
-    if splitby != "---":
-        adata = adata[adata.obs[splitby].isin(splits) & (adata.obs[groupby].isin(groups))]
-    else:
-        adata = adata[adata.obs[groupby].isin(groups)]
-    
-
-    if groupby == splitby:
-        vars = groupby
-    else:
-        vars = [groupby, splitby] if splitby != "---" else groupby
-    if swap:
-        dp = sc.pl.dotplot(adata,var_names=genes, groupby=vars, return_fig = True, swap_axes=True)
-        #dp = sc.pl.DotPlot(adata, var_names=genes, groupby=vars, ax=ax).swap_axes().make_figure()
-    else:
-        dp = sc.pl.dotplot(adata,var_names=genes, groupby=vars, return_fig=True)
-
-    fig = dp
-    
-    return fig
 
 def plot_dotplot(genes, groupby, groups, splitby, splits, swap):
+
+    CUTOFF=0
 
     if groupby == splitby:
         splitby = "---"
@@ -87,9 +62,18 @@ def plot_dotplot(genes, groupby, groups, splitby, splits, swap):
         df["group_splits"] = df[groupby].astype(str) + '_' + df[splitby].astype(str)
 
     
+    
+    expressed = df[genes] > 0
+    expressed["group_splits"] = df["group_splits"]
 
-    dot_size_df = (df.groupby("group_splits")[genes].sum() / df.groupby("group_splits")[genes].count()).stack().reset_index()
+    dot_size_sum = expressed.groupby("group_splits")[genes].sum()
+    dot_size_total = expressed.groupby("group_splits")[genes].count()
+    
+    dot_size_df = dot_size_sum / dot_size_total
+    dot_size_df = dot_size_df.stack().reset_index()
     dot_size_df.columns = ['Category', 'Gene', 'Size']
+
+
     dot_color_df = (df.groupby("group_splits", observed=True)[genes].mean()).stack().reset_index()
     dot_color_df.columns = ['Category', 'Gene', 'Color']
 
@@ -112,14 +96,20 @@ def plot_dotplot(genes, groupby, groups, splitby, splits, swap):
         y=y_cat,
         size='Size',
         color='Color',
-        color_continuous_scale = ["blue","white","red"]
+        color_continuous_scale = ["blue","white","red"],
+        labels = {"Color":"Mean Expression In Group", "Size" : "Fraction of cells in group"},
+        size_max=15
     )
-
+    
     fig.update_layout(
-        yaxis=dict(
-            tickmode='linear',  # Force linear tick placement
-            tickvals=all_y_ticks,  # Set the exact tick labels to show
-            tickangle=0,  # Optional: Set the angle of the labels
+        xaxis_title_text='',
+        yaxis_title_text='',
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1
         )
     )
 
