@@ -263,12 +263,11 @@ app_ui = ui.page_fluid(
                             ),
                             ui.input_selectize("humu_gex_dot_splitby", "Split By:", ["---"] + hsh.categoricals_opts, selected="---"),
                         ),
-                        ui.card(ui.input_switch("humu_gex_dot_swap", "Swap Axes")),
+                        ui.card(ui.input_switch("humu_gex_dot_swap", "Swap Axes", value=False)),
                         ui.input_action_button("humu_gex_dot_run", "RUN"),
                         bg=panel_color
                     ),
-                #ui.card(ui.output_plot("humu_plot_gex_dotplot"), full_screen=True),
-                ui.card(ui.output_plot("show_humu_gex_dotplot"), full_screen=True),
+                ui.card(output_widget("show_humu_gex_dotplot"), full_screen=True),
                 bg = panel_color
                 ),       
             ),
@@ -407,7 +406,7 @@ app_ui = ui.page_fluid(
                         ui.input_action_button("humu_gex_dot_run_example", "RUN"),
                         bg=panel_color
                     ),
-                ui.card(ui.output_plot("show_humu_gex_dotplot_example"), full_screen=True),
+                ui.card(output_widget("show_humu_gex_dotplot_example"), full_screen=True),
                 bg = panel_color
                 )
             ),
@@ -518,7 +517,7 @@ def server(input, output, session):
             ui.update_selectize("humu_gex_dot_splits", choices=[],)
     
 
-
+    '''
     @ui.bind_task_button(button_id="humu_gex_dot_run")
     @reactive.extended_task
     async def async_humu_plot_gex_dotplot(genes, groupby, groups, splitby, splits, swap):
@@ -543,8 +542,22 @@ def server(input, output, session):
 
     @render.plot
     def show_humu_gex_dotplot():
-        #plt.close("all")
         return async_humu_plot_gex_dotplot.result()
+
+    '''
+
+    @render_widget
+    @reactive.event(input.humu_gex_dot_run)
+    def show_humu_gex_dotplot():
+        genes = list(input.humu_gex_dot_gene())
+        groupby = input.humu_gex_dot_groupby()
+        groups = input.humu_gex_dot_groups()
+        splitby = input.humu_gex_dot_splitby()
+        splits = input.humu_gex_dot_splits()
+        swap = input.humu_gex_dot_swap()
+
+        fig = hxp.plot_dotplot(genes, groupby, groups, splitby, splits, swap)
+        return fig
 
 
     
@@ -675,20 +688,9 @@ def server(input, output, session):
             ui.update_selectize("humu_gex_dot_splits_example", choices=[],)
 
 
-
-    @ui.bind_task_button(button_id="humu_gex_dot_run_example")
-    @reactive.extended_task
-    async def async_humu_plot_gex_dotplot_example(genes, groupby, groups, splitby, splits, swap):
-
-        if len(genes) > 0:
-            fig = hxp.plot_sc_dotplot(genes, groupby, groups, splitby, splits, swap)
-            return fig
-        else:
-            return None
-        
-    @reactive.effect
+    @render_widget
     @reactive.event(input.humu_gex_dot_run_example)
-    def humu_gex_dotplot_click():
+    def show_humu_gex_dotplot_example():
         genes = list(input.humu_gex_dot_gene_example())
         groupby = input.humu_gex_dot_groupby_example()
         groups = input.humu_gex_dot_groups_example()
@@ -696,34 +698,9 @@ def server(input, output, session):
         splits = input.humu_gex_dot_splits_example()
         swap = input.humu_gex_dot_swap_example()
 
-        async_humu_plot_gex_dotplot_example(genes, groupby, groups, splitby, splits, swap)
+        fig = hxp.plot_dotplot(genes, groupby, groups, splitby, splits, swap)
+        return fig
 
-    @render.plot
-    def show_humu_gex_dotplot_example():
-        return async_humu_plot_gex_dotplot_example.result()
-
-
-
-            
-    """
-    @render.plot
-    @reactive.event(input.humu_gex_dot_run_example)
-    def humu_plot_gex_dotplot_example():
-
-        genes = list(input.humu_gex_dot_gene_example())
-        if len(genes) > 0:
-            groupby = input.humu_gex_dot_groupby_example()
-            groups = input.humu_gex_dot_groups_example()
-            splitby = input.humu_gex_dot_splitby_example()
-            splits = input.humu_gex_dot_splits_example()
-            swap = input.humu_gex_dot_swap_example()
-
-            fig = hxp.plot_sc_dotplot(genes, groupby, groups, splitby, splits, swap)
-            
-            return fig
-        else:
-            return None
-    """
 
 
 

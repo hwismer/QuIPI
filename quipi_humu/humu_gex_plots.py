@@ -5,7 +5,6 @@ import scanpy as sc
 import matplotlib.pyplot as plt
 import matplotlib
 import humu_shared as hsh
-matplotlib.use('Agg')
 
 def plot_sc_box(gene, x_cat, x_cat_subset, groupby, splitby, sample_aggr):
     cols = {gene, x_cat, groupby, splitby, "Mouse"} - {"---"}
@@ -47,7 +46,7 @@ def plot_sc_dotplot(genes, groupby, groups, splitby, splits, swap):
         splitby=groupby
         splits = groups
 
-    adata = hsh.adata
+    adata = sc.read_h5ad("./quipi_humu_data/quipi_humu_adata.h5ad", backed="r")
 
     fig, ax = matplotlib.pyplot.subplots()
     if splitby != "---":
@@ -61,15 +60,71 @@ def plot_sc_dotplot(genes, groupby, groups, splitby, splits, swap):
     else:
         vars = [groupby, splitby] if splitby != "---" else groupby
     if swap:
-        #dp = sc.pl.dotplot(adata,var_names=genes, groupby=vars, return_fig = True, swap_axes=True)
-        dp = sc.pl.DotPlot(adata, var_names=genes, groupby=vars, ax=ax).swap_axes().make_figure()
+        dp = sc.pl.dotplot(adata,var_names=genes, groupby=vars, return_fig = True, swap_axes=True)
+        #dp = sc.pl.DotPlot(adata, var_names=genes, groupby=vars, ax=ax).swap_axes().make_figure()
     else:
-        #dp = sc.pl.dotplot(adata,var_names=genes, groupby=vars, return_fig=True)
-        dp =sc.pl.DotPlot(adata, var_names=genes, groupby=vars, ax=ax).make_figure()
+        dp = sc.pl.dotplot(adata,var_names=genes, groupby=vars, return_fig=True)
 
-    #fig = dp.make_figure()
+    fig = dp
     
-    return dp
+    return fig
+
+def plot_dotplot(genes, groupby, groups, splitby, splits, swap):
+
+    if groupby == splitby:
+        splitby = "---"
+
+    if splitby == "---":
+        df = pd.read_feather("./quipi_humu_data/quipi_humu_adata_clean_full_PROC.feather", 
+                         columns = genes + [groupby])
+        df = df[df[groupby].isin(groups)]
+        df["group_splits"] = df[groupby].astype(str)
+        
+    else:
+        df = pd.read_feather("./quipi_humu_data/quipi_humu_adata_clean_full_PROC.feather", 
+                         columns = genes + [groupby] + [splitby])
+        df = df[(df[groupby].isin(groups)) & (df[splitby].isin(splits))]
+        df["group_splits"] = df[groupby].astype(str) + '_' + df[splitby].astype(str)
+
+    
+
+    dot_size_df = (df.groupby("group_splits")[genes].sum() / df.groupby("group_splits")[genes].count()).stack().reset_index()
+    dot_size_df.columns = ['Category', 'Gene', 'Size']
+    dot_color_df = (df.groupby("group_splits", observed=True)[genes].mean()).stack().reset_index()
+    dot_color_df.columns = ['Category', 'Gene', 'Color']
+
+    merged_df = pd.merge(dot_size_df, dot_color_df, on=['Category', 'Gene'])
+
+    
+    all_y_ticks = merged_df['Category'].unique()
+
+    if swap is True:
+        x_cat = "Gene"
+        y_cat = "Category"
+    else:
+        x_cat = "Category"
+        y_cat = "Gene"
+        
+    
+    fig = px.scatter(
+        merged_df,
+        x=x_cat,
+        y=y_cat,
+        size='Size',
+        color='Color',
+        color_continuous_scale = ["blue","white","red"]
+    )
+
+    fig.update_layout(
+        yaxis=dict(
+            tickmode='linear',  # Force linear tick placement
+            tickvals=all_y_ticks,  # Set the exact tick labels to show
+            tickangle=0,  # Optional: Set the angle of the labels
+        )
+    )
+
+    
+    return fig
 
 
 
