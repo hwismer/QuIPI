@@ -1,7 +1,6 @@
 from shiny import App, render, ui, reactive
 from shinyswatch import theme
 import plotly.express as px
-import asyncio
 
 px.defaults.template = "simple_white"
 from shinywidgets import output_widget, render_widget 
@@ -515,36 +514,6 @@ def server(input, output, session):
             ui.update_selectize("humu_gex_dot_splits", choices=cat_opts, selected=cat_opts)
         else:
             ui.update_selectize("humu_gex_dot_splits", choices=[],)
-    
-
-    '''
-    @ui.bind_task_button(button_id="humu_gex_dot_run")
-    @reactive.extended_task
-    async def async_humu_plot_gex_dotplot(genes, groupby, groups, splitby, splits, swap):
-
-        if len(genes) > 0:
-            fig = hxp.plot_sc_dotplot(genes, groupby, groups, splitby, splits, swap)
-            return fig
-        else:
-            return None
-        
-    @reactive.effect
-    @reactive.event(input.humu_gex_dot_run)
-    def humu_gex_dotplot_click():
-        genes = list(input.humu_gex_dot_gene())
-        groupby = input.humu_gex_dot_groupby()
-        groups = input.humu_gex_dot_groups()
-        splitby = input.humu_gex_dot_splitby()
-        splits = input.humu_gex_dot_splits()
-        swap = input.humu_gex_dot_swap()
-
-        async_humu_plot_gex_dotplot(genes, groupby, groups, splitby, splits, swap)
-
-    @render.plot
-    def show_humu_gex_dotplot():
-        return async_humu_plot_gex_dotplot.result()
-
-    '''
 
     @render_widget
     @reactive.event(input.humu_gex_dot_run)
