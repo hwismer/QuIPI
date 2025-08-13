@@ -154,7 +154,7 @@ app_ui = ui.page_fluid(
                         ui.input_action_button("gex_dot_run", "RUN"),
                         bg=panel_color
                     ),
-                    ui.card(ui.output_plot("gex_dotplot", fill=True), full_screen=True)   
+                    ui.card(output_widget("gex_dotplot", fill=True), full_screen=True)   
                 )
             ),
 
@@ -670,7 +670,7 @@ def server(input, output, session):
         else:
             ui.update_selectize("gex_dot_splitby_subset", choices=[])
 
-    @render.plot
+    @render_widget
     @reactive.event(input.gex_dot_run)
     def gex_dotplot():
         genes = list(input.gex_dot_genes())
@@ -681,7 +681,7 @@ def server(input, output, session):
         transform = input.gex_dot_transform()
         swap = input.gex_dot_swap()
 
-        return bv.dotplot(genes, groupby, groups, splitby, splits, transform, swap)
+        return bv.plot_dotplot(genes, groupby, groups, splitby, splits, transform, swap)
 
         
     

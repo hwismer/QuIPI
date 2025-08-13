@@ -51,35 +51,82 @@ def box_viol_exprn(transform, x_cat, x_cat_filts, genes, groupby, compartment_mu
             return fig
         
         
-def dotplot(genes, groupby, groups, splitby, splits, transform, swap):
-    adata = sc.read_h5ad("./quipi_data/quipi_adata.h5ad", backed="r")
+def plot_dotplot(genes, groupby, groups, splitby, splits, transform, swap):
 
-    fig, ax = plt.subplots()
-    
-    groupby = sh.categoricals_dict[groupby]
+    CUTOFF=0
 
     if transform == "TPM":
-        transform = None
-    else:
-        transform = "log2"
-
-    if splitby != "---":
-        splitby = sh.categoricals_dict[splitby]
-        adata = adata[adata.obs[splitby].isin(splits) & (adata.obs[groupby].isin(groups))]
-    else:
-        adata = adata[adata.obs[groupby].isin(groups)]
+        path = "./quipi_data/quipi_raw_tpm.feather"
+    elif transform == "Log2(TPM)":
+        path = "./quipi_data/quipi_log2_tpm.feather"
 
     if groupby == splitby:
-        vars = groupby
-    else:
-        vars = [groupby, splitby] if splitby != "---" else groupby
-    
-    if swap:
-        sc.pl.DotPlot(adata, var_names=genes, groupby=vars, ax=ax, layer=transform).swap_axes().make_figure()
-    else:
-        sc.pl.DotPlot(adata, var_names=genes, groupby=vars, ax=ax, layer=transform).make_figure()
+        splitby = "---"
 
-    fig.tight_layout()
-    plt.subplots_adjust(top=0.95, bottom=0.15, left=0.1, right=0.95, hspace=0.0, wspace=0.0)
-    ax = plt.gca()
+    groupby = sh.categoricals_dict[groupby]
+
+    if splitby == "---":
+        df = pd.read_feather(path, 
+                         columns = genes + [groupby])
+        df = df[df[groupby].isin(groups)]
+        df["group_splits"] = df[groupby].astype(str)
+        
+    else:
+        splitby = sh.categoricals_dict[splitby]
+        df = pd.read_feather(path, 
+                         columns = genes + [groupby] + [splitby])
+        df = df[(df[groupby].isin(groups)) & (df[splitby].isin(splits))]
+        df["group_splits"] = df[groupby].astype(str) + '_' + df[splitby].astype(str)
+
+    
+    
+    expressed = df[genes] > CUTOFF
+    expressed["group_splits"] = df["group_splits"]
+
+    dot_size_sum = expressed.groupby("group_splits")[genes].sum()
+    dot_size_total = expressed.groupby("group_splits")[genes].count()
+    
+    dot_size_df = dot_size_sum / dot_size_total
+    dot_size_df = dot_size_df.stack().reset_index()
+    dot_size_df.columns = ['Category', 'Gene', 'Size']
+
+
+    dot_color_df = (df.groupby("group_splits", observed=True)[genes].mean()).stack().reset_index()
+    dot_color_df.columns = ['Category', 'Gene', 'Color']
+
+    merged_df = pd.merge(dot_size_df, dot_color_df, on=['Category', 'Gene'])
+
+
+    if swap is True:
+        x_cat = "Gene"
+        y_cat = "Category"
+    else:
+        x_cat = "Category"
+        y_cat = "Gene"
+        
+    
+    fig = px.scatter(
+        merged_df,
+        x=x_cat,
+        y=y_cat,
+        size='Size',
+        color='Color',
+        color_continuous_scale = ["blue","white","red"],
+        labels = {"Color":"Mean Expression In Group", "Size" : "Fraction of cells in group"},
+        size_max=15
+    )
+    
+    fig.update_layout(
+        xaxis_title_text='',
+        yaxis_title_text='',
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1
+        )
+    )
+
+    
     return fig
