@@ -20,8 +20,12 @@ from pathlib import Path
 #import humu_flow_boxplot as hfb
 #import humu_gex_plots as hxp
 
+gear_fill = ui.HTML(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-gear-fill" viewBox="0 0 16 16"><path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/></svg>'
+)
 
-quipi_tabs_mapped_to_gene_inputs = {"Box/Violin Plots" : ["box_viol_gene_input"],
+
+quipi_tabs_mapped_to_gene_inputs = {"Boxplots" : ["box_viol_gene_input"],
                               "Gene Expresssion Bar Plots" : ["gene_expr_bar_genes"],
                               "Dotplots" : ["gex_dot_genes"],
                               "Correlation Matrix" : ["corr_gene_input"],
@@ -99,34 +103,44 @@ app_ui = ui.page_fluid(
         ##### GENE EXPRESSION
         ui.nav_menu("Gene Expression",
     
-            ui.nav_panel("Box/Violin Plots",  
+            ui.nav_panel("Boxplots",  
                 ui.layout_sidebar(
                     ui.sidebar(
-                        ui.h4("Explore gene expression by category"),
-                        ui.input_action_button("box_viol_run", "Run"),
-                        ui.input_selectize("box_viol_gene_input",
+                       ui.h4("Boxplot"),
+                       ui.card(ui.input_selectize("box_viol_gene_input",
                                             "Select Genes:",
                                             [],
                                             multiple=True),
-                        ui.output_ui("box_viol_multiple_genes"),
-                        ui.input_selectize("box_viol_x_category",
-                                            "Select X-Axis Category:",
-                                            list(qsh.categoricals_dict.keys()),
-                                            selected = "Compartment"),
-                        ui.input_selectize("box_viol_x_cat_filter",
+                        ui.output_ui("box_viol_multiple_genes")),
+
+                        ui.card(
+                            ui.popover(
+                                ui.span(
+                                    gear_fill,
+                                    style="position:absolute; top: 5px; right: 7px;",
+                                ),
+                                ui.input_selectize("box_viol_x_cat_filter",
                                         "**Subset X-Axis Categories.**",
                                         [],
                                         multiple=True,
                                         remove_button=True,options={"plugins": ["clear_button"]}),
-                        ui.input_selectize("box_viol_groupby",
+                                placement="right",
+                            ),
+                            ui.input_selectize("box_viol_x_category",
+                                            "Select X-Axis Category:",
+                                            list(qsh.categoricals_dict.keys()),
+                                            selected = "Compartment"),
+                        ),
+                        ui.card(ui.input_selectize("box_viol_groupby",
                                             "Group by:",
                                             ["---"] + list(qsh.categoricals_dict.keys()),
-                                            selected="---"),
-                        ui.input_selectize("box_viol_transformation",
-                                            "Select TPM Transformation: ",
+                                            selected="---")),
+                        ui.card(ui.input_selectize("box_viol_transformation",
+                                            "TPM Transformation: ",
                                             ["TPM", "Log2(TPM)"],
                                             multiple= False,
-                                            selected= "Log2(TPM)"),
+                                            selected= "Log2(TPM)")),
+                        ui.input_action_button("box_viol_run", "Run"),
                         bg=panel_color
                     ),
                 
@@ -140,61 +154,77 @@ app_ui = ui.page_fluid(
             ui.nav_panel("Dotplots",
                 ui.layout_sidebar(
                     ui.sidebar(
-                        ui.input_selectize("gex_dot_genes", "Choose Genes to plot:", [], multiple=True),
+                        ui.h4("Dotplot"),
+                        ui.card(ui.input_selectize("gex_dot_genes", "Choose Genes to plot:", [], multiple=True)),
+
                         ui.card(
+                            ui.popover(
+                                ui.span(
+                                    gear_fill,
+                                    style="position:absolute; top: 5px; right: 7px;",
+                                ),
+                                ui.input_selectize("gex_dot_groupby_subset", "Subset Groupby Categories:", [], multiple=True,remove_button=True,options={"plugins": ["clear_button"]}),
+                                placement="right",
+                            ),
                             ui.input_selectize("gex_dot_groupby", "Group by:", list(qsh.categorical_choices.keys())),
-                            ui.input_selectize("gex_dot_groupby_subset", "Subset Groupby Categories:", [], multiple=True,remove_button=True,options={"plugins": ["clear_button"]}),
                         ),
+
                         ui.card(
+                            ui.popover(
+                                ui.span(
+                                    gear_fill,
+                                    style="position:absolute; top: 5px; right: 7px;",
+                                ),
+                                ui.input_selectize("gex_dot_splitby_subset", "Subset Splitby Categories:", [], multiple=True,remove_button=True,options={"plugins": ["clear_button"]}), 
+                            ),
                             ui.input_selectize("gex_dot_splitby", "Split by:", ["---"] + list(qsh.categorical_choices.keys()), selected="---"),
-                            ui.input_selectize("gex_dot_splitby_subset", "Subset Splitby Categories:", [], multiple=True,remove_button=True,options={"plugins": ["clear_button"]}), 
                         ),
-                        ui.input_selectize("gex_dot_transform", "Select TPM Transformation:", ["Log2(TPM)", "TPM"], selected = "TPM"),
-                        ui.input_switch("gex_dot_swap", "Swap Axes"),
+                        ui.card(ui.input_selectize("gex_dot_transform", "TPM Transformation:", ["Log2(TPM)", "TPM"], selected = "TPM")),
+                        ui.card(ui.input_switch("gex_dot_swap", "Swap Axes")),
                         ui.input_action_button("gex_dot_run", "RUN"),
                         bg=panel_color
                     ),
-                    ui.card(output_widget("gex_dotplot", fill=True), full_screen=True)   
+                    ui.card(output_widget("gex_dotplot", fill=True), ui.card_footer("Click button in the bottom right for fullscreen view."),full_screen=True)   
                 )
             ),
 
             ui.nav_panel("Query Gene Expression",
                 ui.layout_sidebar(
                     ui.sidebar(
-                        ui.h4("Subset and download gene expression data"),
-                        ui.input_action_button("gene_expr_query_run", "Run"),
-                        ui.download_button("download_query_table", "Download CSV"),
-                        ui.input_selectize("gene_expr_query_genes",
+                        ui.h4("IPI Data Query"),
+                        ui.card(ui.input_selectize("gene_expr_query_genes",
                                         "Select Genes:",
                                         [],
                                         multiple=True,
-                                        options = {"server":True}),
-                        ui.input_selectize("query_indication",
+                                        options = {"server":True})),
+                        ui.card(ui.input_selectize("query_indication",
                                             "Select Indications:",
                                             choices=qsh.indications,
                                             selected=qsh.indications,
                                             multiple = True,
-                                            remove_button=True,options={"plugins": ["clear_button"]}),
-                        ui.input_selectize("query_compartment",
+                                            remove_button=True,options={"plugins": ["clear_button"]})),
+                        ui.card(ui.input_selectize("query_compartment",
                                             "Select Compartments:",
                                             choices=qsh.compartments,
                                             selected=qsh.compartments,
                                             multiple=True,
-                                            remove_button=True,options={"plugins": ["clear_button"]}),
-                        ui.input_selectize("query_archetype",
+                                            remove_button=True,options={"plugins": ["clear_button"]})),
+                        ui.card(ui.input_selectize("query_archetype",
                                             "Select Archetypes:",
                                             choices=qsh.archetypes,
                                             multiple=True,
                                             selected=qsh.archetypes,
-                                            remove_button=True,options={"plugins": ["clear_button"]}),
-                        ui.input_selectize("query_transform",
+                                            remove_button=True,options={"plugins": ["clear_button"]})),
+                        ui.card(ui.input_selectize("query_transform",
                                             "Select TPM Transformation:",
                                             choices=["TPM", "Log2(TPM)"],
-                                            selected="Log2(TPM)"),
+                                            selected="Log2(TPM)")),
+                        ui.input_action_button("gene_expr_query_run", "Run"),
+                        ui.download_button("download_query_table", "Download CSV"),
                         bg=panel_color
                     ),
-                    ui.card(ui.output_data_frame("gene_expr_query")),
-                    #ui.download_button("download_query_table", "Download CSV"),
+                    
+                    ui.card(ui.output_data_frame("gene_expr_query"), ui.card_footer("Click button in the bottom right for fullscreen view."),full_screen=True),
                     bg=panel_color
                 ),
             )
