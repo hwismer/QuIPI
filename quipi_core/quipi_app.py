@@ -70,34 +70,75 @@ app_ui = ui.page_fluid(
     ),
 
     ui.page_navbar(
-    
         ## HOME PAGE
         ui.nav_panel("Home",
-            ui.panel_title("QuIPI - Querying IPI"),
-            ui.p("Here are some useful references."),
-            ui.layout_column_wrap(
-                ui.card(ui.card_header("Cancer Indication Breakdown"),
-                        output_widget("plot_indication_breakdown"), 
-                        full_screen=False,
+            
+                ui.card(
+                    ui.layout_column_wrap(
+                        ui.card(
+                                                        ui.tags.div(
+                                ui.tags.img(src="quipi.png", style="height: 100px; margin-left: 10px; padding-top: 0px"),  # Left-aligned image
+                            ),
+                            ui.h2("QuIPI - Querying Immunoprofiler"),
+                            """
+                            QuIPI is a user interface designed to make it easy to visualize the UCSF Immunoprofiler dataset. 
+                            QuIPI incorporates Bulk RNA-Seq and Flow Cytometry data from over 400 cancer samples across multiple
+                            indications. QuIPI also incorporates archetype calls, building off of the work of Combes, Samad et al. Cell 2022 
+                            in order to identify common immune states across cancer types.
+                            """,
+                            """
+                            QuIPI provides quick and easy to use plotting functionality, allowing anyone to discover trends and insights from
+                            Immunoprofiler data. QuIPI modules are designed with the hope that they can be generalizable to different questions
+                            while still allowing for sufficient cusomization.
+                            """,
+                            ui.HTML(f'<a href="{"https://pubmed.ncbi.nlm.nih.gov/34963056/"}" target="_blank">Discovering dominant tumor immune archetypes in a pan-cancer census. Combes AJ, Samad B, Tsui J, et al. Cell. 2022</a>'),
+                            style="background-color: #BDD0D5"
                         ),
-                ui.card(ui.card_header("Cancer Indication Nomenclature"),
-                    output_widget("cancer_glossary"),
-                    full_screen=False),
-                ui.card(ui.card_header("PanCan Archetype UMAP"),
-                        ui.card_body(output_widget("pancan_archetypes_home")),
-                        ui.card_footer(
-                            ui.HTML(f'<a href="{"https://pubmed.ncbi.nlm.nih.gov/34963056/"}" target="_blank">Discovering dominant tumor immune archetypes in a pan-cancer census. Combes AJ, Samad B, Tsui J, et al. Cell. 2022</a>')
+                        ui.card(
+                            #ui.h1("Immunoprofiler"),
+
+                            ui.tags.div(
+                                ui.tags.img(src="immunoprofiler_image.png", style="height: 100px; margin-left: 10px; padding-top: 10px"),  # Left-aligned image
+                                ui.tags.span("", style="font-size: 50px; font-weight: bold;"),
+                                style="display: flex; align-items: flex-end; gap: 10px;" # Flexbox for horizontal alignment
+                            ),
+                            ui.h2("Immunoprofiler"),
+                            """
+                            The Immunoprofiler (IPI) effort coordinates the processing of valuable samples from cancer patients
+                            in order to perform various tests to learn more about immune composition, immune cell gene expression, and immune interaction biology.
+                            By viewing cancers as a discrete forms of immunopathology, better understanding the immune response is a critical piece for
+                            how to treat cancers and provide new targets for the new forms of immunotherapies.
+                            """,
+                            ui.HTML(f'<a href="{"https://immunoprofiler.org/cancer"}" target="_blank">UCSF Immunoprofiler</a>'),
+                            style="background-color: #8DC8AF"
                         ),
-                        full_screen=False,     
+                    )
+                )
+        ),
+            ui.nav_panel("About The Dataset",
+                ui.layout_column_wrap(
+                    ui.card(ui.card_header("Cancer Indication Breakdown"),
+                            output_widget("plot_indication_breakdown"), 
+                            full_screen=False,
+                            ),
+                    ui.card(ui.card_header("Cancer Indication Nomenclature"),
+                        output_widget("cancer_glossary"),
+                        full_screen=False),
+                    ui.card(ui.card_header("PanCan Archetype UMAP"),
+                            ui.card_body(output_widget("pancan_archetypes_home")),
+                            ui.card_footer(
+                                ui.HTML(f'<a href="{"https://pubmed.ncbi.nlm.nih.gov/34963056/"}" target="_blank">Discovering dominant tumor immune archetypes in a pan-cancer census. Combes AJ, Samad B, Tsui J, et al. Cell. 2022</a>')
+                            ),
+                            full_screen=False,     
+                    ),
+                    ui.card(ui.card_header("PanCan Archetype Breakdown"),
+                            ui.card_body(output_widget("pancan_archetype_breakdown")),
+                            ui.card_footer("""
+                                        Nota Bene: Unclassified patients do not have Feature Scores assigned to them.
+                                        Any calculations involving a feature score are subset to include archetyped patients only.
+                                        """)),
+                    width=.5
                 ),
-                ui.card(ui.card_header("PanCan Archetype Breakdown"),
-                        ui.card_body(output_widget("pancan_archetype_breakdown")),
-                        ui.card_footer("""
-                                    Nota Bene: Unclassified patients do not have Feature Scores assigned to them.
-                                    Any calculations involving a feature score are subset to include archetyped patients only.
-                                    """)),
-                width=.5
-            ),
         ),
 
         ##### GENE EXPRESSION
@@ -452,7 +493,7 @@ app_ui = ui.page_fluid(
         ), # END PANCAN MENU
 
         # BEGIN DGE MENU
-        ui.nav_menu("Ranked DGE",
+        ui.nav_menu("Differential Gene Expression Tests",
                     
             ui.nav_panel("Feature Score Ranked DGE",
                 ui.layout_sidebar(
