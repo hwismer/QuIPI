@@ -74,97 +74,96 @@ app_ui = ui.page_fluid(
 
         ui.nav_panel("Home",
             ui.layout_column_wrap(
-                ui.value_box(
-                    "What is HuMu?",
-                    "The Human-to-Mouse Cancer Translator Project (HuMu) aims to immuno-profile a series of \
+                ui.card(
+                    ui.card_header(ui.h1("What is HuMu?", style='color: white; font-weight: bold;')),
+                    ui.h2("The Human-to-Mouse Cancer Translator Project (HuMu) aims to immuno-profile a series of \
                                     common and exceptional models of cancer in mice to benchmark them against the diversity of \
                                     TMEs in Human cancer (i.e immune archetypes described in Combes, Samad, et al. Cell 2022).",
-                    theme=ui.value_box_theme(bg="#cca9a3" , fg="#FFFFFF"),
-                    showcase_layout="top right",
-                    class_="value-box-border"
+                                    style='color: white; font-weight: bold; margin-bottom: 10px;'),
+                    ui.card_footer(ui.HTML(f'<a href="{"https://pubmed.ncbi.nlm.nih.gov/34963056/"}" target="_blank">Discovering dominant tumor immune archetypes in a pan-cancer census. Combes AJ, Samad B, Tsui J, et al. Cell. 2022</a>')),
+                    style="background-color: #cca9a3; "
                 ),
 
-                ui.value_box(
-                    "HuMu Archetypes Translation Dataset",
+                ui.card(
+                    ui.card_header(ui.h2("HuMu Archetypes Translation Dataset", style='color: white; font-weight: bold;')),
                     ui.tags.img(src="quipi_humu_reference.png",
-                                style="height: auto; border: 2px solid #ddd; border-radius: 10px; box-shadow: 5px 5px 15px rgba(0,0,0,0.3);"),
-                                #theme="bg-gradient-teal-yellow",
-                                theme=ui.value_box_theme(bg="#a3c6cc" , fg="#FFFFFF"),
-                    class_="value-box-border"
+                                style="height: auto; border: 2px solid #ddd; border-radius: 10px; box-shadow: 5px 5px 15px rgba(0,0,0,0.3);"
+                                ),
+                            style="background-color: #a3c6cc;"
                     ),
-                ui.value_box(
-                    "HuMu Dataset",
-                    "The HuMu dataset contains high-dimensional cytometry data (CyTOF) of 15 murine models that \
+                ui.card(
+                    ui.card_header(ui.h1("HuMu Dataset", style='color: white; font-weight: bold;')),
+                    ui.h2("The HuMu dataset contains high-dimensional cytometry data (CyTOF) of 15 murine models that \
                         we use to study high level tumor-immune composition, as well as single-cell sequencing data \
                         from 9 of these models that we use to dissect more granular gene expression profiles across \
                         populations and tumor models.",
-                    theme=ui.value_box_theme(bg="#c6cca3" , fg="#FFFFFF"),
-                    showcase_layout="top right",
-                    class_="value-box-border"
+                        style='color: white; font-weight: bold; margin-bottom: 10px;'),
+
+                    style="background-color: #c6cca3;"
                 ),
             ),
         ),
         ui.nav_panel("FAQ / Terminology",
-            ui.card(ui.h1("Terminology"),
+            #ui.card(ui.h1("Terminology",style='font-weight: bold;'),
                     ui.card(
-                        ui.h2("Mouse"),
+                        ui.h2("Mouse",style='font-weight: bold;'),
                         ui.layout_column_wrap(
-                            ui.card(ui.h4("Tumor Line"),
-                                    "Mouse tumor models used in the study",
-                                    #style="background-color: #d4e3fc; color: #333;"
+                            ui.card(ui.h3("Tumor Line",style='font-weight: bold;'),
+                                    ui.h5("Mouse tumor models used in the study"),
+                                    style="background-color: #BDD0D5; color: #333;"
                             ),
-                            ui.card(ui.h4("Compartment"),
-                                    "TME compartments as defined in Combes, Samad et al. Cell 2022. \
+                            ui.card(ui.h3("Compartment",style='font-weight: bold;'),
+                                    ui.h5("TME compartments as defined in Combes, Samad et al. Cell 2022. \
                                     These describe either pooled effector T cells (T cell), Tregs, pooled myeloid cells \
                                     (Myeloid, containing monocytes, macrophages and dendritic cells), Stroma (fibroblasts \
                                     sorted as CD45-CD44+CD90+ in human and defined in mouse as fibroblasts matching the human \
                                     Stroma gene signature) or Tumor (sorted in human as CD45- non-Stroma and identified in mouse \
-                                    scRNAseq as bieng tumor cells according to their DEGs)",
-                                #style="background-color: ##C5A1CE; color: #333;"
+                                    scRNAseq as bieng tumor cells according to their DEGs)"),
+                                style="background-color: #BDD0D5; color: #333;"
                                 
                             )
                         ),
                         ui.layout_column_wrap(
-                            ui.card(ui.h4("Coarse Annotation"),
-                                "Coarse level of annotations made on the mouse scRNAseq data. Describes high level populations.",
-                                #style="background-color: #d4e3fc; color: #333;"
+                            ui.card(ui.h3("Coarse Annotation",style='font-weight: bold;'),
+                                ui.h5("Coarse level of annotations made on the mouse scRNAseq data. Describes high level populations."),
+                                style="background-color: #BDD0D5; color: #333;"
                             ),
-                            ui.card(ui.h4("Fine Annotation"),
-                                "Fine level of annotations made on the mouse scRNAseq data. Describes individual subsets of cells as shown in Figure S2.",
-                                #style="background-color: #d4e3fc; color: #333;"
+                            ui.card(ui.h3("Fine Annotation",style='font-weight: bold;'),
+                                ui.h5("Fine level of annotations made on the mouse scRNAseq data. Describes individual subsets of cells as shown in Figure S2."),
+                                style="background-color: #BDD0D5; color: #333;"
                             )
                         ),
-                    style="background-color: #c6cca3; color: #333;"
+                    #style="background-color: #c6cca3; color: #333;"
                     ),
                     ui.card(
-                        ui.h2("Human"),
+                        ui.h2("Human",style='font-weight: bold;'),
                         ui.layout_column_wrap(
-                            ui.card(ui.h4("Indication"),
-                                    "Tumor indication of ImmunoProfiler patients",
-                                    #style="background-color: #d4e3fc; color: #333;"
+                            ui.card(ui.h3("Indication",style='font-weight: bold;'),
+                                    ui.h5("Tumor indication of ImmunoProfiler patients"),
+                                    style="background-color: #BDD0D5; color: #333;"
                             ),
-                            ui.card(ui.h4("Archetype"),
-                                    "Tumor-immune archetypes as defined in Combes, Samad et al. Cell 2022",
+                            ui.card(ui.h3("Archetype",style='font-weight: bold;'),
+                                    ui.h5("Tumor-immune archetypes as defined in Combes, Samad et al. Cell 2022"),
                                     ui.HTML(f'<a href="{"https://pubmed.ncbi.nlm.nih.gov/34963056/"}" target="_blank">Discovering dominant tumor immune archetypes in a pan-cancer census. Combes AJ, Samad B, Tsui J, et al. Cell. 2022</a>'),
-                                    #style="background-color: #d4e3fc; color: #333;"
+                                    style="background-color: #BDD0D5; color: #333;"
                             )
                         ),
                         ui.layout_column_wrap(
-                            ui.card(ui.h4("Compartment"),
-                                "TME compartments as defined in Combes, Samad et al. Cell 2022. \
+                            ui.card(ui.h3("Compartment",style='font-weight: bold;'),
+                                ui.h5("TME compartments as defined in Combes, Samad et al. Cell 2022. \
                                 These describe either pooled effector T cells (T cell), Tregs, pooled myeloid cells \
                                 (Myeloid, containing monocytes, macrophages and dendritic cells), Stroma (fibroblasts \
                                 sorted as CD45-CD44+CD90+ in human and defined in mouse as fibroblasts matching the human \
                                 Stroma gene signature) or Tumor (sorted in human as CD45- non-Stroma and identified in mouse \
-                                scRNAseq as bieng tumor cells according to their DEGs)",
-                                #style="background-color: #d4e3fc; color: #333;"
+                                scRNAseq as bieng tumor cells according to their DEGs)"),
+                                style="background-color: #BDD0D5; color: #333;"
                             ),
                         ),
-                    style="background-color: #c6cca3"
+                    #style="background-color: #c6cca3"
                     ),
-                style="background-color: #a3c6cc; color: #333;"
+                #style="background-color: #a3c6cc; color: #333;"
                 
-            )
+            #)
         ),
         ui.nav_panel("HuMu Expression Comparison",
             ui.layout_sidebar(
