@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 import quipi_shared as sh
 import gene_factor as gf
 
+import seaborn as sns
+
 
 def box_viol_exprn(transform, x_cat, x_cat_filts, genes, groupby, compartment_multiple):
 
@@ -28,7 +30,7 @@ def box_viol_exprn(transform, x_cat, x_cat_filts, genes, groupby, compartment_mu
         input_arr = input_arr[input_arr[x_cat].isin(x_cat_filts)]
     
         fig = px.box(input_arr, x = x_cat, y = "factor_score", color = group,
-                    color_discrete_map=color, category_orders={x_cat: orders},
+                    color_discrete_map=color, category_orders=sh.quipi_orders,
                     labels=new_cats)
         return fig
 
@@ -129,4 +131,26 @@ def plot_dotplot(genes, groupby, groups, splitby, splits, transform, swap):
     )
 
     
+    return fig
+
+def plot_heatmap(genes, category, category_subset, transform):
+
+    category = sh.categoricals_dict[category]
+
+    if transform == "TPM":
+        df = pd.read_feather("./quipi_data/quipi_raw_tpm.feather", columns=[category] + list(genes))
+    elif transform == "Log2(TPM)":
+        df = pd.read_feather("./quipi_data/quipi_log2_tpm.feather", columns=[category] + list(genes))
+
+    df = df[df[category].isin(category_subset)]
+
+    fig = sns.clustermap(df.groupby(category)[genes].sum(),
+              z_score=1, vmin=-2, vmax=2,cmap='coolwarm')
+
+    #fig.ax_cbar.set_title('Z-Score of gene across ' + category)  
+
+    fig.ax_heatmap.set_xlabel('')
+    fig.ax_heatmap.set_ylabel('')
+    fig.tick_params(axis='y', rotation=0)
+
     return fig

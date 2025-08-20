@@ -74,7 +74,8 @@ with open("./quipi_data/quipi_flow_score_cols.csv", 'r') as file:
 
 cats = ('patient','sample_name','indication', 'archetype', 'sample_type', 'sample_type_cat', 'x_umap1', 'x_umap2')
 non_cats = tuple(set(quipi_flow_columns) - set(cats))
-genes = list(set(quipi_all_columns) - set(non_genes))
+genes_set = set(quipi_all_columns) - set(non_genes)
+genes = list(genes_set)
 
 categorical_data = pd.read_feather("./quipi_data/quipi_raw_tpm.feather", columns=cats)
 
@@ -156,6 +157,30 @@ color_dict = {"indication" : indic_to_color,
               "compartment" : compartment_colors,
               "archetype" : colors_pancan
               }
+
+def process_gene_text_input(input_text):
+    input_text = input_text.split("\n")
+
+    text_genes = []
+    for line in input_text:
+        line = line.strip().replace("\"", "")
+
+        if "\t" in line:
+            curr_genes = line.split("\t")
+        elif "," in line:
+            curr_genes = line.split(",")
+        elif " " in line:
+            curr_genes = line.split(" ")
+        else:
+            curr_genes = [line]
+
+        
+        for gene in curr_genes:
+            gene = gene.strip()
+            if gene and gene in genes_set:
+                text_genes.append(gene)
+
+    return text_genes
 
 
 def plot_cancer_glossary_table():

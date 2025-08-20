@@ -25,9 +25,8 @@ gear_fill = ui.HTML(
 )
 
 
-quipi_tabs_mapped_to_gene_inputs = {"Boxplots" : ["box_viol_gene_input"],
+quipi_tabs_mapped_to_gene_inputs = {"Boxplot" : ["box_viol_gene_input"],
                               "Gene Expresssion Bar Plots" : ["gene_expr_bar_genes"],
-                              "Dotplots" : ["gex_dot_genes"],
                               "Correlation Matrix" : ["corr_gene_input"],
                               "Compartment Correlation Matrix" : ["comp_corr_mat_genes"],
                               "One-Vs-All Correlation Table" : ["corr_cat_gene_input"],
@@ -35,7 +34,7 @@ quipi_tabs_mapped_to_gene_inputs = {"Boxplots" : ["box_viol_gene_input"],
                               "PanCan Gene-Signature Overlay" : ["gene_factor_genes"],
                               "Feature Score Ranked DGE" : ["dge_highlight_genes"],
                               "Gene-Signature Score Ranked DGE" : ["fs_dge_genes","fs_dge_highlight_genes"],
-                              "Query Gene Expression" : ["gene_expr_query_genes"],
+                              "Query Data" : ["gene_expr_query_genes"],
                               "Cross-Compartment Correlation Table": ["cross_comp_corr_cat_gene_input"],
 
 }
@@ -57,6 +56,11 @@ app_ui = ui.page_fluid(
             }
             .navbar { /* This targets the navset_bar */
                 background-color: #1a1807;
+            }
+            /* Change the link color to white and make it bold on hover */
+            .navbar .nav-link:hover {
+                color: #FFFFFF !important; /* White color on hover */
+                font-weight: bold !important; /* Make the text bold on hover */
             }
     """),
 
@@ -142,9 +146,8 @@ app_ui = ui.page_fluid(
         ),
 
         ##### GENE EXPRESSION
-        ui.nav_menu("Gene Expression",
     
-            ui.nav_panel("Boxplots",  
+            ui.nav_panel("Boxplot",  
                 ui.layout_sidebar(
                     ui.sidebar(
                        ui.h4("Boxplot"),
@@ -188,15 +191,24 @@ app_ui = ui.page_fluid(
                     ui.card(ui.card_body(output_widget("expression_box_viol")),
                             ui.card_footer("Click button in the bottom right for fullscreen view."),
                             full_screen=True),
+
                     bg=panel_color
                 ),
             ),
 
-            ui.nav_panel("Dotplots",
+            ui.nav_panel("Heatmap",
+                         
                 ui.layout_sidebar(
                     ui.sidebar(
-                        ui.h4("Dotplot"),
-                        ui.card(ui.input_selectize("gex_dot_genes", "Choose Genes to plot:", [], multiple=True)),
+                        ui.h4("Heatmap"),
+                        
+                        ui.card(
+                            ui.input_text_area(
+                            "gex_heatmap_text_genes",
+                            "Input Genes:",
+                            rows=8
+                            ),
+                        ),
 
                         ui.card(
                             ui.popover(
@@ -204,40 +216,34 @@ app_ui = ui.page_fluid(
                                     gear_fill,
                                     style="position:absolute; top: 5px; right: 7px;",
                                 ),
-                                ui.input_selectize("gex_dot_groupby_subset", "Subset Groupby Categories:", [], multiple=True,remove_button=True,options={"plugins": ["clear_button"]}),
+                                ui.input_selectize("gex_heatmap_groupby_subset", "Subset Categories:", [], multiple=True,remove_button=True,options={"plugins": ["clear_button"]}),
                                 placement="right",
                             ),
-                            ui.input_selectize("gex_dot_groupby", "Group by:", list(qsh.categorical_choices.keys())),
+                            ui.input_selectize("gex_heatmap_groupby", "Choose Categorical:", list(qsh.categorical_choices.keys())),
                         ),
-
-                        ui.card(
-                            ui.popover(
-                                ui.span(
-                                    gear_fill,
-                                    style="position:absolute; top: 5px; right: 7px;",
-                                ),
-                                ui.input_selectize("gex_dot_splitby_subset", "Subset Splitby Categories:", [], multiple=True,remove_button=True,options={"plugins": ["clear_button"]}), 
-                            ),
-                            ui.input_selectize("gex_dot_splitby", "Split by:", ["---"] + list(qsh.categorical_choices.keys()), selected="---"),
-                        ),
-                        ui.card(ui.input_selectize("gex_dot_transform", "TPM Transformation:", ["Log2(TPM)", "TPM"], selected = "TPM")),
-                        ui.card(ui.input_switch("gex_dot_swap", "Swap Axes")),
-                        ui.input_action_button("gex_dot_run", "RUN"),
+                        
+                        ui.card(ui.input_selectize("gex_heatmap_transform", "TPM Transformation:", ["Log2(TPM)", "TPM"], selected = "TPM")),
+                        ui.input_action_button("gex_heatmap_run", "RUN"),
                         bg=panel_color
                     ),
-                    ui.card(output_widget("gex_dotplot", fill=True), ui.card_footer("Click button in the bottom right for fullscreen view."),full_screen=True)   
-                )
+                    ui.card(ui.output_plot("gex_heatmap", fill=True), ui.card_footer("Click button in the bottom right for fullscreen view."),full_screen=True),
+                    style="min-height: 700px;",
+                    bg=panel_color
+                ),
             ),
 
-            ui.nav_panel("Query Gene Expression",
+            ui.nav_panel("Query Data",
                 ui.layout_sidebar(
                     ui.sidebar(
                         ui.h4("IPI Data Query"),
-                        ui.card(ui.input_selectize("gene_expr_query_genes",
-                                        "Select Genes:",
-                                        [],
-                                        multiple=True,
-                                        options = {"server":True})),
+
+                        ui.card(
+                            ui.input_text_area(
+                                "gene_expr_query_genes",
+                                "Input Genes:",
+                                rows=4
+                            ),
+                        ),
                         ui.card(ui.input_selectize("query_indication",
                                             "Select Indications:",
                                             choices=qsh.indications,
@@ -268,11 +274,10 @@ app_ui = ui.page_fluid(
                     ui.card(ui.output_data_frame("gene_expr_query"), ui.card_footer("Click button in the bottom right for fullscreen view."),full_screen=True),
                     bg=panel_color
                 ),
-            )
-        ), # END GENE EXPRESSION MENU
+            ), # END GENE EXPRESSION MENU
 
         # Pairwise correlation plot between user-defined genes.
-        ui.nav_menu("Correlation Plots", 
+        ui.nav_menu("Correlation", 
             ui.nav_panel("Correlation Matrix",
                 ui.h4("Explore the correlation of genes across the entire IPI dataset."),
                 ui.layout_sidebar(
@@ -432,7 +437,7 @@ app_ui = ui.page_fluid(
             )
         ), # END CORRELATION MENU
 
-        ui.nav_menu("PanCan Archetype UMAP",
+        ui.nav_menu("PanCan Archetypes",
             # Tab where user can select multiple eachs and view their expression overlayed on the individual
             # PanCan UMAPs
             ui.nav_panel("PanCan UMAP Gene Expression",
@@ -493,7 +498,7 @@ app_ui = ui.page_fluid(
         ), # END PANCAN MENU
 
         # BEGIN DGE MENU
-        ui.nav_menu("Differential Gene Expression Tests",
+        ui.nav_menu("Differential Gene Expression",
                     
             ui.nav_panel("Feature Score Ranked DGE",
                 ui.layout_sidebar(
@@ -622,7 +627,7 @@ app_ui = ui.page_fluid(
         #ui.nav_control(ui.a("QuIPI HuMu", href="https://quipi.org/app/quipi_humu", class_="nav-link")),
     ),
     ui.nav_spacer(),
-    #ui.nav_control(ui.a("QuIPI HuMu", href="https://quipi.org/app/quipi_humu", class_="nav-link")),
+    ui.nav_control(ui.a("GitHub", href="https://github.com/hwismer/QuIPI", class_="nav-link",target="_blank")),
     id = "quipi_top_nav",
     theme=theme.cosmo,
     bg = "#1a1807"
@@ -721,38 +726,38 @@ def server(input, output, session):
 
         return fig
     
-    ##### DOTPLOTS
+    ##### HEATMAP
     
     @reactive.effect
-    @reactive.event(input.gex_dot_groupby)  # Trigger when category changes
-    def update_dotplot_group_selectize():
-        x_cat = input.gex_dot_groupby()
+    @reactive.event(input.gex_heatmap_groupby)  # Trigger when category changes
+    def update_heatmap_group_selectize():
+        x_cat = input.gex_heatmap_groupby()
         cat_opts = qsh.categorical_choices[x_cat]
-        ui.update_selectize("gex_dot_groupby_subset", choices=cat_opts, selected=cat_opts)
+        ui.update_selectize("gex_heatmap_groupby_subset", choices=cat_opts, selected=cat_opts)
 
 
     @reactive.effect
-    @reactive.event(input.gex_dot_splitby)  # Trigger when category changes
-    def update_dotplot_group_selectize():
-        split_cat = input.gex_dot_splitby()
+    @reactive.event(input.gex_heatmap_splitby)  # Trigger when category changes
+    def update_heatmap_group_selectize():
+        split_cat = input.gex_heatmap_splitby()
         if split_cat != "---":
             cat_opts = qsh.categorical_choices[split_cat]
-            ui.update_selectize("gex_dot_splitby_subset", choices=cat_opts, selected=cat_opts)
+            ui.update_selectize("gex_heatmap_splitby_subset", choices=cat_opts, selected=cat_opts)
         else:
-            ui.update_selectize("gex_dot_splitby_subset", choices=[])
+            ui.update_selectize("gex_heatmap_splitby_subset", choices=[])
 
-    @render_widget
-    @reactive.event(input.gex_dot_run)
-    def gex_dotplot():
-        genes = list(input.gex_dot_genes())
-        groupby = input.gex_dot_groupby()
-        groups = input.gex_dot_groupby_subset()
-        splitby = input.gex_dot_splitby()
-        splits = input.gex_dot_splitby_subset()
-        transform = input.gex_dot_transform()
-        swap = input.gex_dot_swap()
+    @render.plot
+    @reactive.event(input.gex_heatmap_run)
+    def gex_heatmap():
+        genes = qsh.process_gene_text_input(input.gex_heatmap_text_genes())
+        groupby = input.gex_heatmap_groupby()
+        groups = input.gex_heatmap_groupby_subset()
+        #splitby = input.gex_heatmap_splitby()
+        #splits = input.gex_heatmap_splitby_subset()
+        transform = input.gex_heatmap_transform()
+        #swap = input.gex_heatmap_swap()
 
-        return bv.plot_dotplot(genes, groupby, groups, splitby, splits, transform, swap)
+        return bv.plot_heatmap(genes, groupby, groups, transform)
 
         
     
@@ -761,7 +766,7 @@ def server(input, output, session):
     @reactive.calc
     @reactive.event(input.gene_expr_query_run)
     def gene_expr_query_backend():
-        genes = input.gene_expr_query_genes()
+        genes = qsh.process_gene_text_input(input.gene_expr_query_genes())
         indications = input.query_indication()
         compartments = input.query_compartment()
         archetypes = input.query_archetype()
