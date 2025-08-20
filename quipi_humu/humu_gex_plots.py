@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 import humu_shared as hsh
 import plotly.graph_objects as go
+from scipy.stats import zscore
 
 def plot_sc_box(gene, x_cat, x_cat_subset, groupby, splitby, sample_aggr):
     cols = {gene, x_cat, groupby, splitby, "Mouse"} - {"---"}
@@ -42,7 +43,7 @@ def plot_sc_box(gene, x_cat, x_cat_subset, groupby, splitby, sample_aggr):
     return fig
 
 
-def plot_dotplot(genes, groupby, groups, splitby, splits, swap):
+def plot_dotplot(genes, groupby, groups, splitby, splits, swap, scale):
 
     CUTOFF=0
 
@@ -77,7 +78,11 @@ def plot_dotplot(genes, groupby, groups, splitby, splits, swap):
     dot_color_df = (df.groupby("group_splits", observed=True)[genes].mean()).stack().reset_index()
     dot_color_df.columns = ['Category', 'Gene', 'Color']
 
+
     merged_df = pd.merge(dot_size_df, dot_color_df, on=['Category', 'Gene'])
+
+    #merged_df["Scaled_Color"] = merged_df.groupby("Gene")["Color"].transform(zscore)
+
 
     
     all_y_ticks = merged_df['Category'].unique()
@@ -88,17 +93,27 @@ def plot_dotplot(genes, groupby, groups, splitby, splits, swap):
     else:
         x_cat = "Category"
         y_cat = "Gene"
-        
+    
+    if scale is True:
+        merged_df["Scaled_Color"] = merged_df.groupby("Gene")["Color"].transform(zscore)
+        color = "Scaled_Color"
+        range_color = [-2.5,2.5]
+    else:
+        color = "Color"
+        range_color=None
     
     fig = px.scatter(
         merged_df,
         x=x_cat,
         y=y_cat,
         size='Size',
-        color='Color',
-        color_continuous_scale = ["blue","white","red"],
-        labels = {"Color":"Mean Expression In Group", "Size" : "Fraction of cells in group"},
-        size_max=15
+        color=color,
+        color_continuous_scale = ["blue","lightgray","red"],
+        labels = {"Color":"Mean Expression In Group", 
+                  "Size" : "Fraction of cells in group",
+                  "Scaled_Color":"Scaled Mean Expression In Group"},
+        size_max=15,
+        range_color=range_color
     )
     
     fig.update_layout(

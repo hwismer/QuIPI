@@ -261,7 +261,9 @@ app_ui = ui.page_fluid(
                             ),
                             ui.input_selectize("humu_gex_dot_splitby", "Split By:", ["---"] + hsh.categoricals_opts, selected="---"),
                         ),
-                        ui.card(ui.input_switch("humu_gex_dot_swap", "Swap Axes", value=False)),
+                        ui.card(ui.input_switch("humu_gex_dot_swap", "Swap Axes", value=False),
+                                ui.input_switch("humu_gex_dot_scale", "Z-Score Genes", value=False)
+                        ),
                         ui.input_action_button("humu_gex_dot_run", "RUN"),
                         bg=panel_color
                     ),
@@ -400,7 +402,8 @@ app_ui = ui.page_fluid(
                             ),
                             ui.input_selectize("humu_gex_dot_splitby_example", "Split By:", ["---"] + hsh.categoricals_opts, selected="Tumor Line"),
                         ),
-                        ui.card(ui.input_switch("humu_gex_dot_swap_example", "Swap Axes", False)),
+                        ui.card(ui.input_switch("humu_gex_dot_swap_example", "Swap Axes", False),
+                                ui.input_switch("humu_gex_dot_scale_example", "Z-Score Genes", False)),
                         ui.input_action_button("humu_gex_dot_run_example", "RUN"),
                         bg=panel_color
                     ),
@@ -523,8 +526,9 @@ def server(input, output, session):
         splitby = input.humu_gex_dot_splitby()
         splits = input.humu_gex_dot_splits()
         swap = input.humu_gex_dot_swap()
+        scale = input.humu_gex_dot_scale()
 
-        fig = hxp.plot_dotplot(genes, groupby, groups, splitby, splits, swap)
+        fig = hxp.plot_dotplot(genes, groupby, groups, splitby, splits, swap, scale)
         return fig
 
 
@@ -665,8 +669,9 @@ def server(input, output, session):
         splitby = input.humu_gex_dot_splitby_example()
         splits = input.humu_gex_dot_splits_example()
         swap = input.humu_gex_dot_swap_example()
+        scale = input.humu_gex_dot_scale_example()
 
-        fig = hxp.plot_dotplot(genes, groupby, groups, splitby, splits, swap)
+        fig = hxp.plot_dotplot(genes, groupby, groups, splitby, splits, swap, scale)
         return fig
 
 
