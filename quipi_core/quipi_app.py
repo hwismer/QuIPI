@@ -226,8 +226,8 @@ app_ui = ui.page_fluid(
                         ui.input_action_button("gex_heatmap_run", "RUN"),
                         bg=panel_color
                     ),
-                    ui.card(ui.output_plot("gex_heatmap", fill=True), ui.card_footer("Click button in the bottom right for fullscreen view."),full_screen=True),
-                    style="min-height: 700px;",
+                    ui.output_plot("gex_heatmap"),
+                    #style="min-height: 1000px;",
                     bg=panel_color
                 ),
             ),

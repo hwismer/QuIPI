@@ -2,6 +2,7 @@ import plotly.express as px
 import pandas as pd
 import scanpy as sc
 import matplotlib.pyplot as plt
+import numpy as np
 
 import quipi_shared as sh
 import gene_factor as gf
@@ -137,6 +138,8 @@ def plot_heatmap(genes, category, category_subset, transform):
 
     category = sh.categoricals_dict[category]
 
+    genes = list(set(genes))
+
     if transform == "TPM":
         df = pd.read_feather("./quipi_data/quipi_raw_tpm.feather", columns=[category] + list(genes))
     elif transform == "Log2(TPM)":
@@ -144,13 +147,28 @@ def plot_heatmap(genes, category, category_subset, transform):
 
     df = df[df[category].isin(category_subset)]
 
-    fig = sns.clustermap(df.groupby(category)[genes].sum(),
-              z_score=1, vmin=-2, vmax=2,cmap='coolwarm')
+    fig = sns.clustermap(df.groupby(category)[genes].sum().T,
+              z_score=0, vmin=-2, vmax=2,cmap='coolwarm')
+    
 
-    #fig.ax_cbar.set_title('Z-Score of gene across ' + category)  
+    fig.ax_heatmap.set_yticks(np.arange(len(genes)) + 0.5)
+    fig.ax_heatmap.set_yticklabels(genes)  
 
     fig.ax_heatmap.set_xlabel('')
     fig.ax_heatmap.set_ylabel('')
     fig.tick_params(axis='y', rotation=0)
+
+    plt.subplots_adjust(
+        left=.01,
+        right=.9,
+        top=.95,
+        bottom=.2
+    )
+
+    cbar_pos = [0.01, 0.8, 0.05, 0.1]  # [left, bottom, width, height]
+    fig.ax_cbar.set_position(cbar_pos)
+    fig.ax_cbar.set_title('Z-Score', fontdict={"fontsize":10})
+
+    #plt.tight_layout()
 
     return fig
