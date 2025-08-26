@@ -227,7 +227,6 @@ app_ui = ui.page_fluid(
                         bg=panel_color
                     ),
                     ui.output_plot("gex_heatmap"),
-                    #style="min-height: 1000px;",
                     bg=panel_color
                 ),
             ),

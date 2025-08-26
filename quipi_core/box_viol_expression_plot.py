@@ -146,13 +146,17 @@ def plot_heatmap(genes, category, category_subset, transform):
         df = pd.read_feather("./quipi_data/quipi_log2_tpm.feather", columns=[category] + list(genes))
 
     df = df[df[category].isin(category_subset)]
+    df = df.groupby(category)[genes].median().T
 
-    fig = sns.clustermap(df.groupby(category)[genes].sum().T,
-              z_score=0, vmin=-2, vmax=2,cmap='coolwarm')
-    
+    print(df.std(axis=1) > 0)
 
-    fig.ax_heatmap.set_yticks(np.arange(len(genes)) + 0.5)
-    fig.ax_heatmap.set_yticklabels(genes)  
+    df = df[df.std(axis=1) > 0]
+
+    print(df)
+
+    fig = sns.clustermap(df, vmin=-2, vmax=2, cmap='coolwarm',
+                         z_score=0,
+                         xticklabels=True, yticklabels=True)
 
     fig.ax_heatmap.set_xlabel('')
     fig.ax_heatmap.set_ylabel('')
@@ -165,10 +169,8 @@ def plot_heatmap(genes, category, category_subset, transform):
         bottom=.2
     )
 
-    cbar_pos = [0.01, 0.8, 0.05, 0.1]  # [left, bottom, width, height]
+    cbar_pos = [0.1, 0.85, 0.05, 0.1]  # [left, bottom, width, height]
     fig.ax_cbar.set_position(cbar_pos)
-    fig.ax_cbar.set_title('Z-Score', fontdict={"fontsize":10})
-
-    #plt.tight_layout()
+    fig.ax_cbar.set_title('Gene Z-Score Using Median', fontdict={"fontsize":10})
 
     return fig
