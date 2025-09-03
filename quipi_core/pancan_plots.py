@@ -63,12 +63,12 @@ def plot_pancan_archetypes():
 
     fig = px.scatter(sh.categorical_data[sh.categorical_data["archetype"] != "Unclassified"], x = "x_umap1", y="x_umap2", 
                          color="archetype", color_discrete_map=sh.colors_pancan)
-    fig.update_traces(marker=dict(size=12))
+    fig.update_traces(marker=dict(size=12),)
     fig.update_layout(legend_title_text = "Archetype",)
     fig.update_layout(template = "simple_white",
                       legend=dict(
                         y=0.5,  # Center vertically
-                        font=dict(size=18)  # Increase font size
+                        font=dict(size=12)  # Increase font size
                         ),
     )
     fig.update_yaxes(visible=False)

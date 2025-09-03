@@ -148,15 +148,14 @@ def plot_heatmap(genes, category, category_subset, transform):
     df = df[df[category].isin(category_subset)]
     df = df.groupby(category)[genes].median().T
 
-    print(df.std(axis=1) > 0)
-
     df = df[df.std(axis=1) > 0]
 
-    print(df)
 
     fig = sns.clustermap(df, vmin=-2, vmax=2, cmap='coolwarm',
                          z_score=0,
-                         xticklabels=True, yticklabels=True)
+                         xticklabels=True, yticklabels=True,
+                         #figsize=(10, max(20, 1.25 * len(genes))),
+                         dendrogram_ratio=(0.1, 0.05))
 
     fig.ax_heatmap.set_xlabel('')
     fig.ax_heatmap.set_ylabel('')
@@ -165,12 +164,61 @@ def plot_heatmap(genes, category, category_subset, transform):
     plt.subplots_adjust(
         left=.01,
         right=.9,
-        top=.95,
-        bottom=.2
+        top=1,
+        bottom=.05
     )
 
-    cbar_pos = [0.1, 0.85, 0.05, 0.1]  # [left, bottom, width, height]
+    cbar_pos = [0.025, 0.95, 0.025, 0.025]  # [left, bottom, width, height]
     fig.ax_cbar.set_position(cbar_pos)
-    fig.ax_cbar.set_title('Gene Z-Score Using Median', fontdict={"fontsize":10})
+    fig.ax_cbar.set_title('Z-Score', fontdict={"fontsize":10})
+    fig.ax_heatmap.set_yticklabels(fig.ax_heatmap.get_yticklabels(), size = 8)
+
+    fig
 
     return fig
+
+def plot_ridgeline():
+
+    sns.set_theme(style="white", rc={"axes.facecolor": (0, 0, 0, 0)})
+
+    df = pd.read_feather("/Users/hwismer/Documents/QuIPI/quipi_data/quipi_log2_tpm.feather")
+
+    genes = ["C1QA", "FOXP3", "FOS", "JUNB", "CXCL3", "NCAM1", "DLK1", "NTRK3", "IGF2", "PAPPA2",]
+             #'RAB33A','FFAR4','SERPINF2','GLYAT','SYT6','LINC02694','POU3F3','EMX1','LCP2','GBP3','APOBEC3H','CACYBP','CSF1',
+             #'TNFSF14','CCL4L2','BPGM','C3','DNAJB4','CD200R1','ULBP1']
+    #genes = ["C1QA", "FOXP3", "JUNB"]
+    category = "archetype"
+    sub_df = df[genes + [category]]
+
+    tidy = pd.melt(sub_df,
+          id_vars=category,
+          value_vars=genes,
+          var_name='Gene',
+          value_name='Expression')
+    
+
+    g = sns.FacetGrid(tidy, row = "Gene", hue=category, aspect=1, height=3)
+
+    g.map(sns.kdeplot, "Expression",
+        bw_adjust=1, clip_on=False, 
+        fill=True, alpha=.5, linewidth=1.5)
+
+    #g.refline(y=0, linewidth=2, linestyle="-", color=None, clip_on=False)
+
+    for ax, row_label in zip(g.axes.flat, g.row_names):
+        ax.text(0, .2, row_label, fontweight="bold", color=None,
+                ha="left", va="center", transform=ax.transAxes)
+        
+    g.figure.subplots_adjust(hspace=-.25)
+    #g.figure.subplots_adjust(top=1.1, bottom=.05)
+
+    g.add_legend()
+    g.set_titles("")
+    g.set(yticks=[], ylabel="")
+    g.despine(bottom=False, left=True)
+    #g.figure.set_size_inches(fixed_aspect * fixed_height, len(genes) * 5)
+    #plt.tight_layout()
+    #plt.subplots_adjust(right=.9)
+    g.add_legend(bbox_to_anchor=(1, 0.5))
+
+    return g
