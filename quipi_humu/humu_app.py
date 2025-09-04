@@ -31,48 +31,48 @@ panel_color = "#f0f0f0"
 
 
 # Define the UI
-app_ui = ui.page_fluid(
+app_ui = ui.page_navbar(
+    # ui.page_fluid(
 
-    ui.tags.style("""
-        body { background-color: #a1aace; }  /* Background color */
-        .nav-link { font-size: 20px;
-                    color: white;
-        }
-        .navbar-nav .nav-link.active {
-            color: white !important;  /* Keep text white when selected */
-        }
+    # ui.tags.style("""
+    #     body { background-color: #a1aace; }  /* Background color */
+    #     .nav-link { font-size: 20px;
+    #                 color: white;
+    #     }
+    #     .navbar-nav .nav-link.active {
+    #         color: white !important;  /* Keep text white when selected */
+    #     }
                   
-        .sidebar { /* This is a common class name for Shiny sidebars */
-                  background-color: white !important; /* !important ensures it overrides other rules */
-        }
-        .value-box-border {
-            border: 5px solid #FFFFFF; /* Example border: 2px solid blue-ish color */
-            padding: 0px; /* Add some padding inside the box */
-            border-radius: 5px; /* Slightly rounded corners */
-            margin: 2px; /* Add a small margin around the box for spacing */
-        }
-        .value-box-title {
-            font-size: 1.2e !important; /* Increase font size, e.g., 1.2 times the default */
-            font-weight: bold; /* Make it bold for emphasis */
-            color: #FFFFF; /* Optional: Change color slightly */
-        }          
-    """),
-    ui.head_content(
-        ui.tags.link(
-            rel="icon", type="image/png", sizes="64x64", href="favicon-32x32.png"
-        ),
-    ),
-    ui.tags.div(
-        ui.tags.div(
-            ui.tags.img(src="humu.png", style="width: 90px; margin-left: 10px; margin-top: 18px; margin-bottom: 8px; border: 3px solid; border-radius: 8px;",class_="my-image"),  # Left-aligned image
-            ui.tags.span("QuIPI" + "\n" + "HuMu", style="font-size: 35px; font-weight: bold;"),
-            style="display: flex; align-items: flex-end; gap: 10px;" # Flexbox for horizontal alignment
-        ),
-        style="padding-bottom: 5px;"
-    ),
-    ui.page_navbar(
+    #     .sidebar { /* This is a common class name for Shiny sidebars */
+    #               background-color: white !important; /* !important ensures it overrides other rules */
+    #     }
+    #     .value-box-border {
+    #         border: 5px solid #FFFFFF; /* Example border: 2px solid blue-ish color */
+    #         padding: 0px; /* Add some padding inside the box */
+    #         border-radius: 5px; /* Slightly rounded corners */
+    #         margin: 2px; /* Add a small margin around the box for spacing */
+    #     }
+    #     .value-box-title {
+    #         font-size: 1.2e !important; /* Increase font size, e.g., 1.2 times the default */
+    #         font-weight: bold; /* Make it bold for emphasis */
+    #         color: #FFFFF; /* Optional: Change color slightly */
+    #     }          
+    # """),
+    # ui.head_content(
+    #     ui.tags.link(
+    #         rel="icon", type="image/png", sizes="64x64", href="favicon-32x32.png"
+    #     ),
+    # ),
+    # ui.tags.div(
+    #     ui.tags.div(
+    #         ui.tags.img(src="humu.png", style="width: 90px; margin-left: 10px; margin-top: 18px; margin-bottom: 8px; border: 3px solid; border-radius: 8px;",class_="my-image"),  # Left-aligned image
+    #         ui.tags.span("QuIPI" + "\n" + "HuMu", style="font-size: 35px; font-weight: bold;"),
+    #         style="display: flex; align-items: flex-end; gap: 10px;" # Flexbox for horizontal alignment
+    #     ),
+    #     style="padding-bottom: 5px;"
+    # ),
 
-        ui.nav_panel("Home",
+        ui.nav_panel(ui.tags.img(src="humu_logo.png", style="height: 70px;"),
             ui.layout_column_wrap(
                 ui.card(
                     ui.card_header(ui.h1("What is HuMu?", style='color: white; font-weight: bold;')),
@@ -444,10 +444,32 @@ app_ui = ui.page_fluid(
     ui.nav_spacer(),
     #ui.nav_control(ui.a("QuIPI HuMu", href="https://quipi.org/app/quipi", class_="nav-link")),
     id = "humu_top_nav",
-    theme=theme.cosmo,
-    bg = "#1a1807"
+    header=ui.tags.div(
+        ui.tags.style(
+             """
+            .navbar-nav {
+              display: flex;
+              align-items: center; /* This is the key line for vertical centering */
+              width: 100%;
+              list-style: none;
+              padding: 0;
+            }
+            .nav-item {
+              margin: 0 15px;
+            }
+            body {
+              background-color: #a1aace; /* Your desired navbar background color */
+            }
+            .nav-link { font-size: 16px;
+                    color: black;
+            }
+            """
+        ),
+    ),
+    #theme=theme.cosmo,
+    #bg = "#1a1807"
     )
-)
+#)
 
 def server(input, output, session):
 

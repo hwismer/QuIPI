@@ -111,7 +111,7 @@ def plot_dotplot(genes, groupby, groups, splitby, splits, swap, scale):
         color_continuous_scale = ["blue","lightgray","red"],
         labels = {"Color":"Mean Expression In Group", 
                   "Size" : "Fraction of cells in group",
-                  "Scaled_Color":"Scaled Mean Expression In Group"},
+                  "Scaled_Color":"Z-Score"},
         size_max=15,
         range_color=range_color
     )
