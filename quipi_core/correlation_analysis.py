@@ -5,6 +5,8 @@ import plotly.express as px
 import scipy
 
 
+# Main correlation visualization function
+# User specifies all the categories they want to look in. Simplest correlation function.
 def gene_correlation_heatmap(genes, indications, method, compartments, archetypes, tissues, transform):
 
     if transform == "TPM":
@@ -40,6 +42,8 @@ def gene_correlation_heatmap(genes, indications, method, compartments, archetype
 
     return fig
 
+
+#
 def compartment_correlation_heatmap(genes, compartment1, compartment2, transform, method, indications, tissues, archetypes):
 
     if transform == "TPM":
@@ -111,51 +115,58 @@ def compartment_correlation_heatmap(genes, compartment1, compartment2, transform
         return fig
 
 
-def gene_corr_df():
-    genes = list(input.corr_gene_input())
-    indications = input.corr_indication()
-    method = sh.corr_methods[input.corr_method_input()]
-    compartments = input.corr_compartment()
-    archetypes = input.corr_archetype()
-    tissues = [sh.tissue_dict[tis] for tis in input.corr_tissue()]
+# Unused
+# def gene_corr_df():
+#     genes = list(input.corr_gene_input())
+#     indications = input.corr_indication()
+#     method = sh.corr_methods[input.corr_method_input()]
+#     compartments = input.corr_compartment()
+#     archetypes = input.corr_archetype()
+#     tissues = [sh.tissue_dict[tis] for tis in input.corr_tissue()]
 
-    transform = input.corr_transform()
+#     transform = input.corr_transform()
 
-    input_arr = sh.transformations[transform]
-    input_arr = input_arr[input_arr["indication"].isin(indications)]
-    input_arr = input_arr[input_arr["compartment"].isin(compartments)]
-    input_arr = input_arr[input_arr["archetype"].isin(archetypes)]
-    input_arr = input_arr[input_arr["sample_type_cat"].isin(tissues)]
-    input_arr = input_arr[genes]
+#     input_arr = sh.transformations[transform]
+#     input_arr = input_arr[input_arr["indication"].isin(indications)]
+#     input_arr = input_arr[input_arr["compartment"].isin(compartments)]
+#     input_arr = input_arr[input_arr["archetype"].isin(archetypes)]
+#     input_arr = input_arr[input_arr["sample_type_cat"].isin(tissues)]
+#     input_arr = input_arr[genes]
 
-    return input_arr
-
-
-def categorical_correlation_table(gene,category,categories,range,progress):
+#     return input_arr
 
 
-    log2_df = pd.read_feather("./quipi_data/quipi_log2_tpm.feather")
-    log2_df = log2_df[log2_df[sh.categoricals_dict[category]].isin(categories)][sh.genes]
 
-    df = pd.DataFrame()
-    genes,corrs,p_values = [],[],[]
 
-    for count, gene2 in enumerate(log2_df.columns):
-        if gene != gene2:
-            corr, p_value = scipy.stats.spearmanr(log2_df[gene].astype("float32"), log2_df[gene2].astype("float32"), nan_policy="omit")
-            if corr >= range[0] and corr <= range[1]:
-                genes.append(gene2)
-                corrs.append(corr)
-                p_values.append(p_value)
-        progress.set(count, message = "Calculating")
+##### Categorical correlation table (currently not implemented).
+# User chooses a category (compartment, archetype, etc) and correlations calculated for a gene within that category.
+# def categorical_correlation_table(gene,category,categories,range,progress):
 
-    df['Gene'] = genes
-    df['Spearman R'] = corrs
-    df['P-Value'] = p_values
+#     log2_df = pd.read_feather("./quipi_data/quipi_log2_tpm.feather")
+#     log2_df = log2_df[log2_df[sh.categoricals_dict[category]].isin(categories)][sh.genes]
+
+#     df = pd.DataFrame()
+#     genes,corrs,p_values = [],[],[]
+
+#     for count, gene2 in enumerate(log2_df.columns):
+#         if gene != gene2:
+#             corr, p_value = scipy.stats.spearmanr(log2_df[gene].astype("float32"), log2_df[gene2].astype("float32"), nan_policy="omit")
+#             if corr >= range[0] and corr <= range[1]:
+#                 genes.append(gene2)
+#                 corrs.append(corr)
+#                 p_values.append(p_value)
+#         progress.set(count, message = "Calculating")
+
+#     df['Gene'] = genes
+#     df['Spearman R'] = corrs
+#     df['P-Value'] = p_values
 
             
-    return df.sort_values(["Spearman R"], ascending=False) 
+#     return df.sort_values(["Spearman R"], ascending=False) 
 
+
+# Calculates correlations for specified genes in compartment1 with all genes in each compartment of compartment2
+# Only does compartment right now, but could potentially integrate with the categorical correlation function above?
 def cross_compartment_correlation_table(genes, compartment1, compartment2, range, transform, method, progress):
 
     if transform == "TPM":

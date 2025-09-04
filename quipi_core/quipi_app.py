@@ -6,21 +6,19 @@ px.defaults.template = "simple_white"
 from shinywidgets import output_widget, render_widget 
 
 import quipi_shared as qsh
-#import humu_shared as hsh
 import pandas as pd
 from io import StringIO
 
 import ranked_patient_dge as rpd
 import gene_factor as gf
-import box_viol_expression_plot as bv
+import expression_plots as xp
 import pancan_plots as pp
 import correlation_analysis as corr
 from pathlib import Path
 
 from faicons import icon_svg
 
-#import humu_flow_boxplot as hfb
-#import humu_gex_plots as hxp
+
 
 gear_fill = ui.HTML(
     '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-gear-fill" viewBox="0 0 16 16"><path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/></svg>'
@@ -43,8 +41,6 @@ quipi_tabs_mapped_to_gene_inputs = {"Boxplot" : ["box_viol_gene_input"],
 
 panel_color = "#f0f0f0"
 input_min_height = 200
-#sidebar_color = "#8DC8AF"
-#panel_color = "#BDD0D5"
 
 
 # Define the UI
@@ -817,50 +813,41 @@ app_ui = ui.page_navbar(
 
 def server(input, output, session):
 
+    # Keep track of which tabs have been visited already to avoid repeatedly having to load
+    # input selectize gene lists into the tab. 
     quipi_tabs_visited = []
 
-    ##### QUIPI
 
+    ##### About The Data Plots
+
+    # Cancery glossary table with indication and abbreviations
     @render_widget
     def cancer_glossary():
         return qsh.plot_cancer_glossary_table()
     
+    # Bar chart of proportions of each indication
     @render_widget
     def plot_indication_breakdown():
         return qsh.plot_indication_breakdown()
     
+    # Plots the pancan umap
     @render_widget
     def pancan_archetypes_home():
         fig = pp.plot_pancan_archetypes()
         fig.update_layout(template = "simple_white")
         return fig
     
+    # Plots the bar chart of proportions of each archetype
     @render_widget
     def pancan_archetype_breakdown():
         return qsh.plot_archetype_beakdown()
     
-    @render_widget
-    @reactive.event(input.gene_factor_run)
-    def pancan_archetypes_gfs():
-        fig = pp.plot_pancan_archetypes()
-        fig.update_layout(autosize=False, width=600, height=450,template = "simple_white")
-        return fig
-        
-    @render_widget
-    @reactive.event(input.pancan_umap_run)
-    def pancan_subplots():
-        
-        transform = input.pancan_umap_transformation()
-        genes = input.pancan_gene_input()
-        compartment = input.pancan_compartment_input()
-
-        fig =pp.plot_pancan_exprn_subplots(transform, genes, compartment)
-        return fig
 
 
-    ###### BOX / VIOL PLOTS
+    ###### BOX / VIOLIN PLOTS
 
-    # Reactive calculation where if multiple genes are selected, make the user choose a compartment for factor score calculation.
+    ###### UI when multiple genes are selected for feature score calculation
+    # If the user specifies multiple genes, they need to chosoe the compartments for the feature score calculation.
     @reactive.calc
     def box_viol_multi_options():
         if len(input.box_viol_gene_input()) > 1:
@@ -868,7 +855,8 @@ def server(input, output, session):
         else:
             choices = []
         return choices
-        
+    
+    # Renders the UI that allows the user 
     @render.ui
     def box_viol_multiple_genes():
         choices = box_viol_multi_options()
@@ -878,8 +866,9 @@ def server(input, output, session):
                                       choices,
                                       multiple=True)
         else:
-            return None
-        
+            return None 
+    
+    # Update the selectize of x axis categories depending on what the user selects for subsetting purposes.
     @reactive.effect
     @reactive.event(input.box_viol_x_category)  # Trigger when category changes
     def update_box_viol_selectize():
@@ -887,7 +876,7 @@ def server(input, output, session):
         new_options = qsh.categorials_opts_dict[x_cat]
         ui.update_selectize("box_viol_x_cat_filter", choices=new_options, selected=new_options)
 
-    
+    # Plot the box plot
     @render_widget
     @reactive.event(input.box_viol_run)
     def expression_box_viol():
@@ -903,7 +892,7 @@ def server(input, output, session):
         else:
             compartment_multiple = None
 
-        fig = bv.box_viol_exprn(transform, x_cat, x_cat_filts, gene, group, compartment_multiple)
+        fig = xp.box_viol_exprn(transform, x_cat, x_cat_filts, gene, group, compartment_multiple)
 
         return fig
     
@@ -926,18 +915,17 @@ def server(input, output, session):
         else:
             compartment_multiple = None
 
-        fig = bv.box_viol_exprn(transform, x_cat, x_cat_filts, gene, group, compartment_multiple)
+        fig = xp.box_viol_exprn(transform, x_cat, x_cat_filts, gene, group, compartment_multiple)
         '''
 
-        fig = bv.plot_ridgeline()
-        print(fig)
+        fig = xp.plot_ridgeline()
 
         return fig, f"{1500}px"
     
         #height_param = max(750,15 * len(qsh.process_gene_text_input(input.gex_heatmap_text_genes())) )
         #height = f"{height_param}px"
 
-        #return bv.plot_heatmap(genes, groupby, groups, transform), height
+        #return xp.plot_heatmap(genes, groupby, groups, transform), height
 
     @output(id="ridgeline_plot")
     @render.plot
@@ -957,6 +945,7 @@ def server(input, output, session):
 
     ##### HEATMAP
     
+    # Update the X-Axis category options depending which x category is selected.
     @reactive.effect
     @reactive.event(input.gex_heatmap_groupby)  # Trigger when category changes
     def update_heatmap_group_selectize():
@@ -965,16 +954,19 @@ def server(input, output, session):
         ui.update_selectize("gex_heatmap_groupby_subset", choices=cat_opts, selected=cat_opts)
 
 
-    @reactive.effect
-    @reactive.event(input.gex_heatmap_splitby)  # Trigger when category changes
-    def update_heatmap_group_selectize():
-        split_cat = input.gex_heatmap_splitby()
-        if split_cat != "---":
-            cat_opts = qsh.categorical_choices[split_cat]
-            ui.update_selectize("gex_heatmap_splitby_subset", choices=cat_opts, selected=cat_opts)
-        else:
-            ui.update_selectize("gex_heatmap_splitby_subset", choices=[])
+    #@reactive.effect
+    #@reactive.event(input.gex_heatmap_splitby)  # Trigger when category changes
+    #def update_heatmap_group_selectize():
+    #    split_cat = input.gex_heatmap_splitby()
+    #    if split_cat != "---":
+    #        cat_opts = qsh.categorical_choices[split_cat]
+    #        ui.update_selectize("gex_heatmap_splitby_subset", choices=cat_opts, selected=cat_opts)
+    #    else:
+    #        ui.update_selectize("gex_heatmap_splitby_subset", choices=[])
 
+    ##### PLOT HEATMAP
+
+    # Helper function which generates the figure and automatically returns the figure and its dynamically calculated height
     @reactive.Calc
     @reactive.event(input.gex_heatmap_run)
     def gex_heatmap_helper():
@@ -985,13 +977,15 @@ def server(input, output, session):
         height_param = max(750,15 * len(qsh.process_gene_text_input(input.gex_heatmap_text_genes())) )
         height = f"{height_param}px"
 
-        return bv.plot_heatmap(genes, groupby, groups, transform), height
+        return xp.plot_heatmap(genes, groupby, groups, transform), height
 
+    # Returns the plot itself from the helper function
     @output(id="gex_heatmap_plot")
     @render.plot
     def gex_heatmap_plot():
         return gex_heatmap_helper()[0]
 
+    # Outputs a UI element containing the plot and specifies the dynamically calculated height
     @output(id="gex_heatmap")
     @render.ui
     @reactive.event(input.gex_heatmap_run)
@@ -1003,6 +997,7 @@ def server(input, output, session):
     
     ##### GENE EXPRESSION QUERY
 
+    # Return the subset of the raw dataframe depending on user input
     @reactive.calc
     @reactive.event(input.gene_expr_query_run)
     def gene_expr_query_backend():
@@ -1022,10 +1017,12 @@ def server(input, output, session):
 
         return subset
     
+    # Returns the dataframe for visualization
     @render.data_frame
     def gene_expr_query():
         return gene_expr_query_backend()
     
+    # Download option
     @render.download(filename="quipi_query.csv")
     def download_query_table():
         df = gene_expr_query_backend()
@@ -1037,6 +1034,8 @@ def server(input, output, session):
     ##########  CORRELATION PLOTS
 
     ##### CORRELATION HEATMAP
+
+    # Simple correlation matrix across the whole dataset allowing for any categoricals to be chosen.
     @render_widget
     @reactive.event(input.corr_run)
     def gene_correlation_heatmap():
@@ -1052,45 +1051,58 @@ def server(input, output, session):
         return corr.gene_correlation_heatmap(genes, indications, method, compartments, archetypes, tissues, transform)
     
 
-    ##### CROSS-COMPARTMENT CORRELATION HEATMAP
-    @render_widget
-    @reactive.event(input.comp_corr_mat_run)
-    def comp_corr_mat():
-        genes = list(input.comp_corr_mat_genes())
-        comp1 = input.comp_corr_mat_compartment1()
-        comp2 = input.comp_corr_mat_compartment2()
-        transform = input.comp_corr_mat_transform()
-        method = input.comp_corr_mat_method()
 
-        indications = input.comp_corr_mat_indication()
-        tissues = [qsh.tissue_dict[tis] for tis in input.comp_corr_mat_tissue()]
-        archetypes = input.comp_corr_mat_archetype()
+    # ##### CROSS-COMPARTMENT CORRELATION HEATMAP
+    # CURRENTLY NOT IMPLEMENTED
+    # @render_widget
+    # @reactive.event(input.comp_corr_mat_run)
+    # def comp_corr_mat():
+    #     genes = list(input.comp_corr_mat_genes())
+    #     comp1 = input.comp_corr_mat_compartment1()
+    #     comp2 = input.comp_corr_mat_compartment2()
+    #     transform = input.comp_corr_mat_transform()
+    #     method = input.comp_corr_mat_method()
 
-        fig = corr.compartment_correlation_heatmap(genes, comp1,comp2,transform,method,indications,tissues,archetypes)
+    #     indications = input.comp_corr_mat_indication()
+    #     tissues = [qsh.tissue_dict[tis] for tis in input.comp_corr_mat_tissue()]
+    #     archetypes = input.comp_corr_mat_archetype()
 
-        return fig
+    #     fig = corr.compartment_correlation_heatmap(genes, comp1,comp2,transform,method,indications,tissues,archetypes)
+
+    #     return fig
 
 
     ##### CATEGORICAL CORRELATION
+    
 
-    @render.data_frame
-    @reactive.event(input.corr_cat_run)  
-    async def corr_cat_gene_correlations(): 
+    # Considering reimplementing in the future in a different way
+
+    # @render.data_frame
+    # @reactive.event(input.corr_cat_run)  
+    # async def corr_cat_gene_correlations(): 
         
-        with ui.Progress(min=1, max = len(qsh.quipi_all_columns)) as p:
-            p.set(message="Calculating", detail="Please Wait")
-            genes = input.corr_cat_gene_input()
-            category = input.corr_cat_category_input()
-            categories = input.corr_cat_category_opts()
-            range = input.corr_cat_slider()
+    #     with ui.Progress(min=1, max = len(qsh.quipi_all_columns)) as p:
+    #         p.set(message="Calculating", detail="Please Wait")
+    #         genes = input.corr_cat_gene_input()
+    #         category = input.corr_cat_category_input()
+    #         categories = input.corr_cat_category_opts()
+    #         range = input.corr_cat_slider()
 
-            df = corr.categorical_correlation_table(genes, category, categories, range,p)
+    #         df = corr.categorical_correlation_table(genes, category, categories, range,p)
                 
-            return df
+    #         return df
+
+    # # Update choices 
+    # @reactive.effect
+    # def corr_cat_update_choices():
+    #     choices = input.corr_cat_category_input()
+    #     ui.update_selectize("corr_cat_category_opts", choices=qsh.categorical_choices[choices])
         
 
     ##### CROSS COMPARTMENT CATEGORICAL
 
+    # Takes a gene as input as well as a compartment A and n compartments B and calculates the correlation
+    # of the selected gene in A with all genes in each B compartment
     @render.data_frame
     @reactive.event(input.cross_comp_corr_cat_run)
     async def cross_comp_corr_cat_gene_correlations():
@@ -1107,15 +1119,12 @@ def server(input, output, session):
             df = corr.cross_compartment_correlation_table(genes, comp1, comp2, range_slider, transform, method, p)
 
             return df
-
-    @reactive.effect
-    def corr_cat_update_choices():
-        choices = input.corr_cat_category_input()
-        ui.update_selectize("corr_cat_category_opts", choices=qsh.categorical_choices[choices])
     
+
 
     ##### PANCAN GENE-SIGNATURE OVERLAY
 
+    # Plots the gene factor score in a given compartment on the PanCan UMAP
     @render_widget
     @reactive.event(input.gene_factor_run)
     def gene_factor_analysis():
@@ -1136,10 +1145,35 @@ def server(input, output, session):
         fig.update_xaxes(visible=False)
         return fig
     
+    # Plots the pancan umap next to the gene factor score. This function returns just the pancan umap.
+    @render_widget
+    @reactive.event(input.gene_factor_run)
+    def pancan_archetypes_gfs():
+        fig = pp.plot_pancan_archetypes()
+        fig.update_layout(autosize=False, width=600, height=450,template = "simple_white")
+        return fig
+    
+
+    ##### PANCAN SUBPLOTS
+
+    # Plots the pancan UMAP for each gene input within a given compartment.
+    @render_widget
+    @reactive.event(input.pancan_umap_run)
+    def pancan_subplots():
+        
+        transform = input.pancan_umap_transformation()
+        genes = input.pancan_gene_input()
+        compartment = input.pancan_compartment_input()
+
+        fig =pp.plot_pancan_exprn_subplots(transform, genes, compartment)
+        return fig
+    
 
 
     ##### DGE BY COMPARTMENT SCORE
 
+    # Helper function for DGE analysis that returns the figure to plot, positive and negative dge dataframes, and
+    # the highlighted boxplot of genes of interest.
     @reactive.calc
     @reactive.event(input.dge_run)
     def feature_ranked_dge_reactive():
@@ -1153,7 +1187,8 @@ def server(input, output, session):
 
         return fig, sig_pos, sig_neg, highlighted_boxplot
 
-    
+    # Helper functions that render each output from the helper function as a widget or dataframe
+
     @render_widget
     def compartment_featurescore_dge():
         return feature_ranked_dge_reactive()[0]
@@ -1172,6 +1207,7 @@ def server(input, output, session):
         if boxplot is not None:
             return boxplot
     
+    # Download option
     @render.download(filename="FeatureScore_DEGs.csv")
     def download_featurescore_dges():
         df = pd.concat([feature_ranked_dge_reactive()[1],feature_ranked_dge_reactive()[2]], axis = 0, ignore_index=True)
@@ -1182,6 +1218,9 @@ def server(input, output, session):
 
 
     ##### DGE BY GENE-SIGNATURE
+
+    # Helper function for DGE analysis that returns the figure to plot, positive and negative dge dataframes, and
+    # the highlighted boxplot of genes of interest.
     @reactive.calc
     @reactive.event(input.fs_dge_run)
     def factor_ranked_dge_reactive():
@@ -1197,11 +1236,13 @@ def server(input, output, session):
 
             return fig, sig_pos, sig_neg, highlight_boxplot
     
+
+    # Helper functions that render each output from the helper function as a widget or dataframe
+
     @render_widget
     def gfs_ranked_dge():
         return factor_ranked_dge_reactive()[0]
 
-    
     @render.data_frame
     def gfs_ranked_dge_top():
         return factor_ranked_dge_reactive()[1]
@@ -1217,6 +1258,7 @@ def server(input, output, session):
         if boxplot != None :
             return boxplot
     
+    # Download option
     @render.download(filename="SignatureScore_DEGS.csv")
     def download_signaturecore_dges():
         df = pd.concat([factor_ranked_dge_reactive()[1],factor_ranked_dge_reactive()[2]], axis = 0, ignore_index=True)
@@ -1224,7 +1266,12 @@ def server(input, output, session):
         df.to_csv(csv_buffer, index=False)
         yield csv_buffer.getvalue()
 
-    ## HELPER: Populate individual gene selection boxes to avoid long startup.
+
+
+    ## HELPER FUNCTION TO POPULATE INPUT_SELECTIZE FOR GENE LISTS: 
+    # Populate individual gene selection boxes to avoid long startup.
+    # As each tab is visited, if it has a gene input selectize then gene choices will be loaded into it.
+    # Stored in quipi_tabs_visited to avoid redundant loading
     @reactive.effect
     def populate_gene_selections():
         current_tab = input.quipi_top_nav()

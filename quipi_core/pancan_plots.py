@@ -9,7 +9,7 @@ import pandas as pd
 pd.options.plotting.backend = 'plotly'
 
 
-
+# Plots a pancan umap for each gene in genes list within a certain compartment
 def plot_pancan_exprn_subplots(transform, genes, compartment):
 
     #input_arr = sh.transformations[transform]
@@ -59,6 +59,7 @@ def plot_pancan_exprn_subplots(transform, genes, compartment):
         return fig
     
 
+# Plots the Pancan UMAP
 def plot_pancan_archetypes():
 
     fig = px.scatter(sh.categorical_data[sh.categorical_data["archetype"] != "Unclassified"], x = "x_umap1", y="x_umap2", 

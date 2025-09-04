@@ -10,6 +10,7 @@ import gene_factor as gf
 import seaborn as sns
 
 
+# BOXPLOT PLOTTING FUNCTION
 def box_viol_exprn(transform, x_cat, x_cat_filts, genes, groupby, compartment_multiple):
 
 
@@ -53,7 +54,8 @@ def box_viol_exprn(transform, x_cat, x_cat_filts, genes, groupby, compartment_mu
             fig.update_layout(title_text= transform + genes[0], title_x=0.5)
             return fig
         
-        
+
+# DOTPLOT - CURRENTLY DEPRECATED REPLACED BY HEATMAP
 def plot_dotplot(genes, groupby, groups, splitby, splits, transform, swap):
 
     CUTOFF=0
@@ -134,6 +136,8 @@ def plot_dotplot(genes, groupby, groups, splitby, splits, transform, swap):
     
     return fig
 
+
+# HEATMAP PLOT - SNS CLUSTERMAP CODE
 def plot_heatmap(genes, category, category_subset, transform):
 
     category = sh.categoricals_dict[category]
@@ -177,6 +181,7 @@ def plot_heatmap(genes, category, category_subset, transform):
 
     return fig
 
+# RIDGELINE PLOT - CURRENTLY NOT IMPLEMENTED
 def plot_ridgeline():
 
     sns.set_theme(style="white", rc={"axes.facecolor": (0, 0, 0, 0)})

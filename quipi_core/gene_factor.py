@@ -3,6 +3,7 @@ import pandas as pd
 from scipy.stats import zscore
 import quipi_shared as sh
 
+# Helper function to calculate a gene factor score in a compartment given a set of genes
 def calculate_gene_factor_score(gene_set,compartment):
 
     input_arr = pd.read_feather("./quipi_data/quipi_log2_tpm.feather", columns=sh.non_genes + gene_set)
@@ -13,6 +14,7 @@ def calculate_gene_factor_score(gene_set,compartment):
     log2_subset_full = log2_subset[sh.non_genes].merge(z_subset,left_index=True,right_index=True)
 
     return log2_subset_full
+
 
 def calculate_gene_factor_score_all_patients(gene_set,compartments):
 
