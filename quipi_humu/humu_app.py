@@ -32,7 +32,6 @@ panel_color = "#f0f0f0"
 
 # Define the UI
 app_ui = ui.page_navbar(
-    # ui.page_fluid(
 
     # ui.tags.style("""
     #     body { background-color: #a1aace; }  /* Background color */
@@ -72,375 +71,372 @@ app_ui = ui.page_navbar(
     #     style="padding-bottom: 5px;"
     # ),
 
-        ui.nav_panel(ui.tags.img(src="humu_logo.png", style="height: 70px;"),
-            ui.layout_column_wrap(
-                ui.card(
-                    ui.card_header(ui.h1("What is HuMu?", style='color: white; font-weight: bold;')),
-                    ui.h2("The Human-to-Mouse Cancer Translator Project (HuMu) aims to immuno-profile a series of \
-                                    common and exceptional models of cancer in mice to benchmark them against the diversity of \
-                                    TMEs in Human cancer (i.e immune archetypes described in Combes, Samad, et al. Cell 2022).",
-                                    style='color: white; font-weight: bold; margin-bottom: 10px;'),
-                    ui.card_footer(ui.HTML(f'<a href="{"https://pubmed.ncbi.nlm.nih.gov/34963056/"}" target="_blank">Discovering dominant tumor immune archetypes in a pan-cancer census. Combes AJ, Samad B, Tsui J, et al. Cell. 2022</a>')),
-                    style="background-color: #cca9a3; "
-                ),
+    ui.nav_panel(ui.tags.img(src="humu_logo.png", style="height: 70px;"),
+        ui.layout_column_wrap(
+            ui.card(
+                ui.card_header(ui.h1("What is HuMu?", style='color: white; font-weight: bold;')),
+                ui.h2("The Human-to-Mouse Cancer Translator Project (HuMu) aims to immuno-profile a series of \
+                                common and exceptional models of cancer in mice to benchmark them against the diversity of \
+                                TMEs in Human cancer (i.e immune archetypes described in Combes, Samad, et al. Cell 2022).",
+                                style='color: white; font-weight: bold; margin-bottom: 10px;'),
+                ui.card_footer(ui.HTML(f'<a href="{"https://pubmed.ncbi.nlm.nih.gov/34963056/"}" target="_blank">Discovering dominant tumor immune archetypes in a pan-cancer census. Combes AJ, Samad B, Tsui J, et al. Cell. 2022</a>')),
+                style="background-color: #cca9a3; "
+            ),
 
-                ui.card(
-                    ui.card_header(ui.h2("HuMu Archetypes Translation Dataset", style='color: white; font-weight: bold;')),
-                    ui.tags.img(src="quipi_humu_reference.png",
-                                style="height: auto; border: 2px solid #ddd; border-radius: 10px; box-shadow: 5px 5px 15px rgba(0,0,0,0.3);"
-                                ),
-                            style="background-color: #a3c6cc;"
-                    ),
-                ui.card(
-                    ui.card_header(ui.h1("HuMu Dataset", style='color: white; font-weight: bold;')),
-                    ui.h2("The HuMu dataset contains high-dimensional cytometry data (CyTOF) of 15 murine models that \
-                        we use to study high level tumor-immune composition, as well as single-cell sequencing data \
-                        from 9 of these models that we use to dissect more granular gene expression profiles across \
-                        populations and tumor models.",
-                        style='color: white; font-weight: bold; margin-bottom: 10px;'),
+            ui.card(
+                ui.card_header(ui.h2("HuMu Archetypes Translation Dataset", style='color: white; font-weight: bold;')),
+                ui.tags.img(src="quipi_humu_reference.png",
+                            style="height: auto; border: 2px solid #ddd; border-radius: 10px; box-shadow: 5px 5px 15px rgba(0,0,0,0.3);"
+                            ),
+                        style="background-color: #a3c6cc;"
+            ),
+            ui.card(
+                ui.card_header(ui.h1("HuMu Dataset", style='color: white; font-weight: bold;')),
+                ui.h2("The HuMu dataset contains high-dimensional cytometry data (CyTOF) of 15 murine models that \
+                    we use to study high level tumor-immune composition, as well as single-cell sequencing data \
+                    from 9 of these models that we use to dissect more granular gene expression profiles across \
+                    populations and tumor models.",
+                    style='color: white; font-weight: bold; margin-bottom: 10px;'),
 
-                    style="background-color: #c6cca3;"
-                ),
+                style="background-color: #c6cca3;"
             ),
         ),
-        ui.nav_panel("FAQ / Terminology",
-            #ui.card(ui.h1("Terminology",style='font-weight: bold;'),
-                    ui.card(
-                        ui.h2("Mouse",style='font-weight: bold;'),
-                        ui.layout_column_wrap(
-                            ui.card(ui.h3("Tumor Line",style='font-weight: bold;'),
-                                    ui.h5("Mouse tumor models used in the study"),
-                                    style="background-color: #BDD0D5; color: #333;"
-                            ),
-                            ui.card(ui.h3("Compartment",style='font-weight: bold;'),
-                                    ui.h5("TME compartments as defined in Combes, Samad et al. Cell 2022. \
-                                    These describe either pooled effector T cells (T cell), Tregs, pooled myeloid cells \
-                                    (Myeloid, containing monocytes, macrophages and dendritic cells), Stroma (fibroblasts \
-                                    sorted as CD45-CD44+CD90+ in human and defined in mouse as fibroblasts matching the human \
-                                    Stroma gene signature) or Tumor (sorted in human as CD45- non-Stroma and identified in mouse \
-                                    scRNAseq as bieng tumor cells according to their DEGs)"),
+    ),
+
+    ui.nav_panel("FAQ / Terminology",
+        ui.accordion(
+            ui.accordion_panel("Mouse",
+                    ui.layout_column_wrap(
+                        ui.card(ui.h3("Tumor Line",style='font-weight: bold;'),
+                                ui.h5("Mouse tumor models used in the study"),
                                 style="background-color: #BDD0D5; color: #333;"
-                                
-                            )
                         ),
-                        ui.layout_column_wrap(
-                            ui.card(ui.h3("Coarse Annotation",style='font-weight: bold;'),
-                                ui.h5("Coarse level of annotations made on the mouse scRNAseq data. Describes high level populations."),
-                                style="background-color: #BDD0D5; color: #333;"
-                            ),
-                            ui.card(ui.h3("Fine Annotation",style='font-weight: bold;'),
-                                ui.h5("Fine level of annotations made on the mouse scRNAseq data. Describes individual subsets of cells as shown in Figure S2."),
-                                style="background-color: #BDD0D5; color: #333;"
-                            )
-                        ),
-                    #style="background-color: #c6cca3; color: #333;"
-                    ),
-                    ui.card(
-                        ui.h2("Human",style='font-weight: bold;'),
-                        ui.layout_column_wrap(
-                            ui.card(ui.h3("Indication",style='font-weight: bold;'),
-                                    ui.h5("Tumor indication of ImmunoProfiler patients"),
-                                    style="background-color: #BDD0D5; color: #333;"
-                            ),
-                            ui.card(ui.h3("Archetype",style='font-weight: bold;'),
-                                    ui.h5("Tumor-immune archetypes as defined in Combes, Samad et al. Cell 2022"),
-                                    ui.HTML(f'<a href="{"https://pubmed.ncbi.nlm.nih.gov/34963056/"}" target="_blank">Discovering dominant tumor immune archetypes in a pan-cancer census. Combes AJ, Samad B, Tsui J, et al. Cell. 2022</a>'),
-                                    style="background-color: #BDD0D5; color: #333;"
-                            )
-                        ),
-                        ui.layout_column_wrap(
-                            ui.card(ui.h3("Compartment",style='font-weight: bold;'),
+                        ui.card(ui.h3("Compartment",style='font-weight: bold;'),
                                 ui.h5("TME compartments as defined in Combes, Samad et al. Cell 2022. \
                                 These describe either pooled effector T cells (T cell), Tregs, pooled myeloid cells \
                                 (Myeloid, containing monocytes, macrophages and dendritic cells), Stroma (fibroblasts \
                                 sorted as CD45-CD44+CD90+ in human and defined in mouse as fibroblasts matching the human \
                                 Stroma gene signature) or Tumor (sorted in human as CD45- non-Stroma and identified in mouse \
                                 scRNAseq as bieng tumor cells according to their DEGs)"),
-                                style="background-color: #BDD0D5; color: #333;"
-                            ),
+                            style="background-color: #BDD0D5; color: #333;"
+                            
                         ),
-                    #style="background-color: #c6cca3"
+                        ui.card(ui.h3("Coarse Annotation",style='font-weight: bold;'),
+                            ui.h5("Coarse level of annotations made on the mouse scRNAseq data. Describes high level populations."),
+                            style="background-color: #BDD0D5; color: #333;"
+                        ),
+                        ui.card(ui.h3("Fine Annotation",style='font-weight: bold;'),
+                            ui.h5("Fine level of annotations made on the mouse scRNAseq data. Describes individual subsets of cells as shown in Figure S2."),
+                            style="background-color: #BDD0D5; color: #333;"
+                        ),
+                        width=.5
                     ),
-                #style="background-color: #a3c6cc; color: #333;"
-                
-            #)
+            ),
+            ui.accordion_panel("Human",
+                    ui.layout_column_wrap(
+                        ui.card(ui.h3("Indication",style='font-weight: bold;'),
+                                ui.h5("Tumor indication of ImmunoProfiler patients"),
+                                style="background-color: #BDD0D5; color: #333;"
+                        ),
+                        ui.card(ui.h3("Archetype",style='font-weight: bold;'),
+                                ui.h5("Tumor-immune archetypes as defined in Combes, Samad et al. Cell 2022"),
+                                ui.HTML(f'<a href="{"https://pubmed.ncbi.nlm.nih.gov/34963056/"}" target="_blank">Discovering dominant tumor immune archetypes in a pan-cancer census. Combes AJ, Samad B, Tsui J, et al. Cell. 2022</a>'),
+                                style="background-color: #BDD0D5; color: #333;"
+                        ),
+                        ui.card(ui.h3("Compartment",style='font-weight: bold;'),
+                            ui.h5("TME compartments as defined in Combes, Samad et al. Cell 2022. \
+                            These describe either pooled effector T cells (T cell), Tregs, pooled myeloid cells \
+                            (Myeloid, containing monocytes, macrophages and dendritic cells), Stroma (fibroblasts \
+                            sorted as CD45-CD44+CD90+ in human and defined in mouse as fibroblasts matching the human \
+                            Stroma gene signature) or Tumor (sorted in human as CD45- non-Stroma and identified in mouse \
+                            scRNAseq as bieng tumor cells according to their DEGs)"),
+                            style="background-color: #BDD0D5; color: #333;"
+                        ),
+                        width=.5
+                    )
+            ),
+            open=False
+        )
+    ),
+
+    ui.nav_panel("HuMu Expression Comparison",
+        ui.layout_sidebar(
+            ui.sidebar(
+                ui.card(
+                    ui.card_header("Human Options"),
+                    ui.input_selectize("humu_box_comp_human_genes", "Choose Human Gene", [], multiple=False),
+                    ui.input_selectize("humu_box_comp_x_cat_filter",
+                                        "Subset Compartments",
+                                        hsh.quipi_compartments,
+                                        selected=hsh.humu_compartments,
+                                        multiple=True,
+                                        remove_button=True,options={"plugins": ["clear_button"]}),
+                    ui.input_selectize("humu_box_comp_transformation",
+                                        "Select TPM Transformation: ",
+                                        ["TPM", "Log2(TPM)"],
+                                        multiple= False,
+                                        selected= "Log2(TPM)"),
+                    ui.input_selectize("humu_box_comp_human_groupby", "Group by:", ["---"] + hsh.quipi_cats_opts, selected="---"),
+                ),
+                ui.card(
+                    ui.card_header("Mouse Options"),
+                    ui.input_selectize("humu_box_comp_mu_genes", "Choose Murine Gene", []),
+                    ui.input_selectize("humu_box_comp_cat_mouse_subset", "Subset Compartments",hsh.humu_compartments, selected=hsh.humu_compartments, multiple=True, remove_button=True,options={"plugins": ["clear_button"]}),
+                    ui.input_selectize("humu_box_comp_mouse_groupby", "Group by:", ["---"] + hsh.categoricals_opts),
+                    ui.input_switch("humu_box_comp_sample_aggr", "Average Counts by Sample")
+                ),
+                ui.input_action_button("humu_box_comp_run", "RUN"),
+            bg=panel_color
+            ),
+            ui.card(
+                ui.card(ui.card_header("Human"),
+                        output_widget("humu_gene_comparison_human")),
+                ui.card(ui.card_header("Mouse"),
+                        output_widget("humu_gene_comparison_mouse")),
+                full_screen=True
+            ),
+            bg=panel_color
         ),
-        ui.nav_panel("HuMu Expression Comparison",
+    ),
+
+    ui.nav_menu("Mouse Gene Expression",
+                
+        ui.nav_panel("Boxplots",
             ui.layout_sidebar(
                 ui.sidebar(
+                    ui.input_selectize("humu_gex_box_gene", "Choose Gene to plot:", []),
+                    ui.card(
+                        ui.popover(
+                            ui.span(
+                                gear_fill,
+                                style="position:absolute; top: 5px; right: 7px;",
+                            ),
+                            ui.input_selectize("humu_gex_box_cat_subset", "Subset Categories:", [], multiple=True, remove_button=True,options={"plugins": ["clear_button"]}),
+                            placement="right",
+                        ),
+                        ui.input_selectize("humu_gex_box_x_cat", "Choose X-Axis Category:", hsh.categoricals_opts),
+                    ),
+                    ui.card(
+                        ui.input_selectize("humu_gex_box_groupby", "Group by:", ["---"] + hsh.categoricals_opts, selected="---"),
+                        ui.input_selectize("humu_gex_box_splitby", "Split by:", ["---"] + hsh.categoricals_opts, selected="---"),
+                    ),
+                    ui.card(ui.input_switch("humu_gex_box_sample_aggr", "Average Counts by Sample")),
+                    ui.input_action_button("humu_gene_box_run", "RUN"),
+                    bg=panel_color
+                ),
+                ui.card(output_widget("gex_box"), full_screen=True),
+                bg=panel_color
+            )       
+        ),
+
+        ui.nav_panel("Dotplots",
+            ui.layout_sidebar(
+                ui.sidebar(
+                    ui.input_selectize("humu_gex_dot_gene", "Choose Genes to plot:", [], multiple=True),
+                    ui.card(
+                        ui.popover(
+                            ui.span(
+                                gear_fill,
+                                style="position:absolute; top: 5px; right: 7px;",
+                            ),
+                            ui.input_selectize("humu_gex_dot_groups", "Subset Groupby Categories:", [], multiple=True),
+                            placement="right",
+                        ),
+                        ui.input_selectize("humu_gex_dot_groupby", "Group By:", hsh.categoricals_opts, selected="---"),
+                    ),
+                    ui.card(
+                        ui.popover(
+                            ui.span(
+                                gear_fill,
+                                style="position:absolute; top: 5px; right: 7px;",
+                            ),
+                            ui.input_selectize('humu_gex_dot_splits', "Subset Splitby Categories:", [], multiple=True),
+                            placement="right",
+                        ),
+                        ui.input_selectize("humu_gex_dot_splitby", "Split By:", ["---"] + hsh.categoricals_opts, selected="---"),
+                    ),
+                    ui.card(ui.input_switch("humu_gex_dot_swap", "Swap Axes", value=False),
+                            ui.input_switch("humu_gex_dot_scale", "Z-Score Genes", value=False)
+                    ),
+                    ui.input_action_button("humu_gex_dot_run", "RUN"),
+                    bg=panel_color
+                ),
+            ui.card(output_widget("show_humu_gex_dotplot"), full_screen=True),
+            bg = panel_color
+            ),       
+        ),
+    ),
+
+    ui.nav_panel("Flow Cytometry Proportions",
+        ui.layout_sidebar(
+            ui.sidebar(
+                ui.card(
+                    ui.input_selectize("humu_box_score_1", "Choose Parameter", hsh.flow_scores),
+                    ui.input_selectize("humu_box_score_2", "Divide By Second Parameter (Optional)", ["---"] + hsh.flow_scores, selected="---"),
+                ),
+                ui.card(
+                    ui.input_selectize("humu_box_x_cat", "Select X-Axis Category", hsh.flow_cats),
+                    ui.input_switch("humu_box_switch", "Sort X-Category On Value"),
+                        ui.popover(
+                            ui.span(
+                                gear_fill,
+                                style="position:absolute; top: 5px; right: 7px;",
+                            ),
+                            ui.input_selectize("humu_box_x_cat_filter", "Subset X-Axis Categories.", [], multiple=True),
+                            placement="right",
+                        ),
+                ),
+                ui.card(ui.input_selectize("humu_box_group", "Group By:",  ["---"] + hsh.flow_cats, selected="---")),
+                ui.input_action_button("humu_box_run", "RUN"),
+                bg=panel_color
+            ),
+            ui.card(ui.card_body(output_widget("humu_expression_box_viol")),
+                    ui.card_footer("Click button in the bottom right for fullscreen view."),
+                    full_screen=True),
+            bg=panel_color,
+        )
+    ),
+
+
+
+    ##### EXAMPLE
+    ui.nav_menu("Examples - Just Hit Run",
+        ui.nav_panel("HuMu Expression Comparison", # EXAMPLE
+            ui.layout_sidebar(
+                ui.sidebar(
+                    ui.input_action_button("humu_box_comp_run_example", "RUN"),
                     ui.card(
                         ui.card_header("Human Options"),
-                        ui.input_selectize("humu_box_comp_human_genes", "Choose Human Gene", [], multiple=False),
-                        ui.input_selectize("humu_box_comp_x_cat_filter",
+                        ui.input_selectize("humu_box_comp_human_genes_example", "Choose Human Gene", ["CTLA4", "CCR5"], multiple=False, selected="CTLA4"),
+                        ui.input_selectize("humu_box_comp_x_cat_filter_example",
                                             "Subset Compartments",
                                             hsh.quipi_compartments,
                                             selected=hsh.humu_compartments,
                                             multiple=True,
                                             remove_button=True,options={"plugins": ["clear_button"]}),
-                        ui.input_selectize("humu_box_comp_transformation",
-                                            "Select TPM Transformation: ",
+                        ui.input_selectize("humu_box_comp_transformation_example",
+                                            "Select TPM Transformation:",
                                             ["TPM", "Log2(TPM)"],
                                             multiple= False,
                                             selected= "Log2(TPM)"),
-                        ui.input_selectize("humu_box_comp_human_groupby", "Group by:", ["---"] + hsh.quipi_cats_opts, selected="---"),
+                        ui.input_selectize("humu_box_comp_human_groupby_example", "Group by:", ["---"] + hsh.quipi_cats_opts, selected="---")
+                        
                     ),
                     ui.card(
                         ui.card_header("Mouse Options"),
-                        ui.input_selectize("humu_box_comp_mu_genes", "Choose Murine Gene", []),
-                        ui.input_selectize("humu_box_comp_cat_mouse_subset", "Subset Compartments",hsh.humu_compartments, selected=hsh.humu_compartments, multiple=True, remove_button=True,options={"plugins": ["clear_button"]}),
-                        ui.input_selectize("humu_box_comp_mouse_groupby", "Group by:", ["---"] + hsh.categoricals_opts),
-                        ui.input_switch("humu_box_comp_sample_aggr", "Average Counts by Sample")
+                        ui.input_selectize("humu_box_comp_mu_genes_example", "Choose Murine Gene", ["Ctla4", "Ccr5"], selected="Ctla4"),
+                        ui.input_selectize("humu_box_comp_cat_mouse_subset_example", "Subset Categories:",hsh.humu_compartments, selected=hsh.humu_compartments, multiple=True, remove_button=True,options={"plugins": ["clear_button"]}),
+                        ui.input_selectize("humu_box_comp_mouse_groupby_example", "Group by:", ["---"] + hsh.categoricals_opts),
+                        ui.input_switch("humu_box_comp_sample_aggr_example", "Average Counts by Sample")
                     ),
-                    ui.input_action_button("humu_box_comp_run", "RUN"),
-                bg=panel_color
+                    bg=panel_color
                 ),
                 ui.card(
                     ui.card(ui.card_header("Human"),
-                            output_widget("humu_gene_comparison_human")),
+                            output_widget("humu_gene_comparison_human_example")),
                     ui.card(ui.card_header("Mouse"),
-                            output_widget("humu_gene_comparison_mouse")),
+                            output_widget("humu_gene_comparison_mouse_example")),
                     full_screen=True
                 ),
-                bg=panel_color
-            ),
+            bg=panel_color
+            )
         ),
-
-        ui.nav_menu("Mouse Gene Expression",
-
-            ui.nav_panel("Boxplots",
-                ui.layout_sidebar(
-                    ui.sidebar(
-                        ui.input_selectize("humu_gex_box_gene", "Choose Gene to plot:", []),
-                        ui.card(
-                            ui.popover(
-                                ui.span(
-                                    gear_fill,
-                                    style="position:absolute; top: 5px; right: 7px;",
-                                ),
-                                ui.input_selectize("humu_gex_box_cat_subset", "Subset Categories:", [], multiple=True, remove_button=True,options={"plugins": ["clear_button"]}),
-                                placement="right",
-                            ),
-                            ui.input_selectize("humu_gex_box_x_cat", "Choose X-Axis Category:", hsh.categoricals_opts),
-                        ),
-                        ui.card(
-                            ui.input_selectize("humu_gex_box_groupby", "Group by:", ["---"] + hsh.categoricals_opts, selected="---"),
-                            ui.input_selectize("humu_gex_box_splitby", "Split by:", ["---"] + hsh.categoricals_opts, selected="---"),
-                        ),
-                        ui.card(ui.input_switch("humu_gex_box_sample_aggr", "Average Counts by Sample")),
-                        ui.input_action_button("humu_gene_box_run", "RUN"),
-                        bg=panel_color
-                    ),
-                    ui.card(output_widget("gex_box"), full_screen=True),
-                    bg=panel_color
-                )       
-            ),
-
-            ui.nav_panel("Dotplots",
-                ui.layout_sidebar(
-                    ui.sidebar(
-                        ui.input_selectize("humu_gex_dot_gene", "Choose Genes to plot:", [], multiple=True),
-                        ui.card(
-                            ui.popover(
-                                ui.span(
-                                    gear_fill,
-                                    style="position:absolute; top: 5px; right: 7px;",
-                                ),
-                                ui.input_selectize("humu_gex_dot_groups", "Subset Groupby Categories:", [], multiple=True),
-                                placement="right",
-                            ),
-                            ui.input_selectize("humu_gex_dot_groupby", "Group By:", hsh.categoricals_opts, selected="---"),
-                        ),
-                        ui.card(
-                            ui.popover(
-                                ui.span(
-                                    gear_fill,
-                                    style="position:absolute; top: 5px; right: 7px;",
-                                ),
-                                ui.input_selectize('humu_gex_dot_splits', "Subset Splitby Categories:", [], multiple=True),
-                                placement="right",
-                            ),
-                            ui.input_selectize("humu_gex_dot_splitby", "Split By:", ["---"] + hsh.categoricals_opts, selected="---"),
-                        ),
-                        ui.card(ui.input_switch("humu_gex_dot_swap", "Swap Axes", value=False),
-                                ui.input_switch("humu_gex_dot_scale", "Z-Score Genes", value=False)
-                        ),
-                        ui.input_action_button("humu_gex_dot_run", "RUN"),
-                        bg=panel_color
-                    ),
-                ui.card(output_widget("show_humu_gex_dotplot"), full_screen=True),
-                bg = panel_color
-                ),       
-            ),
-        ),
-
-        ui.nav_panel("Flow Cytometry Proportions",
+        ui.nav_panel("Mouse Boxplot", # EXAMPLE
             ui.layout_sidebar(
                 ui.sidebar(
+                    ui.input_action_button("humu_gene_box_run_example", "RUN"),
+                    ui.input_selectize("humu_gex_box_gene_example", "Choose Gene to plot:", ["Ctla4", "Ccr5"], selected="Ctla4"),
                     ui.card(
-                        ui.input_selectize("humu_box_score_1", "Choose Parameter", hsh.flow_scores),
-                        ui.input_selectize("humu_box_score_2", "Divide By Second Parameter (Optional)", ["---"] + hsh.flow_scores, selected="---"),
-                    ),
-                    ui.card(
-                        ui.input_selectize("humu_box_x_cat", "Select X-Axis Category", hsh.flow_cats),
-                        ui.input_switch("humu_box_switch", "Sort X-Category On Value"),
-                            ui.popover(
+                        ui.input_selectize("humu_gex_box_x_cat_example", "Choose X-Axis Category:", hsh.categoricals_opts, selected = "Tumor Line"),
+                        ui.popover(
                                 ui.span(
                                     gear_fill,
                                     style="position:absolute; top: 5px; right: 7px;",
                                 ),
-                                ui.input_selectize("humu_box_x_cat_filter", "Subset X-Axis Categories.", [], multiple=True),
+                                ui.input_selectize("humu_gex_box_cat_subset_example", "Subset Categories:", [], multiple=True, remove_button=True,options={"plugins": ["clear_button"]}),
                                 placement="right",
                             ),
                     ),
-                    ui.card(ui.input_selectize("humu_box_group", "Group By:",  ["---"] + hsh.flow_cats, selected="---")),
-                    ui.input_action_button("humu_box_run", "RUN"),
+                    ui.card(
+                        ui.input_selectize("humu_gex_box_groupby_example", "Group by:", ["---"] + hsh.categoricals_opts, selected="Coarse Annotation"),
+                        ui.input_selectize("humu_gex_box_splitby_example", "Split by:", ["---"] + hsh.categoricals_opts, selected="---"),
+                    ),
+                    ui.card(ui.input_switch("humu_gex_box_sample_aggr_example", "Average Counts by Sample")),
+                    bg=panel_color
+                    ),
+                    ui.card(output_widget("gex_box_example"), full_screen=True),
+                    bg=panel_color
+            )
+        ),
+        ui.nav_panel("Mouse Dotplot", # EXAMPLE
+            ui.layout_sidebar(
+                ui.sidebar(
+                    ui.input_selectize("humu_gex_dot_gene_example", "Choose Genes to plot:", 
+                                        ["Itgam", "C1qc", "Cd3e", "Ctla4", "Pdcd1", "Lag3", "Havcr2", "Tox"], 
+                                        selected=["Itgam", "C1qc", "Cd3e", "Ctla4", "Pdcd1", "Lag3", "Havcr2", "Tox"],multiple=True),
+                    ui.card(
+                        ui.popover(
+                            ui.span(
+                                gear_fill,
+                                style="position:absolute; top: 5px; right: 7px;",
+                            ),
+                            ui.input_selectize("humu_gex_dot_groups_example", "Subset Groupby Categories:", [], multiple=True),
+                            placement="right",
+                        ),
+                        ui.input_selectize("humu_gex_dot_groupby_example", "Group By:", hsh.categoricals_opts, selected="Compartment"),
+                    ),
+                    ui.card(
+                        ui.popover(
+                            ui.span(
+                                gear_fill,
+                                style="position:absolute; top: 5px; right: 7px;",
+                            ),
+                            ui.input_selectize('humu_gex_dot_splits_example', "Subset Splitby Categories:", [], multiple=True),
+                            placement="right",
+                        ),
+                        ui.input_selectize("humu_gex_dot_splitby_example", "Split By:", ["---"] + hsh.categoricals_opts, selected="Tumor Line"),
+                    ),
+                    ui.card(ui.input_switch("humu_gex_dot_swap_example", "Swap Axes", False),
+                            ui.input_switch("humu_gex_dot_scale_example", "Z-Score Genes", False)),
+                    ui.input_action_button("humu_gex_dot_run_example", "RUN"),
                     bg=panel_color
                 ),
-                ui.card(ui.card_body(output_widget("humu_expression_box_viol")),
-                        ui.card_footer("Click button in the bottom right for fullscreen view."),
-                        full_screen=True),
-                bg=panel_color,
+            ui.card(output_widget("show_humu_gex_dotplot_example"), full_screen=True),
+            bg = panel_color
             )
         ),
 
-
-
-        ##### EXAMPLE
-        ui.nav_menu("Examples - Just Hit Run",
-            ui.nav_panel("HuMu Expression Comparison", # EXAMPLE
-                ui.layout_sidebar(
-                    ui.sidebar(
-                        ui.input_action_button("humu_box_comp_run_example", "RUN"),
-                        ui.card(
-                            ui.card_header("Human Options"),
-                            ui.input_selectize("humu_box_comp_human_genes_example", "Choose Human Gene", ["CTLA4", "CCR5"], multiple=False, selected="CTLA4"),
-                            ui.input_selectize("humu_box_comp_x_cat_filter_example",
-                                                "Subset Compartments",
-                                                hsh.quipi_compartments,
-                                                selected=hsh.humu_compartments,
-                                                multiple=True,
-                                                remove_button=True,options={"plugins": ["clear_button"]}),
-                            ui.input_selectize("humu_box_comp_transformation_example",
-                                                "Select TPM Transformation:",
-                                                ["TPM", "Log2(TPM)"],
-                                                multiple= False,
-                                                selected= "Log2(TPM)"),
-                            ui.input_selectize("humu_box_comp_human_groupby_example", "Group by:", ["---"] + hsh.quipi_cats_opts, selected="---")
-                            
-                        ),
-                        ui.card(
-                            ui.card_header("Mouse Options"),
-                            ui.input_selectize("humu_box_comp_mu_genes_example", "Choose Murine Gene", ["Ctla4", "Ccr5"], selected="Ctla4"),
-                            ui.input_selectize("humu_box_comp_cat_mouse_subset_example", "Subset Categories:",hsh.humu_compartments, selected=hsh.humu_compartments, multiple=True, remove_button=True,options={"plugins": ["clear_button"]}),
-                            ui.input_selectize("humu_box_comp_mouse_groupby_example", "Group by:", ["---"] + hsh.categoricals_opts),
-                            ui.input_switch("humu_box_comp_sample_aggr_example", "Average Counts by Sample")
-                        ),
-                        bg=panel_color
+        ui.nav_panel("Flow Cytometry Proportions", # EXAMPLE
+            ui.layout_sidebar(
+                ui.sidebar(
+                    ui.input_action_button("humu_box_run_example", "RUN"),
+                    ui.card(
+                        ui.input_selectize("humu_box_score_1_example", "Choose Parameter", ["Tcells_Live"], selected = "Tcells_Live"),
+                        ui.input_selectize("humu_box_score_2_example", "Divide By Second Parameter (Optional)", ["CD45_Live"], selected="CD45_Live"),
                     ),
                     ui.card(
-                        ui.card(ui.card_header("Human"),
-                                output_widget("humu_gene_comparison_human_example")),
-                        ui.card(ui.card_header("Mouse"),
-                                output_widget("humu_gene_comparison_mouse_example")),
-                        full_screen=True
-                    ),
-                bg=panel_color
-                )
-            ),
-            ui.nav_panel("Mouse Boxplot", # EXAMPLE
-                ui.layout_sidebar(
-                    ui.sidebar(
-                        ui.input_action_button("humu_gene_box_run_example", "RUN"),
-                        ui.input_selectize("humu_gex_box_gene_example", "Choose Gene to plot:", ["Ctla4", "Ccr5"], selected="Ctla4"),
-                        ui.card(
-                            ui.input_selectize("humu_gex_box_x_cat_example", "Choose X-Axis Category:", hsh.categoricals_opts, selected = "Tumor Line"),
-                            ui.popover(
-                                    ui.span(
-                                        gear_fill,
-                                        style="position:absolute; top: 5px; right: 7px;",
-                                    ),
-                                    ui.input_selectize("humu_gex_box_cat_subset_example", "Subset Categories:", [], multiple=True, remove_button=True,options={"plugins": ["clear_button"]}),
-                                    placement="right",
-                                ),
-                        ),
-                        ui.card(
-                            ui.input_selectize("humu_gex_box_groupby_example", "Group by:", ["---"] + hsh.categoricals_opts, selected="Coarse Annotation"),
-                            ui.input_selectize("humu_gex_box_splitby_example", "Split by:", ["---"] + hsh.categoricals_opts, selected="---"),
-                        ),
-                        ui.card(ui.input_switch("humu_gex_box_sample_aggr_example", "Average Counts by Sample")),
-                        bg=panel_color
-                        ),
-                        ui.card(output_widget("gex_box_example"), full_screen=True),
-                        bg=panel_color
-                )
-            ),
-            ui.nav_panel("Mouse Dotplot", # EXAMPLE
-                ui.layout_sidebar(
-                    ui.sidebar(
-                        ui.input_selectize("humu_gex_dot_gene_example", "Choose Genes to plot:", 
-                                           ["Itgam", "C1qc", "Cd3e", "Ctla4", "Pdcd1", "Lag3", "Havcr2", "Tox"], 
-                                           selected=["Itgam", "C1qc", "Cd3e", "Ctla4", "Pdcd1", "Lag3", "Havcr2", "Tox"],multiple=True),
-                        ui.card(
-                            ui.popover(
+                        ui.input_selectize("humu_box_x_cat_example", "Select X-Axis Category", hsh.flow_cats, selected="Human Archetype / Mouse Tumor Line"),
+                        ui.popover(
                                 ui.span(
                                     gear_fill,
                                     style="position:absolute; top: 5px; right: 7px;",
                                 ),
-                                ui.input_selectize("humu_gex_dot_groups_example", "Subset Groupby Categories:", [], multiple=True),
+                                ui.input_selectize("humu_box_x_cat_filter_example", "Subset X-Axis Categories.", [], multiple=True),
                                 placement="right",
                             ),
-                            ui.input_selectize("humu_gex_dot_groupby_example", "Group By:", hsh.categoricals_opts, selected="Compartment"),
-                        ),
-                        ui.card(
-                            ui.popover(
-                                ui.span(
-                                    gear_fill,
-                                    style="position:absolute; top: 5px; right: 7px;",
-                                ),
-                                ui.input_selectize('humu_gex_dot_splits_example', "Subset Splitby Categories:", [], multiple=True),
-                                placement="right",
-                            ),
-                            ui.input_selectize("humu_gex_dot_splitby_example", "Split By:", ["---"] + hsh.categoricals_opts, selected="Tumor Line"),
-                        ),
-                        ui.card(ui.input_switch("humu_gex_dot_swap_example", "Swap Axes", False),
-                                ui.input_switch("humu_gex_dot_scale_example", "Z-Score Genes", False)),
-                        ui.input_action_button("humu_gex_dot_run_example", "RUN"),
-                        bg=panel_color
+                        ui.input_switch("humu_box_switch_example", "Sort X-Category On Value", True),
                     ),
-                ui.card(output_widget("show_humu_gex_dotplot_example"), full_screen=True),
-                bg = panel_color
-                )
-            ),
-            ui.nav_panel("Flow Cytometry Proportions", # EXAMPLE
-                ui.layout_sidebar(
-                    ui.sidebar(
-                        ui.input_action_button("humu_box_run_example", "RUN"),
-                        ui.card(
-                            ui.input_selectize("humu_box_score_1_example", "Choose Parameter", ["Tcells_Live"], selected = "Tcells_Live"),
-                            ui.input_selectize("humu_box_score_2_example", "Divide By Second Parameter (Optional)", ["CD45_Live"], selected="CD45_Live"),
-                        ),
-                        ui.card(
-                            ui.input_selectize("humu_box_x_cat_example", "Select X-Axis Category", hsh.flow_cats, selected="Human Archetype / Mouse Tumor Line"),
-                            ui.popover(
-                                    ui.span(
-                                        gear_fill,
-                                        style="position:absolute; top: 5px; right: 7px;",
-                                    ),
-                                    ui.input_selectize("humu_box_x_cat_filter_example", "Subset X-Axis Categories.", [], multiple=True),
-                                    placement="right",
-                                ),
-                            ui.input_switch("humu_box_switch_example", "Sort X-Category On Value", True),
-                        ),
-                        ui.card(ui.input_selectize("humu_box_group_example", "Group By:",  ["---"] + hsh.flow_cats, selected="Species")),
-                        bg=panel_color
-                    ),
-                ui.card(ui.card_body(output_widget("humu_expression_box_viol_example")),
-                        ui.card_footer("Click button in the bottom right for fullscreen view."),
-                        full_screen=True),
-                bg=panel_color,
+                    ui.card(ui.input_selectize("humu_box_group_example", "Group By:",  ["---"] + hsh.flow_cats, selected="Species")),
+                    bg=panel_color
+                ),
+            ui.card(ui.card_body(output_widget("humu_expression_box_viol_example")),
+                    ui.card_footer("Click button in the bottom right for fullscreen view."),
+                    full_screen=True),
+            bg=panel_color,
             )
-        )
+        )   
     ),
+    
     ui.nav_spacer(),
     #ui.nav_control(ui.a("QuIPI HuMu", href="https://quipi.org/app/quipi", class_="nav-link")),
     id = "humu_top_nav",
