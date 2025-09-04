@@ -15,6 +15,8 @@ import humu_flow_boxplot as hfb
 import humu_gex_plots as hxp
 import matplotlib.pyplot as plt
 
+from faicons import icon_svg
+
 gear_fill = ui.HTML(
     '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-gear-fill" viewBox="0 0 16 16"><path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/></svg>'
 )
@@ -162,30 +164,31 @@ app_ui = ui.page_navbar(
     ui.nav_panel("HuMu Expression Comparison",
         ui.layout_sidebar(
             ui.sidebar(
-                ui.card(
-                    ui.card_header("Human Options"),
-                    ui.input_selectize("humu_box_comp_human_genes", "Choose Human Gene", [], multiple=False),
-                    ui.input_selectize("humu_box_comp_x_cat_filter",
-                                        "Subset Compartments",
-                                        hsh.quipi_compartments,
-                                        selected=hsh.humu_compartments,
-                                        multiple=True,
-                                        remove_button=True,options={"plugins": ["clear_button"]}),
-                    ui.input_selectize("humu_box_comp_transformation",
-                                        "Select TPM Transformation: ",
-                                        ["TPM", "Log2(TPM)"],
-                                        multiple= False,
-                                        selected= "Log2(TPM)"),
-                    ui.input_selectize("humu_box_comp_human_groupby", "Group by:", ["---"] + hsh.quipi_cats_opts, selected="---"),
+                ui.accordion(
+                    ui.accordion_panel("Human Options",
+                        ui.input_selectize("humu_box_comp_human_genes", "Gene", [], multiple=False),
+                        ui.input_selectize("humu_box_comp_x_cat_filter",
+                                            "Compartments",
+                                            hsh.quipi_compartments,
+                                            selected=hsh.humu_compartments,
+                                            multiple=True,
+                                            remove_button=True,options={"plugins": ["clear_button"]}),
+                        ui.input_selectize("humu_box_comp_transformation",
+                                            "TPM Transformation",
+                                            ["TPM", "Log2(TPM)"],
+                                            multiple= False,
+                                            selected= "Log2(TPM)"),
+                        ui.input_selectize("humu_box_comp_human_groupby", "Groupby", ["---"] + hsh.quipi_cats_opts, selected="---"),
+                    ),
+                    ui.accordion_panel("Mouse Options",
+                        ui.input_selectize("humu_box_comp_mu_genes", "Gene", []),
+                        ui.input_selectize("humu_box_comp_cat_mouse_subset", "Compartments",hsh.humu_compartments, selected=hsh.humu_compartments, multiple=True, remove_button=True,options={"plugins": ["clear_button"]}),
+                        ui.input_selectize("humu_box_comp_mouse_groupby", "Groupby", ["---"] + hsh.categoricals_opts),
+                        ui.input_switch("humu_box_comp_sample_aggr", "Average Counts by Sample")
+                    ),
+                    open=False
                 ),
-                ui.card(
-                    ui.card_header("Mouse Options"),
-                    ui.input_selectize("humu_box_comp_mu_genes", "Choose Murine Gene", []),
-                    ui.input_selectize("humu_box_comp_cat_mouse_subset", "Subset Compartments",hsh.humu_compartments, selected=hsh.humu_compartments, multiple=True, remove_button=True,options={"plugins": ["clear_button"]}),
-                    ui.input_selectize("humu_box_comp_mouse_groupby", "Group by:", ["---"] + hsh.categoricals_opts),
-                    ui.input_switch("humu_box_comp_sample_aggr", "Average Counts by Sample")
-                ),
-                ui.input_action_button("humu_box_comp_run", "RUN"),
+                ui.input_action_button("humu_box_comp_run", "RUN",icon=icon_svg("arrow-right")),
             bg=panel_color
             ),
             ui.card(
@@ -200,28 +203,31 @@ app_ui = ui.page_navbar(
     ),
 
     ui.nav_menu("Mouse Gene Expression",
-                
         ui.nav_panel("Boxplots",
             ui.layout_sidebar(
                 ui.sidebar(
-                    ui.input_selectize("humu_gex_box_gene", "Choose Gene to plot:", []),
-                    ui.card(
-                        ui.popover(
-                            ui.span(
-                                gear_fill,
-                                style="position:absolute; top: 5px; right: 7px;",
-                            ),
-                            ui.input_selectize("humu_gex_box_cat_subset", "Subset Categories:", [], multiple=True, remove_button=True,options={"plugins": ["clear_button"]}),
-                            placement="right",
+                    ui.accordion(
+                        ui.accordion_panel("Gene",
+                            ui.input_selectize("humu_gex_box_gene", "", []),
                         ),
-                        ui.input_selectize("humu_gex_box_x_cat", "Choose X-Axis Category:", hsh.categoricals_opts),
+                        ui.accordion_panel("X-Axis Category",
+                            ui.popover(
+                                ui.span(
+                                    gear_fill,
+                                    style="float: right;",
+                                ),
+                                ui.input_selectize("humu_gex_box_cat_subset", "Subset Categories:", [], multiple=True, remove_button=True,options={"plugins": ["clear_button"]}),
+                                placement="right",
+                            ),
+                            ui.input_selectize("humu_gex_box_x_cat", "Choose X-Axis Category:", hsh.categoricals_opts),
+                        ),
+                        ui.accordion_panel("Parameters",
+                            ui.input_selectize("humu_gex_box_groupby", "Group by:", ["---"] + hsh.categoricals_opts, selected="---"),
+                            ui.input_selectize("humu_gex_box_splitby", "Split by:", ["---"] + hsh.categoricals_opts, selected="---"),
+                            ui.input_switch("humu_gex_box_sample_aggr", "Average Counts by Sample"),
+                        )
                     ),
-                    ui.card(
-                        ui.input_selectize("humu_gex_box_groupby", "Group by:", ["---"] + hsh.categoricals_opts, selected="---"),
-                        ui.input_selectize("humu_gex_box_splitby", "Split by:", ["---"] + hsh.categoricals_opts, selected="---"),
-                    ),
-                    ui.card(ui.input_switch("humu_gex_box_sample_aggr", "Average Counts by Sample")),
-                    ui.input_action_button("humu_gene_box_run", "RUN"),
+                    ui.input_action_button("humu_gene_box_run", "RUN",icon=icon_svg("arrow-right")),
                     bg=panel_color
                 ),
                 ui.card(output_widget("gex_box"), full_screen=True),
@@ -232,33 +238,39 @@ app_ui = ui.page_navbar(
         ui.nav_panel("Dotplots",
             ui.layout_sidebar(
                 ui.sidebar(
-                    ui.input_selectize("humu_gex_dot_gene", "Choose Genes to plot:", [], multiple=True),
-                    ui.card(
-                        ui.popover(
-                            ui.span(
-                                gear_fill,
-                                style="position:absolute; top: 5px; right: 7px;",
-                            ),
-                            ui.input_selectize("humu_gex_dot_groups", "Subset Groupby Categories:", [], multiple=True),
-                            placement="right",
+                    ui.accordion(
+                        ui.accordion_panel("Select Genes",
+                            ui.input_selectize("humu_gex_dot_gene", "", [], multiple=True),
                         ),
-                        ui.input_selectize("humu_gex_dot_groupby", "Group By:", hsh.categoricals_opts, selected="---"),
-                    ),
-                    ui.card(
-                        ui.popover(
-                            ui.span(
-                                gear_fill,
-                                style="position:absolute; top: 5px; right: 7px;",
+                        ui.accordion_panel("Groupby",
+                            ui.popover(
+                                ui.span(
+                                    gear_fill,
+                                    style="",
+                                ),
+                                ui.input_selectize("humu_gex_dot_groups", "Subset Groupby Categories:", [], multiple=True),
+                                placement="right",
                             ),
-                            ui.input_selectize('humu_gex_dot_splits', "Subset Splitby Categories:", [], multiple=True),
-                            placement="right",
+                            ui.input_selectize("humu_gex_dot_groupby", "", hsh.categoricals_opts, selected="---"),
                         ),
-                        ui.input_selectize("humu_gex_dot_splitby", "Split By:", ["---"] + hsh.categoricals_opts, selected="---"),
+                        ui.accordion_panel("Splitby",
+                            ui.popover(
+                                ui.span(
+                                    gear_fill,
+                                    style="",
+                                ),
+                                ui.input_selectize('humu_gex_dot_splits', "Subset Splitby Categories:", [], multiple=True),
+                                placement="right",
+                            ),
+                            ui.input_selectize("humu_gex_dot_splitby", "", ["---"] + hsh.categoricals_opts, selected="---"),
+                        ),
+                        ui.accordion_panel("Parameters",
+                            ui.card(ui.input_switch("humu_gex_dot_swap", "Swap Axes", value=False),
+                                    ui.input_switch("humu_gex_dot_scale", "Z-Score Genes", value=False)
+                            ),
+                        )
                     ),
-                    ui.card(ui.input_switch("humu_gex_dot_swap", "Swap Axes", value=False),
-                            ui.input_switch("humu_gex_dot_scale", "Z-Score Genes", value=False)
-                    ),
-                    ui.input_action_button("humu_gex_dot_run", "RUN"),
+                    ui.input_action_button("humu_gex_dot_run", "RUN",icon=icon_svg("arrow-right")),
                     bg=panel_color
                 ),
             ui.card(output_widget("show_humu_gex_dotplot"), full_screen=True),
@@ -270,24 +282,28 @@ app_ui = ui.page_navbar(
     ui.nav_panel("Flow Cytometry Proportions",
         ui.layout_sidebar(
             ui.sidebar(
-                ui.card(
-                    ui.input_selectize("humu_box_score_1", "Choose Parameter", hsh.flow_scores),
-                    ui.input_selectize("humu_box_score_2", "Divide By Second Parameter (Optional)", ["---"] + hsh.flow_scores, selected="---"),
-                ),
-                ui.card(
-                    ui.input_selectize("humu_box_x_cat", "Select X-Axis Category", hsh.flow_cats),
-                    ui.input_switch("humu_box_switch", "Sort X-Category On Value"),
-                        ui.popover(
-                            ui.span(
-                                gear_fill,
-                                style="position:absolute; top: 5px; right: 7px;",
+                ui.accordion(
+                    ui.accordion_panel("Parameters",
+                        ui.input_selectize("humu_box_score_1", "Parameter A", hsh.flow_scores),
+                        ui.input_selectize("humu_box_score_2", "Divide Parameter A by (optional):", ["---"] + hsh.flow_scores, selected="---"),
+                    ),
+                    ui.accordion_panel('X-Axis Category',
+                        ui.input_selectize("humu_box_x_cat", "", hsh.flow_cats),
+                        ui.input_switch("humu_box_switch", "Sort X-Category"),
+                            ui.popover(
+                                ui.span(
+                                    gear_fill,
+                                    style="position:absolute; top: 5px; right: 7px;",
+                                ),
+                                ui.input_selectize("humu_box_x_cat_filter", "Subset X-Axis Categories.", [], multiple=True),
+                                placement="right",
                             ),
-                            ui.input_selectize("humu_box_x_cat_filter", "Subset X-Axis Categories.", [], multiple=True),
-                            placement="right",
-                        ),
+                    ),
+                    ui.accordion_panel("Groupby",
+                        ui.input_selectize("humu_box_group", "",  ["---"] + hsh.flow_cats, selected="---"),
+                    ),
                 ),
-                ui.card(ui.input_selectize("humu_box_group", "Group By:",  ["---"] + hsh.flow_cats, selected="---")),
-                ui.input_action_button("humu_box_run", "RUN"),
+                ui.input_action_button("humu_box_run", "RUN",icon=icon_svg("arrow-right")),
                 bg=panel_color
             ),
             ui.card(ui.card_body(output_widget("humu_expression_box_viol")),
@@ -304,30 +320,30 @@ app_ui = ui.page_navbar(
         ui.nav_panel("HuMu Expression Comparison", # EXAMPLE
             ui.layout_sidebar(
                 ui.sidebar(
-                    ui.input_action_button("humu_box_comp_run_example", "RUN"),
-                    ui.card(
-                        ui.card_header("Human Options"),
-                        ui.input_selectize("humu_box_comp_human_genes_example", "Choose Human Gene", ["CTLA4", "CCR5"], multiple=False, selected="CTLA4"),
-                        ui.input_selectize("humu_box_comp_x_cat_filter_example",
-                                            "Subset Compartments",
-                                            hsh.quipi_compartments,
-                                            selected=hsh.humu_compartments,
-                                            multiple=True,
-                                            remove_button=True,options={"plugins": ["clear_button"]}),
-                        ui.input_selectize("humu_box_comp_transformation_example",
-                                            "Select TPM Transformation:",
-                                            ["TPM", "Log2(TPM)"],
-                                            multiple= False,
-                                            selected= "Log2(TPM)"),
-                        ui.input_selectize("humu_box_comp_human_groupby_example", "Group by:", ["---"] + hsh.quipi_cats_opts, selected="---")
-                        
-                    ),
-                    ui.card(
-                        ui.card_header("Mouse Options"),
-                        ui.input_selectize("humu_box_comp_mu_genes_example", "Choose Murine Gene", ["Ctla4", "Ccr5"], selected="Ctla4"),
-                        ui.input_selectize("humu_box_comp_cat_mouse_subset_example", "Subset Categories:",hsh.humu_compartments, selected=hsh.humu_compartments, multiple=True, remove_button=True,options={"plugins": ["clear_button"]}),
-                        ui.input_selectize("humu_box_comp_mouse_groupby_example", "Group by:", ["---"] + hsh.categoricals_opts),
-                        ui.input_switch("humu_box_comp_sample_aggr_example", "Average Counts by Sample")
+                    ui.input_action_button("humu_box_comp_run_example", "RUN",icon=icon_svg("arrow-right")),
+                    ui.accordion(
+                        ui.accordion_panel("Human",
+                            ui.input_selectize("humu_box_comp_human_genes_example", "Gene", ["CTLA4", "CCR5"], multiple=False, selected="CTLA4"),
+                            ui.input_selectize("humu_box_comp_x_cat_filter_example",
+                                                "Compartments",
+                                                hsh.quipi_compartments,
+                                                selected=hsh.humu_compartments,
+                                                multiple=True,
+                                                remove_button=True,options={"plugins": ["clear_button"]}),
+                            ui.input_selectize("humu_box_comp_transformation_example",
+                                                "TPM Transformation",
+                                                ["TPM", "Log2(TPM)"],
+                                                multiple= False,
+                                                selected= "Log2(TPM)"),
+                            ui.input_selectize("humu_box_comp_human_groupby_example", "Groupby", ["---"] + hsh.quipi_cats_opts, selected="---")
+                        ),
+                        ui.accordion_panel("Mouse",
+                            ui.input_selectize("humu_box_comp_mu_genes_example", "Gene", ["Ctla4", "Ccr5"], selected="Ctla4"),
+                            ui.input_selectize("humu_box_comp_cat_mouse_subset_example", "Categories",hsh.humu_compartments, selected=hsh.humu_compartments, multiple=True, remove_button=True,options={"plugins": ["clear_button"]}),
+                            ui.input_selectize("humu_box_comp_mouse_groupby_example", "Groupby", ["---"] + hsh.categoricals_opts),
+                            ui.input_switch("humu_box_comp_sample_aggr_example", "Average by Sample")
+                        ),
+                        open=False
                     ),
                     bg=panel_color
                 ),
@@ -344,24 +360,28 @@ app_ui = ui.page_navbar(
         ui.nav_panel("Mouse Boxplot", # EXAMPLE
             ui.layout_sidebar(
                 ui.sidebar(
-                    ui.input_action_button("humu_gene_box_run_example", "RUN"),
-                    ui.input_selectize("humu_gex_box_gene_example", "Choose Gene to plot:", ["Ctla4", "Ccr5"], selected="Ctla4"),
-                    ui.card(
-                        ui.input_selectize("humu_gex_box_x_cat_example", "Choose X-Axis Category:", hsh.categoricals_opts, selected = "Tumor Line"),
-                        ui.popover(
-                                ui.span(
-                                    gear_fill,
-                                    style="position:absolute; top: 5px; right: 7px;",
-                                ),
-                                ui.input_selectize("humu_gex_box_cat_subset_example", "Subset Categories:", [], multiple=True, remove_button=True,options={"plugins": ["clear_button"]}),
-                                placement="right",
+                    ui.input_action_button("humu_gene_box_run_example", "RUN",icon=icon_svg("arrow-right")),
+                    ui.accordion(
+                        ui.accordion_panel("Gene",
+                            ui.input_selectize("humu_gex_box_gene_example", "", ["Ctla4", "Ccr5"], selected="Ctla4"),
+                        ),
+                        ui.accordion_panel("X-Axis Category",
+                            ui.popover(
+                                    ui.span(
+                                        gear_fill,
+                                        style="",
+                                    ),
+                                    ui.input_selectize("humu_gex_box_cat_subset_example", "Subset Categories:", [], multiple=True, remove_button=True,options={"plugins": ["clear_button"]}),
+                                    placement="right",
                             ),
+                            ui.input_selectize("humu_gex_box_x_cat_example", "", hsh.categoricals_opts, selected = "Tumor Line"),
+                        ),
+                        ui.accordion_panel("Parameters",
+                            ui.input_selectize("humu_gex_box_groupby_example", "Groupby", ["---"] + hsh.categoricals_opts, selected="Coarse Annotation"),
+                            ui.input_selectize("humu_gex_box_splitby_example", "Splitby", ["---"] + hsh.categoricals_opts, selected="---"),
+                            ui.input_switch("humu_gex_box_sample_aggr_example", "Average by Sample"),
+                        ),
                     ),
-                    ui.card(
-                        ui.input_selectize("humu_gex_box_groupby_example", "Group by:", ["---"] + hsh.categoricals_opts, selected="Coarse Annotation"),
-                        ui.input_selectize("humu_gex_box_splitby_example", "Split by:", ["---"] + hsh.categoricals_opts, selected="---"),
-                    ),
-                    ui.card(ui.input_switch("humu_gex_box_sample_aggr_example", "Average Counts by Sample")),
                     bg=panel_color
                     ),
                     ui.card(output_widget("gex_box_example"), full_screen=True),
@@ -371,34 +391,43 @@ app_ui = ui.page_navbar(
         ui.nav_panel("Mouse Dotplot", # EXAMPLE
             ui.layout_sidebar(
                 ui.sidebar(
-                    ui.input_selectize("humu_gex_dot_gene_example", "Choose Genes to plot:", 
-                                        ["Itgam", "C1qc", "Cd3e", "Ctla4", "Pdcd1", "Lag3", "Havcr2", "Tox"], 
-                                        selected=["Itgam", "C1qc", "Cd3e", "Ctla4", "Pdcd1", "Lag3", "Havcr2", "Tox"],multiple=True),
-                    ui.card(
-                        ui.popover(
-                            ui.span(
-                                gear_fill,
-                                style="position:absolute; top: 5px; right: 7px;",
+                    ui.input_action_button("humu_gex_dot_run_example", "RUN",icon=icon_svg("arrow-right")),
+
+                    ui.accordion(
+                        ui.accordion_panel("Genes",
+                            ui.input_selectize("humu_gex_dot_gene_example", "", 
+                                                ["Itgam", "C1qc", "Cd3e", "Ctla4", "Pdcd1", "Lag3", "Havcr2", "Tox"], 
+                                                selected=["Itgam", "C1qc", "Cd3e", "Ctla4", "Pdcd1", "Lag3", "Havcr2", "Tox"],multiple=True)
                             ),
-                            ui.input_selectize("humu_gex_dot_groups_example", "Subset Groupby Categories:", [], multiple=True),
-                            placement="right",
-                        ),
-                        ui.input_selectize("humu_gex_dot_groupby_example", "Group By:", hsh.categoricals_opts, selected="Compartment"),
-                    ),
-                    ui.card(
-                        ui.popover(
-                            ui.span(
-                                gear_fill,
-                                style="position:absolute; top: 5px; right: 7px;",
+                        ui.accordion_panel("Groupby",
+                            ui.popover(
+                                ui.span(
+                                    gear_fill,
+                                    style="",
+                                ),
+                                ui.input_selectize("humu_gex_dot_groups_example", "Subset Groupby Categories:", [], multiple=True),
+                                placement="right",
                             ),
-                            ui.input_selectize('humu_gex_dot_splits_example', "Subset Splitby Categories:", [], multiple=True),
-                            placement="right",
+                            ui.input_selectize("humu_gex_dot_groupby_example", "Group By:", hsh.categoricals_opts, selected="Compartment"),
                         ),
-                        ui.input_selectize("humu_gex_dot_splitby_example", "Split By:", ["---"] + hsh.categoricals_opts, selected="Tumor Line"),
+
+                        ui.accordion_panel("Splitby",
+                            ui.popover(
+                                ui.span(
+                                    gear_fill,
+                                    style="",
+                                ),
+                                ui.input_selectize('humu_gex_dot_splits_example', "Subset Splitby Categories:", [], multiple=True),
+                                placement="right",
+                            ),
+                            ui.input_selectize("humu_gex_dot_splitby_example", "Split By:", ["---"] + hsh.categoricals_opts, selected="Tumor Line"),
+                        ),
+
+                        ui.accordion_panel("Parameters",
+                            ui.input_switch("humu_gex_dot_swap_example", "Swap Axes", False),
+                            ui.input_switch("humu_gex_dot_scale_example", "Z-Score Genes", False)
+                        )
                     ),
-                    ui.card(ui.input_switch("humu_gex_dot_swap_example", "Swap Axes", False),
-                            ui.input_switch("humu_gex_dot_scale_example", "Z-Score Genes", False)),
-                    ui.input_action_button("humu_gex_dot_run_example", "RUN"),
                     bg=panel_color
                 ),
             ui.card(output_widget("show_humu_gex_dotplot_example"), full_screen=True),
@@ -409,24 +438,29 @@ app_ui = ui.page_navbar(
         ui.nav_panel("Flow Cytometry Proportions", # EXAMPLE
             ui.layout_sidebar(
                 ui.sidebar(
-                    ui.input_action_button("humu_box_run_example", "RUN"),
-                    ui.card(
-                        ui.input_selectize("humu_box_score_1_example", "Choose Parameter", ["Tcells_Live"], selected = "Tcells_Live"),
-                        ui.input_selectize("humu_box_score_2_example", "Divide By Second Parameter (Optional)", ["CD45_Live"], selected="CD45_Live"),
-                    ),
-                    ui.card(
-                        ui.input_selectize("humu_box_x_cat_example", "Select X-Axis Category", hsh.flow_cats, selected="Human Archetype / Mouse Tumor Line"),
-                        ui.popover(
-                                ui.span(
-                                    gear_fill,
-                                    style="position:absolute; top: 5px; right: 7px;",
+                    ui.input_action_button("humu_box_run_example", "RUN",icon=icon_svg("arrow-right")),
+
+                    ui.accordion(
+                        ui.accordion_panel("Parameters",
+                            ui.input_selectize("humu_box_score_1_example", "Parameter A", ["Tcells_Live"], selected = "Tcells_Live"),
+                            ui.input_selectize("humu_box_score_2_example", "Divide Parameter A by (optional):", ["CD45_Live"], selected="CD45_Live"),
+                        ),
+                        ui.accordion_panel("X-Axis Category",
+                            ui.input_selectize("humu_box_x_cat_example", "", hsh.flow_cats, selected="Human Archetype / Mouse Tumor Line"),
+                            ui.popover(
+                                    ui.span(
+                                        gear_fill,
+                                        style="position:absolute; top: 5px; right: 7px;",
+                                    ),
+                                    ui.input_selectize("humu_box_x_cat_filter_example", "Subset X-Axis Categories.", [], multiple=True),
+                                    placement="right",
                                 ),
-                                ui.input_selectize("humu_box_x_cat_filter_example", "Subset X-Axis Categories.", [], multiple=True),
-                                placement="right",
-                            ),
-                        ui.input_switch("humu_box_switch_example", "Sort X-Category On Value", True),
+                            ui.input_switch("humu_box_switch_example", "Sort X-Category On Value", True),
+                        ),
+                        ui.accordion_panel("Groupby",
+                            ui.input_selectize("humu_box_group_example", "",  ["---"] + hsh.flow_cats, selected="Species"),
+                        )
                     ),
-                    ui.card(ui.input_selectize("humu_box_group_example", "Group By:",  ["---"] + hsh.flow_cats, selected="Species")),
                     bg=panel_color
                 ),
             ui.card(ui.card_body(output_widget("humu_expression_box_viol_example")),
@@ -462,10 +496,7 @@ app_ui = ui.page_navbar(
             """
         ),
     ),
-    #theme=theme.cosmo,
-    #bg = "#1a1807"
-    )
-#)
+)
 
 def server(input, output, session):
 
