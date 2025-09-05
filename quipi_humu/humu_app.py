@@ -279,7 +279,7 @@ app_ui = ui.page_navbar(
         ),
     ),
 
-    ui.nav_panel("Flow Cytometry Proportions",
+    ui.nav_panel("Composition Comparison",
         ui.layout_sidebar(
             ui.sidebar(
                 ui.accordion(
@@ -435,7 +435,7 @@ app_ui = ui.page_navbar(
             )
         ),
 
-        ui.nav_panel("Flow Cytometry Proportions", # EXAMPLE
+        ui.nav_panel("Composition Comparison", # EXAMPLE
             ui.layout_sidebar(
                 ui.sidebar(
                     ui.input_action_button("humu_box_run_example", "RUN",icon=icon_svg("arrow-right")),
