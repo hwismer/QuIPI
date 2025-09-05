@@ -425,7 +425,7 @@ app_ui = ui.page_navbar(
 
                         ui.accordion_panel("Parameters",
                             ui.input_switch("humu_gex_dot_swap_example", "Swap Axes", False),
-                            ui.input_switch("humu_gex_dot_scale_example", "Z-Score Genes", False)
+                            ui.input_switch("humu_gex_dot_scale_example", "Z-Score Genes", True)
                         )
                     ),
                     bg=panel_color
