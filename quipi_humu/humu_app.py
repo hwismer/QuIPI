@@ -76,31 +76,31 @@ app_ui = ui.page_navbar(
     ui.nav_panel(ui.tags.img(src="humu_logo.png", style="height: 70px;"),
         ui.layout_column_wrap(
             ui.card(
-                ui.card_header(ui.h1("What is HuMu?", style='color: white; font-weight: bold;')),
-                ui.h2("The Human-to-Mouse Cancer Translator Project (HuMu) aims to immuno-profile a series of \
+                ui.card_header(ui.h2("What is HuMu?", style='color: white; font-weight: bold;')),
+                ui.h3("The Human-to-Mouse Cancer Translator Project (HuMu) aims to immuno-profile a series of \
                                 common and exceptional models of cancer in mice to benchmark them against the diversity of \
                                 TMEs in Human cancer (i.e immune archetypes described in Combes, Samad, et al. Cell 2022).",
                                 style='color: white; font-weight: bold; margin-bottom: 10px;'),
                 ui.card_footer(ui.HTML(f'<a href="{"https://pubmed.ncbi.nlm.nih.gov/34963056/"}" target="_blank">Discovering dominant tumor immune archetypes in a pan-cancer census. Combes AJ, Samad B, Tsui J, et al. Cell. 2022</a>')),
-                style="background-color: #cca9a3; "
+                style="background-color: #a3c6cc; " #cca9a3
             ),
 
             ui.card(
-                ui.card_header(ui.h2("HuMu Archetypes Translation Dataset", style='color: white; font-weight: bold;')),
+                ui.card_header(ui.h2("HuMu Translation", style='color: white; font-weight: bold;')),
                 ui.tags.img(src="quipi_humu_reference.png",
                             style="height: auto; border: 2px solid #ddd; border-radius: 10px; box-shadow: 5px 5px 15px rgba(0,0,0,0.3);"
                             ),
                         style="background-color: #a3c6cc;"
             ),
             ui.card(
-                ui.card_header(ui.h1("HuMu Dataset", style='color: white; font-weight: bold;')),
-                ui.h2("The HuMu dataset contains high-dimensional cytometry data (CyTOF) of 15 murine models that \
+                ui.card_header(ui.h2("HuMu Dataset", style='color: white; font-weight: bold;')),
+                ui.h3("The HuMu dataset contains high-dimensional cytometry data (CyTOF) of 15 murine models that \
                     we use to study high level tumor-immune composition, as well as single-cell sequencing data \
                     from 9 of these models that we use to dissect more granular gene expression profiles across \
                     populations and tumor models.",
                     style='color: white; font-weight: bold; margin-bottom: 10px;'),
 
-                style="background-color: #c6cca3;"
+                style="background-color: #a3c6cc;" #c6cca3
             ),
         ),
     ),
@@ -219,11 +219,11 @@ app_ui = ui.page_navbar(
                                 ui.input_selectize("humu_gex_box_cat_subset", "Subset Categories:", [], multiple=True, remove_button=True,options={"plugins": ["clear_button"]}),
                                 placement="right",
                             ),
-                            ui.input_selectize("humu_gex_box_x_cat", "Choose X-Axis Category:", hsh.categoricals_opts),
+                            ui.input_selectize("humu_gex_box_x_cat", "", hsh.categoricals_opts),
                         ),
                         ui.accordion_panel("Parameters",
-                            ui.input_selectize("humu_gex_box_groupby", "Group by:", ["---"] + hsh.categoricals_opts, selected="---"),
-                            ui.input_selectize("humu_gex_box_splitby", "Split by:", ["---"] + hsh.categoricals_opts, selected="---"),
+                            ui.input_selectize("humu_gex_box_groupby", "Groupby", ["---"] + hsh.categoricals_opts, selected="---"),
+                            ui.input_selectize("humu_gex_box_splitby", "Splitby", ["---"] + hsh.categoricals_opts, selected="---"),
                             ui.input_switch("humu_gex_box_sample_aggr", "Average Counts by Sample"),
                         )
                     ),
