@@ -7,6 +7,8 @@ import matplotlib
 import humu_shared as hsh
 import plotly.graph_objects as go
 from scipy.stats import zscore
+import seaborn as sns
+from pandas.api.types import is_numeric_dtype
 
 def plot_sc_box(gene, x_cat, x_cat_subset, groupby, splitby, sample_aggr):
     cols = {gene, x_cat, groupby, splitby, "Mouse"} - {"---"}
@@ -180,6 +182,160 @@ def humu_box_comparison_mouse(mouse_gene, mouse_compartment_filters, sample_aggr
                 category_orders={"Compartment" : hsh.humu_compartments,})
 
     return fig
+
+
+# Plots a pancan umap for each gene in genes list within a certain compartment
+def plot_humu_umap(genes, categories):
+    
+    
+    input_arr = pd.read_feather("./quipi_humu_data/quipi_humu_adata_clean_full_PROC.feather", 
+                                columns =  genes + categories + ["X_UMAP", "Y_UMAP"])
+    
+
+    combined_length = len(genes + categories)
+
+    n_col = 4
+    n_rows = (combined_length + n_col - 1) // n_col
+    horizontal_spacing = 0.05
+
+    fig = make_subplots(rows =  n_rows , cols = n_col, 
+                        subplot_titles=genes + categories,
+                        vertical_spacing=.05,horizontal_spacing=horizontal_spacing,
+                        shared_xaxes=True,shared_yaxes=True)
+
+    count = 0
+    for gene in genes:
+        
+        row = count // n_col
+        col = count % n_col
+
+        x_col_end = (col + 1) / n_col
+    
+        # 2. Adjust for spacing if it's not the last column
+        if col < n_col - 1:
+            x_domain_end = x_col_end - (horizontal_spacing / 2)
+        else:
+            x_domain_end = x_col_end
+            
+        # 3. Final X position (normalized figure coordinate)
+        colorbar_x = x_domain_end - 0.002
+        y_center = 1 - ((row + 0.5) / n_rows)
+
+        scatter = go.Scattergl(
+        x = input_arr["X_UMAP"], 
+        y = input_arr["Y_UMAP"],
+        mode = 'markers',
+        marker=dict(
+            size=4,
+            color=input_arr[gene],
+            colorscale='Viridis',
+            colorbar=dict(
+                #title=gene,
+                # --- Positioning and Sizing Parameters ---
+                x=colorbar_x,
+                y=y_center,
+                yanchor="middle",
+                lenmode="fraction", # Use 'len' as a fraction of total figure height
+                len=0.75 / n_rows, # Set length relative to the subplot height (e.g., 75%)
+                # ----------------------------------------
+                thickness=15, 
+                thicknessmode="pixels"
+            ),
+        )
+    )
+
+    
+        fig.add_trace(scatter, row= row+1, col= col+1)
+        count += 1
+
+    
+    for cat in categories:
+
+
+        row = count // n_col
+        col = count % n_col
+
+
+        if is_numeric_dtype(input_arr[cat]):
+
+
+            x_col_end = (col + 1) / n_col
+        
+            # 2. Adjust for spacing if it's not the last column
+            if col < n_col - 1:
+                x_domain_end = x_col_end - (horizontal_spacing / 2)
+            else:
+                x_domain_end = x_col_end
+                
+            # 3. Final X position (normalized figure coordinate)
+            colorbar_x = x_domain_end - 0.002
+            y_center = 1 - ((row + 0.5) / n_rows)
+
+
+            scatter = go.Scattergl(x = input_arr["X_UMAP"], y = input_arr["Y_UMAP"],
+                                mode = 'markers',
+                                marker=dict(
+                                    size=4,  # Adjust marker size if needed
+                                    color=input_arr[cat],  # Color by the numerical value
+                                    colorscale='Viridis',
+                                    colorbar=dict(
+                #title=gene,
+                # --- Positioning and Sizing Parameters ---
+                x=colorbar_x,
+                y=y_center,
+                yanchor="middle",
+                lenmode="fraction", # Use 'len' as a fraction of total figure height
+                len=0.75 / n_rows, # Set length relative to the subplot height (e.g., 75%)
+                # ----------------------------------------
+                thickness=15, 
+                thicknessmode="pixels"
+            ),
+                                    ))
+
+
+        else:
+
+            color_sequence = px.colors.qualitative.Safe 
+            unique_categories = input_arr[cat].unique()
+
+            for i, category_value in enumerate(unique_categories):
+                color = color_sequence[i % len(color_sequence)] 
+                df_cat = input_arr[input_arr[cat].astype(str) == category_value]
+                
+                # Create the trace
+                scatter = go.Scattergl(
+                    x=df_cat["X_UMAP"], 
+                    y=df_cat["Y_UMAP"],
+                    mode='markers',
+                    name=category_value, # Name for the legend
+                    legendgroup=cat, 
+                    text=category_value,
+                    hoverinfo='text',
+                    showlegend=True, 
+                    marker=dict(
+                        size=4,
+                        color=color, # Assign single, discrete color
+                    ),
+                )
+                fig.add_trace(scatter, row=row + 1, col=col + 1)
+
+    
+        fig.add_trace(scatter, row= row+1, col= col+1)
+        count += 1
+    
+         
+
+    #fig.update_layout(showlegend=False) 
+    fig.update_xaxes(scaleanchor="y", scaleratio=1, showticklabels=False)
+    fig.update_yaxes(scaleanchor="x", scaleratio=1, showticklabels=False)
+    fig.update_layout(height=300*n_rows, width=290*n_col, showlegend=False,
+                     uirevision=True,)
+
+    return fig
+
+
+
+
 
     
 

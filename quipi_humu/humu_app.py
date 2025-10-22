@@ -24,6 +24,7 @@ gear_fill = ui.HTML(
 humu_tabs_mapped_to_gene_inputs = {"Boxplots" : [["humu_gex_box_gene", "Mouse"]],
                                    "Dotplots" : [["humu_gex_dot_gene", "Mouse"]],
                                    "HuMu Expression Comparison" : [["humu_box_comp_human_genes", "Human"],["humu_box_comp_mu_genes", "Mouse"]],
+                                   "UMAP Overlays" : [["humu_umap_gene", "Mouse"]]
 }
 
 
@@ -313,6 +314,27 @@ app_ui = ui.page_navbar(
         )
     ),
 
+    ui.nav_panel("UMAP Overlays",
+        ui.layout_sidebar(
+            ui.sidebar(
+                ui.accordion(
+                    ui.accordion_panel("Genes",
+                        ui.input_selectize("humu_umap_gene", "", [], multiple=True),
+                        #ui.input_selectize("humu_box_score_1", "Parameter A", hsh.flow_scores),
+                        #ui.input_selectize("humu_box_score_2", "Divide Parameter A by (optional):", ["---"] + hsh.flow_scores, selected="---"),
+                    ),
+                    ui.accordion_panel('Categories',
+                        ui.input_selectize("humu_umap_category", "", hsh.categoricals, multiple=True, selected = "Coarse Annotation")  
+                    ),
+                ),
+                ui.input_action_button("humu_umap_run", "RUN",icon=icon_svg("arrow-right")),
+                bg=panel_color
+            ),
+            output_widget("humu_umap_plot"),
+            bg=panel_color,
+        )
+    ),
+
 
 
     ##### EXAMPLE
@@ -490,7 +512,7 @@ app_ui = ui.page_navbar(
             body {
               background-color: #a1aace; /* Your desired navbar background color */
             }
-            .nav-link { font-size: 16px;
+            .nav-link { font-size: 14px;
                     color: black;
             }
             """
@@ -617,6 +639,19 @@ def server(input, output, session):
         x_cat = input.humu_box_comp_x_cat_mouse()
         cat_opts = list(pd.read_feather("./quipi_humu_data/quipi_humu_adata_clean_full_PROC.feather", columns=[x_cat])[x_cat].unique())
         ui.update_selectize("humu_box_comp_cat_mouse_subset", choices=cat_opts, selected=cat_opts)
+
+
+    @render_widget
+    @reactive.event(input.humu_umap_run)
+    def humu_umap_plot():
+        genes = input.humu_umap_gene()
+        categories = input.humu_umap_category()
+
+        plot = hxp.plot_humu_umap(list(genes), list(categories))
+
+
+        return plot
+
 
 
 
