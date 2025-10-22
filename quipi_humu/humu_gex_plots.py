@@ -194,6 +194,7 @@ def plot_humu_umap(genes, categories):
 
     combined_length = len(genes + categories)
 
+    # Create main figure, size set by total number of plots needed
     n_col = 4
     n_rows = (combined_length + n_col - 1) // n_col
     horizontal_spacing = 0.05
@@ -203,96 +204,88 @@ def plot_humu_umap(genes, categories):
                         vertical_spacing=.05,horizontal_spacing=horizontal_spacing,
                         shared_xaxes=True,shared_yaxes=True)
 
+    # count will keep track of how many plots have been plotted to allow for calculation of correct row and column
     count = 0
+
+    # Begin with the genes which should all have numeric values
     for gene in genes:
         
         row = count // n_col
         col = count % n_col
 
+        # Calculations for correct colorbar placement (still a bit wonky)
         x_col_end = (col + 1) / n_col
-    
-        # 2. Adjust for spacing if it's not the last column
         if col < n_col - 1:
             x_domain_end = x_col_end - (horizontal_spacing / 2)
         else:
             x_domain_end = x_col_end
-            
-        # 3. Final X position (normalized figure coordinate)
         colorbar_x = x_domain_end - 0.002
         y_center = 1 - ((row + 0.5) / n_rows)
 
+
         scatter = go.Scattergl(
-        x = input_arr["X_UMAP"], 
-        y = input_arr["Y_UMAP"],
-        mode = 'markers',
-        marker=dict(
-            size=4,
-            color=input_arr[gene],
-            colorscale='Viridis',
-            colorbar=dict(
-                #title=gene,
-                # --- Positioning and Sizing Parameters ---
-                x=colorbar_x,
-                y=y_center,
-                yanchor="middle",
-                lenmode="fraction", # Use 'len' as a fraction of total figure height
-                len=0.75 / n_rows, # Set length relative to the subplot height (e.g., 75%)
-                # ----------------------------------------
-                thickness=15, 
-                thicknessmode="pixels"
-            ),
+            x = input_arr["X_UMAP"], 
+            y = input_arr["Y_UMAP"],
+            mode = 'markers',
+            marker=dict(
+                size=4,
+                color=input_arr[gene],
+                colorscale='Viridis',
+                # May need tweaking
+                colorbar=dict(
+                    x=colorbar_x,
+                    y=y_center,
+                    yanchor="middle",
+                    lenmode="fraction",
+                    len=0.75 / n_rows,
+                    thickness=15, 
+                    thicknessmode="pixels"
+                ),
+            )
         )
-    )
 
     
         fig.add_trace(scatter, row= row+1, col= col+1)
         count += 1
 
-    
+    # Proceed to non-gene options such as nFeature_RNA or Coarse Annotation
+    # Mix of dtypes here needs consideration
     for cat in categories:
-
 
         row = count // n_col
         col = count % n_col
 
-
+        # Check if the category is numeric, in which case give it a continuous color palette and a colorbar
         if is_numeric_dtype(input_arr[cat]):
 
-
+            # Colorbar placement
             x_col_end = (col + 1) / n_col
-        
-            # 2. Adjust for spacing if it's not the last column
             if col < n_col - 1:
                 x_domain_end = x_col_end - (horizontal_spacing / 2)
             else:
                 x_domain_end = x_col_end
-                
-            # 3. Final X position (normalized figure coordinate)
             colorbar_x = x_domain_end - 0.002
             y_center = 1 - ((row + 0.5) / n_rows)
 
 
             scatter = go.Scattergl(x = input_arr["X_UMAP"], y = input_arr["Y_UMAP"],
-                                mode = 'markers',
-                                marker=dict(
-                                    size=4,  # Adjust marker size if needed
-                                    color=input_arr[cat],  # Color by the numerical value
-                                    colorscale='Viridis',
-                                    colorbar=dict(
-                #title=gene,
-                # --- Positioning and Sizing Parameters ---
-                x=colorbar_x,
-                y=y_center,
-                yanchor="middle",
-                lenmode="fraction", # Use 'len' as a fraction of total figure height
-                len=0.75 / n_rows, # Set length relative to the subplot height (e.g., 75%)
-                # ----------------------------------------
-                thickness=15, 
-                thicknessmode="pixels"
-            ),
-                                    ))
-
-
+                                   mode = 'markers',
+                                   marker=dict(
+                                       size=4,  # Adjust marker size if needed
+                                       color=input_arr[cat],  # Color by the numerical value
+                                       colorscale='Viridis',
+                                       colorbar=dict(
+                                            x=colorbar_x,
+                                            y=y_center,
+                                            yanchor="middle",
+                                            lenmode="fraction", # Use 'len' as a fraction of total figure height
+                                            len=0.75 / n_rows, # Set length relative to the subplot height (e.g., 75%)
+                                            thickness=15, 
+                                            thicknessmode="pixels"
+                                        ),
+                                    )
+                                )
+        # Otherwise if the category is qualitative, give it a discrete color palette
         else:
 
             color_sequence = px.colors.qualitative.Safe 
@@ -325,7 +318,6 @@ def plot_humu_umap(genes, categories):
     
          
 
-    #fig.update_layout(showlegend=False) 
     fig.update_xaxes(scaleanchor="y", scaleratio=1, showticklabels=False)
     fig.update_yaxes(scaleanchor="x", scaleratio=1, showticklabels=False)
     fig.update_layout(height=300*n_rows, width=290*n_col, showlegend=False,
