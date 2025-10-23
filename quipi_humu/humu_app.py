@@ -324,7 +324,9 @@ app_ui = ui.page_navbar(
                         #ui.input_selectize("humu_box_score_2", "Divide Parameter A by (optional):", ["---"] + hsh.flow_scores, selected="---"),
                     ),
                     ui.accordion_panel('Categories',
-                        ui.input_selectize("humu_umap_category", "", hsh.categoricals, multiple=True, selected = "Coarse Annotation")  
+                        ui.input_selectize("humu_umap_category", "", 
+                                           ['nCount_RNA','nFeature_RNA','Tumor Line','Compartment','Coarse Annotation', 'Fine Annotation'], 
+                                           multiple=True, selected = "Coarse Annotation")  
                     ),
                 ),
                 ui.input_action_button("humu_umap_run", "RUN",icon=icon_svg("arrow-right")),
