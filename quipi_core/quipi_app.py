@@ -782,8 +782,16 @@ app_ui = ui.page_navbar(
                 """)
         ),
     ), # END DGE MENU
-
-    ui.nav_control(ui.a("GitHub", href="https://github.com/hwismer/QuIPI", class_="nav-link",target="_blank")), # GITHUB LINK FOR ISSUES
+    
+    ui.nav_spacer(),
+    ui.nav_control(ui.a(ui.tags.img(src="humu_logo.png", style="height: 70px;"), href="https://quipi.org/app/quipi_humu",class_="nav-link",target="_blank")),
+    ui.nav_control(ui.a(ui.tags.img(
+                src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
+                height="70px",
+                style="vertical-align: middle;"
+            ), href="https://github.com/hwismer/QuIPI", class_="nav-link",target="_blank")), # GITHUB LINK FOR ISSUES
+    #ui.nav_control(ui.a("QuIPI HuMu", href="https://quipi.org/app/quipi_humu",class_="nav-link",target="_blank")),
+    
     id = "quipi_top_nav",
 
     # CSS code controlling navbar display, background color etc.
@@ -793,7 +801,7 @@ app_ui = ui.page_navbar(
             .navbar-nav {
               display: flex;
               align-items: center; /* This is the key line for vertical centering */
-              width: 100%;
+              width: auto;
               list-style: none;
               padding: 0;
             }
@@ -805,6 +813,8 @@ app_ui = ui.page_navbar(
             }
             .nav-link { font-size: 16px;
                     color: black;
+
+                
             }
             """
         ),
