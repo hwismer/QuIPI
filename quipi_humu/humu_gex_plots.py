@@ -184,36 +184,51 @@ def humu_box_comparison_mouse(mouse_gene, mouse_compartment_filters, sample_aggr
     return fig
 
 
-# Plots a pancan umap for each gene in genes list within a certain compartment
-def plot_humu_umap(genes, categories):
-    
-    
-    input_arr = pd.read_feather("./quipi_humu_data/quipi_humu_adata_clean_full_PROC.feather", 
-                                columns =  genes + categories + ["X_UMAP", "Y_UMAP"])
-    
+import logging
+import pickle
+from pandas.api.types import is_numeric_dtype
+from plotly.subplots import make_subplots
+import plotly.express as px
+import plotly.graph_objects as go
 
-    combined_length = len(genes + categories)
+logger = logging.getLogger("humu_umap_debug")
+if not logger.handlers:
+    h = logging.FileHandler("humu_umap_debug.log")
+    h.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
+    logger.addHandler(h)
+    logger.setLevel(logging.DEBUG)
 
-    # Create main figure, size set by total number of plots needed
+def plot_humu_umap(genes, categories, max_points=30000, per_category_max=8000):
+    """
+    max_points: cap total points loaded for numeric plots (sampled)
+    per_category_max: cap points per discrete category for categorical plots
+    """
+    # read only needed columns
+    cols = list(genes) + list(categories) + ["X_UMAP", "Y_UMAP"]
+    input_arr = pd.read_feather("./quipi_humu_data/quipi_humu_adata_clean_full_PROC.feather",
+                                columns=cols)
+
+    # global downsample if huge
+    total_rows = len(input_arr)
+    if total_rows > max_points:
+        input_arr = input_arr.sample(n=max_points, random_state=42).reset_index(drop=True)
+
+    combined_length = len(genes) + len(categories)
+
+    # subplot grid
     n_col = 4
     n_rows = (combined_length + n_col - 1) // n_col
     horizontal_spacing = 0.05
 
-    fig = make_subplots(rows =  n_rows , cols = n_col, 
+    fig = make_subplots(rows=n_rows, cols=n_col,
                         subplot_titles=genes + categories,
-                        vertical_spacing=.05,horizontal_spacing=horizontal_spacing,
-                        shared_xaxes=True,shared_yaxes=True)
+                        vertical_spacing=.05, horizontal_spacing=horizontal_spacing,
+                        shared_xaxes=True, shared_yaxes=True)
 
-    # count will keep track of how many plots have been plotted to allow for calculation of correct row and column
     count = 0
 
-    # Begin with the genes which should all have numeric values
-    for gene in genes:
-        
-        row = count // n_col
-        col = count % n_col
-
-        # Calculations for correct colorbar placement (still a bit wonky)
+    # helper to compute colorbar placement
+    def colorbar_pos(col, row):
         x_col_end = (col + 1) / n_col
         if col < n_col - 1:
             x_domain_end = x_col_end - (horizontal_spacing / 2)
@@ -221,107 +236,104 @@ def plot_humu_umap(genes, categories):
             x_domain_end = x_col_end
         colorbar_x = x_domain_end - 0.002
         y_center = 1 - ((row + 0.5) / n_rows)
+        return colorbar_x, y_center
 
+    # Genes (numeric)
+    for gene in genes:
+        row = count // n_col
+        col = count % n_col
+        colorbar_x, y_center = colorbar_pos(col, row)
 
         scatter = go.Scattergl(
-            x = input_arr["X_UMAP"], 
-            y = input_arr["Y_UMAP"],
-            mode = 'markers',
+            x=input_arr["X_UMAP"],
+            y=input_arr["Y_UMAP"],
+            mode='markers',
             marker=dict(
                 size=4,
                 color=input_arr[gene],
                 colorscale='Viridis',
-                # May need tweaking
                 colorbar=dict(
                     x=colorbar_x,
                     y=y_center,
                     yanchor="middle",
                     lenmode="fraction",
                     len=0.75 / n_rows,
-                    thickness=15, 
+                    thickness=15,
                     thicknessmode="pixels"
                 ),
-            )
+            ),
+            hoverinfo="skip"  # reduce payload, change if you need hover text
         )
-
-    
-        fig.add_trace(scatter, row= row+1, col= col+1)
+        fig.add_trace(scatter, row=row + 1, col=col + 1)
         count += 1
 
-    # Proceed to non-gene options such as nFeature_RNA or Coarse Annotation
-    # Mix of dtypes here needs consideration
+    # Categories (mixed dtypes)
     for cat in categories:
-
         row = count // n_col
         col = count % n_col
 
-        # Check if the category is numeric, in which case give it a continuous color palette and a colorbar
         if is_numeric_dtype(input_arr[cat]):
+            colorbar_x, y_center = colorbar_pos(col, row)
+            scatter = go.Scattergl(
+                x=input_arr["X_UMAP"],
+                y=input_arr["Y_UMAP"],
+                mode='markers',
+                marker=dict(
+                    size=4,
+                    color=input_arr[cat],
+                    colorscale='Viridis',
+                    colorbar=dict(
+                        x=colorbar_x,
+                        y=y_center,
+                        yanchor="middle",
+                        lenmode="fraction",
+                        len=0.75 / n_rows,
+                        thickness=15,
+                        thicknessmode="pixels"
+                    ),
+                ),
+                hoverinfo="skip"
+            )
+            fig.add_trace(scatter, row=row + 1, col=col + 1)
 
-            # Colorbar placement
-            x_col_end = (col + 1) / n_col
-            if col < n_col - 1:
-                x_domain_end = x_col_end - (horizontal_spacing / 2)
-            else:
-                x_domain_end = x_col_end
-            colorbar_x = x_domain_end - 0.002
-            y_center = 1 - ((row + 0.5) / n_rows)
-
-
-            scatter = go.Scattergl(x = input_arr["X_UMAP"], y = input_arr["Y_UMAP"],
-                                   mode = 'markers',
-                                   marker=dict(
-                                       size=4,  # Adjust marker size if needed
-                                       color=input_arr[cat],  # Color by the numerical value
-                                       colorscale='Viridis',
-                                       colorbar=dict(
-                                            x=colorbar_x,
-                                            y=y_center,
-                                            yanchor="middle",
-                                            lenmode="fraction", # Use 'len' as a fraction of total figure height
-                                            len=0.75 / n_rows, # Set length relative to the subplot height (e.g., 75%)
-                                            thickness=15, 
-                                            thicknessmode="pixels"
-                                        ),
-                                    )
-                                )
-        # Otherwise if the category is qualitative, give it a discrete color palette
         else:
-
-            color_sequence = px.colors.qualitative.Safe 
+            color_sequence = px.colors.qualitative.Safe
             unique_categories = input_arr[cat].unique()
 
+            # for each discrete category, sample up to per_category_max points
             for i, category_value in enumerate(unique_categories):
-                color = color_sequence[i % len(color_sequence)] 
-                df_cat = input_arr[input_arr[cat].astype(str) == category_value]
-                
-                # Create the trace
+                color = color_sequence[i % len(color_sequence)]
+                df_cat = input_arr[input_arr[cat].astype(str) == str(category_value)]
+                if len(df_cat) > per_category_max:
+                    df_cat = df_cat.sample(n=per_category_max, random_state=42)
+
                 scatter = go.Scattergl(
-                    x=df_cat["X_UMAP"], 
+                    x=df_cat["X_UMAP"],
                     y=df_cat["Y_UMAP"],
                     mode='markers',
-                    name=category_value, # Name for the legend
-                    legendgroup=cat, 
-                    text=category_value,
-                    hoverinfo='text',
-                    showlegend=True, 
-                    marker=dict(
-                        size=4,
-                        color=color, # Assign single, discrete color
-                    ),
+                    name=str(category_value),
+                    legendgroup=str(cat),
+                    text=None,
+                    hoverinfo='skip',
+                    showlegend=False,  # hide per-subplot legend to reduce payload; enable if desired
+                    marker=dict(size=4, color=color)
                 )
                 fig.add_trace(scatter, row=row + 1, col=col + 1)
 
-    
-        fig.add_trace(scatter, row= row+1, col= col+1)
         count += 1
-    
-         
 
-    fig.update_xaxes(scaleanchor="y", scaleratio=1, showticklabels=False)
-    fig.update_yaxes(scaleanchor="x", scaleratio=1, showticklabels=False)
-    fig.update_layout(height=300*n_rows, width=290*n_col, showlegend=False,
-                     uirevision=True,)
+    # axis layout
+    fig.update_xaxes(matches=None)  # keep per-subplot axes but no ticks
+    fig.update_xaxes(showticklabels=False)
+    fig.update_yaxes(showticklabels=False)
+    fig.update_layout(height=300 * n_rows, width=290 * n_col, showlegend=False)
+
+    # debug: try to pickle and log size (helpful to see if still huge)
+    try:
+        s = len(pickle.dumps(fig))
+        logger.debug("plot_humu_umap returning figure, pickled size=%d bytes (rows=%d)", s, total_rows)
+    except Exception as e:
+        logger.exception("Could not pickle figure: %s", e)
 
     return fig
 

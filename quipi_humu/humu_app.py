@@ -74,7 +74,7 @@ app_ui = ui.page_navbar(
     #     style="padding-bottom: 5px;"
     # ),
 
-    ui.nav_panel(ui.tags.img(src="humu_logo.png", style="height: 70px;"),
+    ui.nav_panel(ui.tags.img(src="humu_logo.png", style="height: 75px;"),
         ui.layout_column_wrap(
             ui.card(
                 ui.card_header(ui.h2("What is HuMu?", style='color: white; font-weight: bold;')),
@@ -314,28 +314,29 @@ app_ui = ui.page_navbar(
         )
     ),
 
-    ui.nav_panel("UMAP Overlays",
-        ui.layout_sidebar(
-            ui.sidebar(
-                ui.accordion(
-                    ui.accordion_panel("Genes",
-                        ui.input_selectize("humu_umap_gene", "", [], multiple=True),
-                        #ui.input_selectize("humu_box_score_1", "Parameter A", hsh.flow_scores),
-                        #ui.input_selectize("humu_box_score_2", "Divide Parameter A by (optional):", ["---"] + hsh.flow_scores, selected="---"),
-                    ),
-                    ui.accordion_panel('Categories',
-                        ui.input_selectize("humu_umap_category", "", 
-                                           ['nCount_RNA','nFeature_RNA','Tumor Line','Compartment','Coarse Annotation', 'Fine Annotation'], 
-                                           multiple=True, selected = "Coarse Annotation")  
-                    ),
-                ),
-                ui.input_action_button("humu_umap_run", "RUN",icon=icon_svg("arrow-right")),
-                bg=panel_color
-            ),
-            output_widget("humu_umap_plot"),
-            bg=panel_color,
-        )
-    ),
+    
+    #ui.nav_panel("UMAP Overlays",
+    #    ui.layout_sidebar(
+    #        ui.sidebar(
+    #            ui.accordion(
+    #                ui.accordion_panel("Genes",
+    #                    ui.input_selectize("humu_umap_gene", "", [], multiple=True),
+    #                    #ui.input_selectize("humu_box_score_1", "Parameter A", hsh.flow_scores),
+    #                    #ui.input_selectize("humu_box_score_2", "Divide Parameter A by (optional):", ["---"] + hsh.flow_scores, selected="---"),
+    #                ),
+    #                ui.accordion_panel('Categories',
+    #                    ui.input_selectize("humu_umap_category", "", 
+    #                                       ['nCount_RNA','nFeature_RNA','Tumor Line','Compartment','Coarse Annotation', 'Fine Annotation'], 
+    #                                       multiple=True, selected = "Coarse Annotation")  
+    #                ),
+    #            ),
+    #            ui.input_action_button("humu_umap_run", "RUN",icon=icon_svg("arrow-right")),
+    #            bg=panel_color
+    #        ),
+    #        output_widget("humu_umap_plot"),
+    #        bg=panel_color,
+    #    )
+    #),
 
 
 
@@ -496,6 +497,12 @@ app_ui = ui.page_navbar(
     ),
     
     ui.nav_spacer(),
+    ui.nav_control(ui.a(ui.tags.img(src="quipi.png", style="height: 70px;"), href="https://quipi.org/app/quipi",class_="nav-link",target="_blank")),
+    ui.nav_control(ui.a(ui.tags.img(
+                src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
+                height="70px",
+                style="vertical-align: middle;"
+            ), href="https://github.com/hwismer/QuIPI", class_="nav-link",target="_blank")),
     #ui.nav_control(ui.a("QuIPI HuMu", href="https://quipi.org/app/quipi", class_="nav-link")),
     id = "humu_top_nav",
     header=ui.tags.div(
@@ -504,7 +511,7 @@ app_ui = ui.page_navbar(
             .navbar-nav {
               display: flex;
               align-items: center; /* This is the key line for vertical centering */
-              width: 100%;
+              width: auto;
               list-style: none;
               padding: 0;
             }
@@ -512,10 +519,12 @@ app_ui = ui.page_navbar(
               margin: 0 15px;
             }
             body {
-              background-color: #a1aace; /* Your desired navbar background color */
+              background-color: #BDD0D5; /* Your desired navbar background color */
             }
-            .nav-link { font-size: 14px;
+            .nav-link { font-size: 16px;
                     color: black;
+
+                
             }
             """
         ),
@@ -646,12 +655,12 @@ def server(input, output, session):
     @render_widget
     @reactive.event(input.humu_umap_run)
     def humu_umap_plot():
+
         genes = input.humu_umap_gene()
         categories = input.humu_umap_category()
 
         plot = hxp.plot_humu_umap(list(genes), list(categories))
-
-
+        print(plot)
         return plot
 
 
