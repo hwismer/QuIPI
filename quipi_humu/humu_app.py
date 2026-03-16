@@ -85,15 +85,15 @@ app_ui = ui.page_navbar(
                                 TMEs in Human cancer (i.e immune archetypes described in Combes, Samad, et al. Cell 2022).",
                                 style='color: white; font-weight: bold; margin-bottom: 10px;'),
                 ui.card_footer(ui.HTML(f'<a href="{"https://pubmed.ncbi.nlm.nih.gov/34963056/"}" target="_blank">Discovering dominant tumor immune archetypes in a pan-cancer census. Combes AJ, Samad B, Tsui J, et al. Cell. 2022</a>')),
-                style="background-color: #a3c6cc; " #cca9a3
+                style="background-color: #9AC6B0; " #cca9a3
             ),
 
             ui.card(
-                ui.card_header(ui.h2("HuMu Translation", style='color: white; font-weight: bold;')),
+                ui.card_header(ui.h2("HuMu Data", style='color: white; font-weight: bold;')),
                 ui.tags.img(src="quipi_humu_reference.png",
                             style="height: auto; border: 2px solid #ddd; border-radius: 10px; box-shadow: 5px 5px 15px rgba(0,0,0,0.3);"
                             ),
-                        style="background-color: #a3c6cc;"
+                        style="background-color: #9AC6B0;"
             ),
             ui.card(
                 ui.card_header(ui.h2("HuMu Dataset", style='color: white; font-weight: bold;')),
@@ -103,7 +103,7 @@ app_ui = ui.page_navbar(
                     populations and tumor models.",
                     style='color: white; font-weight: bold; margin-bottom: 10px;'),
 
-                style="background-color: #a3c6cc;" #c6cca3
+                style="background-color: #9AC6B0;" #c6cca3
             ),
         ),
     ),
