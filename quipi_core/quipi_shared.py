@@ -159,7 +159,7 @@ color_dict = {"indication" : indic_to_color,
               }
 
 def process_gene_text_input(input_text):
-    input_text = input_text.split("\n")
+    input_text = input_text.upper().split("\n")
 
     text_genes = []
     for line in input_text:

@@ -722,9 +722,7 @@ def server(input, output, session):
     @render.download(filename="humu_query.csv")
     def humu_download_query_table():
         df = gene_expr_query_backend()
-        csv_buffer = StringIO()
-        df.to_csv(csv_buffer, index=True)
-        yield csv_buffer.getvalue()
+        yield df.to_csv(index=True)
         
 
     ##### HUMU COMPARISON BOXPLOTS   

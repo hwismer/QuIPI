@@ -1099,9 +1099,7 @@ def server(input, output, session):
     @render.download(filename="quipi_query.csv")
     def download_query_table():
         df = gene_expr_query_backend()
-        csv_buffer = StringIO()
-        df.to_csv(csv_buffer, index=False)
-        yield csv_buffer.getvalue()
+        yield df.to_csv(index=False)
 
 
     ##########  CORRELATION PLOTS
