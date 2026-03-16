@@ -33,6 +33,31 @@ categorial_opts_dict = {"Tumor Line": ['B16-F10', 'LLC', 'MC38', 'RENCA', '4T1',
                                              'TAM_prolif_Mgl2_Cst3','MonoMac_ISG_C1q','pDC',
                                              'Tumor_Prolif_1','TAM_prolif_matrix','Melano_Prolif','gdT_other','DC_Cst3']}
 
+
+def process_gene_text_input_humu(input_text):
+    input_text = input_text.upper().split("\n")
+
+    text_genes = []
+    for line in input_text:
+        line = line.strip().replace("\"", "")
+
+        if "\t" in line:
+            curr_genes = line.split("\t")
+        elif "," in line:
+            curr_genes = line.split(",")
+        elif " " in line:
+            curr_genes = line.split(" ")
+        else:
+            curr_genes = [line]
+
+        
+        for gene in curr_genes:
+            gene = gene.strip().capitalize()
+            if gene and gene in genes:
+                text_genes.append(gene)
+
+    return text_genes
+
 ## QUIPI
 
 humu_compartments = ["Tumor", "T Cell", "T-Reg", "Myeloid", "Stroma"]
@@ -151,3 +176,5 @@ quipi_orders = {"indication" : indication_order,
 with open("./quipi_humu_data/quipi_humu_genes.csv", "r") as f:
     reader = csv.reader(f)
     genes = next(reader)
+
+

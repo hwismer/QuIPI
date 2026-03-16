@@ -17,6 +17,8 @@ import matplotlib.pyplot as plt
 
 from faicons import icon_svg
 
+from io import StringIO
+
 gear_fill = ui.HTML(
     '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-gear-fill" viewBox="0 0 16 16"><path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/></svg>'
 )
@@ -106,61 +108,148 @@ app_ui = ui.page_navbar(
         ),
     ),
 
-    ui.nav_panel("FAQ / Terminology",
-        ui.accordion(
-            ui.accordion_panel("Mouse",
-                    ui.layout_column_wrap(
-                        ui.card(ui.h3("Tumor Line",style='font-weight: bold;'),
-                                ui.h5("Mouse tumor models used in the study"),
+    ui.nav_panel("Resources",
+        ui.card(ui.h3("Terminology"),
+            ui.accordion(
+                ui.accordion_panel("Mouse",
+                        ui.layout_column_wrap(
+                            ui.card(ui.h3("Tumor Line",style='font-weight: bold;'),
+                                    ui.h5("Mouse tumor models used in the study"),
+                                    style="background-color: #BDD0D5; color: #333;"
+                            ),
+                            ui.card(ui.h3("Compartment",style='font-weight: bold;'),
+                                    ui.h5("TME compartments as defined in Combes, Samad et al. Cell 2022. \
+                                    These describe either pooled effector T cells (T cell), Tregs, pooled myeloid cells \
+                                    (Myeloid, containing monocytes, macrophages and dendritic cells), Stroma (fibroblasts \
+                                    sorted as CD45-CD44+CD90+ in human and defined in mouse as fibroblasts matching the human \
+                                    Stroma gene signature) or Tumor (sorted in human as CD45- non-Stroma and identified in mouse \
+                                    scRNAseq as bieng tumor cells according to their DEGs)"),
                                 style="background-color: #BDD0D5; color: #333;"
+                                
+                            ),
+                            ui.card(ui.h3("Coarse Annotation",style='font-weight: bold;'),
+                                ui.h5("Coarse level of annotations made on the mouse scRNAseq data. Describes high level populations."),
+                                style="background-color: #BDD0D5; color: #333;"
+                            ),
+                            ui.card(ui.h3("Fine Annotation",style='font-weight: bold;'),
+                                ui.h5("Fine level of annotations made on the mouse scRNAseq data. Describes individual subsets of cells as shown in Figure S2."),
+                                style="background-color: #BDD0D5; color: #333;"
+                            ),
+                            width=.5
                         ),
-                        ui.card(ui.h3("Compartment",style='font-weight: bold;'),
+                ),
+                ui.accordion_panel("Human",
+                        ui.layout_column_wrap(
+                            ui.card(ui.h3("Indication",style='font-weight: bold;'),
+                                    ui.h5("Tumor indication of ImmunoProfiler patients"),
+                                    style="background-color: #BDD0D5; color: #333;"
+                            ),
+                            ui.card(ui.h3("Archetype",style='font-weight: bold;'),
+                                    ui.h5("Tumor-immune archetypes as defined in Combes, Samad et al. Cell 2022"),
+                                    ui.HTML(f'<a href="{"https://pubmed.ncbi.nlm.nih.gov/34963056/"}" target="_blank">Discovering dominant tumor immune archetypes in a pan-cancer census. Combes AJ, Samad B, Tsui J, et al. Cell. 2022</a>'),
+                                    style="background-color: #BDD0D5; color: #333;"
+                            ),
+                            ui.card(ui.h3("Compartment",style='font-weight: bold;'),
                                 ui.h5("TME compartments as defined in Combes, Samad et al. Cell 2022. \
                                 These describe either pooled effector T cells (T cell), Tregs, pooled myeloid cells \
                                 (Myeloid, containing monocytes, macrophages and dendritic cells), Stroma (fibroblasts \
                                 sorted as CD45-CD44+CD90+ in human and defined in mouse as fibroblasts matching the human \
                                 Stroma gene signature) or Tumor (sorted in human as CD45- non-Stroma and identified in mouse \
                                 scRNAseq as bieng tumor cells according to their DEGs)"),
-                            style="background-color: #BDD0D5; color: #333;"
-                            
-                        ),
-                        ui.card(ui.h3("Coarse Annotation",style='font-weight: bold;'),
-                            ui.h5("Coarse level of annotations made on the mouse scRNAseq data. Describes high level populations."),
-                            style="background-color: #BDD0D5; color: #333;"
-                        ),
-                        ui.card(ui.h3("Fine Annotation",style='font-weight: bold;'),
-                            ui.h5("Fine level of annotations made on the mouse scRNAseq data. Describes individual subsets of cells as shown in Figure S2."),
-                            style="background-color: #BDD0D5; color: #333;"
-                        ),
-                        width=.5
-                    ),
-            ),
-            ui.accordion_panel("Human",
-                    ui.layout_column_wrap(
-                        ui.card(ui.h3("Indication",style='font-weight: bold;'),
-                                ui.h5("Tumor indication of ImmunoProfiler patients"),
                                 style="background-color: #BDD0D5; color: #333;"
-                        ),
-                        ui.card(ui.h3("Archetype",style='font-weight: bold;'),
-                                ui.h5("Tumor-immune archetypes as defined in Combes, Samad et al. Cell 2022"),
-                                ui.HTML(f'<a href="{"https://pubmed.ncbi.nlm.nih.gov/34963056/"}" target="_blank">Discovering dominant tumor immune archetypes in a pan-cancer census. Combes AJ, Samad B, Tsui J, et al. Cell. 2022</a>'),
-                                style="background-color: #BDD0D5; color: #333;"
-                        ),
-                        ui.card(ui.h3("Compartment",style='font-weight: bold;'),
-                            ui.h5("TME compartments as defined in Combes, Samad et al. Cell 2022. \
-                            These describe either pooled effector T cells (T cell), Tregs, pooled myeloid cells \
-                            (Myeloid, containing monocytes, macrophages and dendritic cells), Stroma (fibroblasts \
-                            sorted as CD45-CD44+CD90+ in human and defined in mouse as fibroblasts matching the human \
-                            Stroma gene signature) or Tumor (sorted in human as CD45- non-Stroma and identified in mouse \
-                            scRNAseq as bieng tumor cells according to their DEGs)"),
-                            style="background-color: #BDD0D5; color: #333;"
-                        ),
-                        width=.5
+                            ),
+                            width=.5
+                        )
+                ),
+                open=False
+            )
+        ),
+        ui.layout_column_wrap(
+
+            ui.card(ui.h3("QuIPI"),
+                    "QuIPI is a user interface designed to make it easy to visualize the UCSF Immunoprofiler dataset. QuIPI incorporates Bulk RNA-Seq and Flow Cytometry data from over 400 cancer samples across multiple indications. QuIPI also incorporates archetype calls, building off of the work of Combes, Samad et al. Cell 2022 in order to identify common immune states across cancer types. QuIPI provides quick and easy to use plotting functionality, allowing anyone to discover trends and insights from Immunoprofiler data. QuIPI modules are designed with the hope that they can be generalizable to different questions while still allowing for sufficient cusomization.",
+                    ui.p("Find it here:",class_="mt-2"),
+                    ui.div(
+                        ui.a(ui.tags.img(src="quipi.png", style="height: 125px;"), href="https://quipi.org/app/quipi",class_="nav-link",target="_blank")
+                        #class_="text-center"
                     )
             ),
-            open=False
-        )
+
+            ui.card(ui.h3("Github"),
+                "Please submit any feedback, feature requests, bugs, or suggestions as issues on the github page for QuIPI.",
+                ui.br(),
+                ui.p("Find it here:", class_="mt-4"),
+                ui.div(ui.a(ui.tags.img(
+                        src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
+                        height="150px",
+                    ),href="https://github.com/hwismer/QuIPI", class_="nav-link",target="_blank"),
+                    
+                #class_="text-center"
+                )
+            ), # GITHUB LINK FOR ISSUES
+        ),
     ),
+
+    # DATA QUERY NAV
+    ui.nav_panel("Data Query",
+        ui.layout_sidebar(
+            ui.sidebar(
+                ui.h4("Data Query"),
+                ui.accordion(
+                    ui.accordion_panel("Input Genes",
+                        ui.input_text_area(
+                            "humu_gene_expr_query_genes",
+                            "",
+                            rows=4
+                        ),
+                    ),
+                    ui.accordion_panel("Select Tumor Lines",
+                        ui.input_selectize("humu_query_indication",
+                                            "",
+                                            choices=hsh.categorial_opts_dict["Tumor Line"],
+                                            selected=hsh.categorial_opts_dict["Tumor Line"],
+                                            multiple = True,
+                                            remove_button=True,options={"plugins": ["clear_button"]}
+                        ),
+                    ),
+                    ui.accordion_panel("Select Compartments",
+                        ui.input_selectize("humu_query_compartment",
+                                            "",
+                                            choices=hsh.categorial_opts_dict["Compartment"],
+                                            selected=hsh.categorial_opts_dict["Compartment"],
+                                            multiple=True,
+                                            remove_button=True,options={"plugins": ["clear_button"]}
+                        ),
+                    ),
+                    ui.accordion_panel("Select Coarse Cell Types",
+                        ui.input_selectize("humu_query_coarse_celltype",
+                                            "",
+                                            choices=hsh.categorial_opts_dict["Coarse Annotation"],
+                                            multiple=True,
+                                            selected=hsh.categorial_opts_dict["Coarse Annotation"],
+                                            remove_button=True,options={"plugins": ["clear_button"]}
+                        ),
+                    ),
+                    ui.accordion_panel("Select Fine Cell Types",
+                        ui.input_selectize("humu_query_fine_celltype",
+                                            "",
+                                            choices=hsh.categorial_opts_dict["Fine Annotation"],
+                                            multiple=True,
+                                            selected=hsh.categorial_opts_dict["Fine Annotation"],
+                                            remove_button=True,options={"plugins": ["clear_button"]}
+                        ),
+                    ),
+                ),
+            ui.input_action_button("humu_gene_expr_query_run", "RUN", icon=icon_svg("arrow-right")),
+            ui.download_button("humu_download_query_table", "Download CSV", icon=icon_svg("download")),
+            bg=panel_color
+            ),
+            ui.card(ui.output_data_frame("humu_gene_expr_query"),full_screen=True),
+            bg=panel_color
+        ),
+    ),
+
+
 
     ui.nav_panel("HuMu Expression Comparison",
         ui.layout_sidebar(
@@ -496,35 +585,21 @@ app_ui = ui.page_navbar(
         )   
     ),
     
-    ui.nav_spacer(),
-    ui.nav_control(ui.a(ui.tags.img(src="quipi.png", style="height: 70px;"), href="https://quipi.org/app/quipi",class_="nav-link",target="_blank")),
-    ui.nav_control(ui.a(ui.tags.img(
-                src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
-                height="70px",
-                style="vertical-align: middle;"
-            ), href="https://github.com/hwismer/QuIPI", class_="nav-link",target="_blank")),
-    #ui.nav_control(ui.a("QuIPI HuMu", href="https://quipi.org/app/quipi", class_="nav-link")),
     id = "humu_top_nav",
+    
     header=ui.tags.div(
         ui.tags.style(
-             """
-            .navbar-nav {
-              display: flex;
-              align-items: center; /* This is the key line for vertical centering */
-              width: auto;
-              list-style: none;
-              padding: 0;
-            }
-            .nav-item {
-              margin: 0 15px;
-            }
+            """
             body {
               background-color: #BDD0D5; /* Your desired navbar background color */
             }
             .nav-link { font-size: 16px;
                     color: black;
-
                 
+            }
+            .navbar .navbar-nav, .navbar .nav {
+                display: flex;
+                align-items: center;
             }
             """
         ),
@@ -615,6 +690,41 @@ def server(input, output, session):
 
 
     
+    ##### GENE EXPRESSION QUERY
+
+    # Return the subset of the raw dataframe depending on user input
+    @reactive.calc
+    @reactive.event(input.humu_gene_expr_query_run)
+    def gene_expr_query_backend():
+        genes = hsh.process_gene_text_input_humu(input.humu_gene_expr_query_genes())
+        indications = input.humu_query_indication()
+        compartments = input.humu_query_compartment()
+        coarse = input.humu_query_coarse_celltype()
+        fine = input.humu_query_fine_celltype()
+
+        df = pd.read_feather("./quipi_humu_data/quipi_humu_adata_clean_full_PROC.feather", columns = ["__index_level_0__"] + hsh.categoricals_opts + genes )
+
+        subset = df[(df["Tumor Line"].isin(indications)) & \
+                    (df["Compartment"].isin(compartments)) & \
+                    (df["Coarse Annotation"].isin(coarse)) & \
+                    (df["Fine Annotation"].isin(fine))]
+        
+        #subset = subset[["patient","indication","sample_type","compartment","archetype"] + list(genes)]
+
+        return subset
+    
+    # Returns the dataframe for visualization
+    @render.data_frame
+    def humu_gene_expr_query():
+        return gene_expr_query_backend()
+    
+    # Download option
+    @render.download(filename="humu_query.csv")
+    def humu_download_query_table():
+        df = gene_expr_query_backend()
+        csv_buffer = StringIO()
+        df.to_csv(csv_buffer, index=True)
+        yield csv_buffer.getvalue()
         
 
     ##### HUMU COMPARISON BOXPLOTS   
