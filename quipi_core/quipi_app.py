@@ -91,174 +91,110 @@ app_ui = ui.page_navbar(
                 ui.HTML(f'<a href="{"https://immunoprofiler.org/cancer"}" target="_blank">UCSF Immunoprofiler</a>'),
                 style="background-color: #8DC8AF"
             ),
-        )
+        ),
     ),
-
-    # ABOUT Panel
-    ui.nav_panel("About The Dataset",
+    
+    
+    # # ABOUT Panel
+    # ui.nav_panel("About",
                  
-        ui.accordion(
+    #     ui.accordion(
 
-            # Plots describing cancer indications
-            ui.accordion_panel("Cancer Indications",
-                ui.layout_column_wrap(
-                    ui.card(ui.card_header("Cancer Indication Breakdown"),
-                            output_widget("plot_indication_breakdown"), 
-                            full_screen=False,
-                            ),
-                    ui.card(ui.card_header("Cancer Indication Nomenclature"),
-                        output_widget("cancer_glossary"),
-                        full_screen=False),
-                        width=.5, min_height=650
-                ),
-            ),
-            # Plots describing pancan archetypes
-            ui.accordion_panel("PanCan Archetypes",
-                ui.layout_column_wrap(
-                    ui.card(ui.card_header("PanCan Archetype UMAP"),
-                            ui.card_body(output_widget("pancan_archetypes_home")),
-                            ui.card_footer(
-                                ui.HTML(f'<a href="{"https://pubmed.ncbi.nlm.nih.gov/34963056/"}" target="_blank">Discovering dominant tumor immune archetypes in a pan-cancer census. Combes AJ, Samad B, Tsui J, et al. Cell. 2022</a>')
-                            ),
-                            full_screen=False,     
-                    ),
-                    ui.card(ui.card_header("PanCan Archetype Breakdown"),
-                            ui.card_body(output_widget("pancan_archetype_breakdown")),
-                    ),
-                    min_height=700
-                ),
-            ),
-            id="data_accordion",
-            open=False
-        ),
-    ),
-
-    ##### GENE EXPRESSION PLOTS
-
-    # BOXPLOT NAV
-    ui.nav_panel("Boxplot",
-        ui.layout_sidebar(
-            ui.sidebar(
-                ui.h3("Boxplot"),
-                ui.accordion(
-                    ui.accordion_panel("Select Genes",
-                        ui.input_selectize("box_viol_gene_input",
-                                            "Select Genes:",
-                                            [],
-                                            multiple=True),
-                        ui.output_ui("box_viol_multiple_genes"),
-                    ),
-                    ui.accordion_panel("X-Axis Category",
-                        ui.popover(
-                            ui.span(gear_fill, style="float: right;"),
-                            ui.input_selectize("box_viol_x_cat_filter",
-                                    "Subset X-Axis Categories",
-                                    [],
-                                    multiple=True,
-                                    remove_button=True,options={"plugins": ["clear_button"]}),
-                            placement="right",
-                        ),
-                        ui.input_selectize("box_viol_x_category",
-                                        "",
-                                        list(qsh.categoricals_dict.keys()),
-                                        selected = "Compartment"),
-                    ),
-
-                    ui.accordion_panel("Groupby:",
-                        ui.input_selectize("box_viol_groupby",
-                            "",
-                            ["---"] + list(qsh.categoricals_dict.keys()),
-                            selected="---")),
-
-                    ui.accordion_panel("TPM Transformation",
-                        ui.input_selectize("box_viol_transformation",
-                            "",
-                            ["TPM", "Log2(TPM)"],
-                            multiple= False,
-                            selected= "Log2(TPM)")),
-                ),
-                    ui.input_action_button("box_viol_run", "RUN", icon=icon_svg("arrow-right")),
-                    bg=panel_color
-            ),
-            ui.card((output_widget("expression_box_viol")),full_screen=True),
-            bg=panel_color
-        ),
-    ),
-
-
-    # # RIDGELINE PLOT NAV
-    # ui.nav_panel("Ridgeline",
-    #     ui.layout_sidebar(
-    #         ui.sidebar(
-    #             ui.h4("Ridgeline Plot"),
-    #             ui.card(
-    #                 ui.input_selectize("ridgeline_gene_input",
-    #                                     "Select Genes:",
-    #                                     [],
-    #                                     multiple=True)),
-    #                 ui.card(
-    #                     ui.popover(
-    #                         ui.span(gear_fill, style="position:absolute; top: 5px; right: 7px;"),
-    #                         ui.input_selectize("ridgeline_x_cat_filter",
-    #                                 "**Subset X-Axis Categories.**",
-    #                                 [],
-    #                                 multiple=True,
-    #                                 remove_button=True,options={"plugins": ["clear_button"]}),
-    #                         placement="right",
-    #                     ),
-    #                     ui.input_selectize("ridgeline_x_category",
-    #                                     "Select X-Axis Category:",
-    #                                     list(qsh.categoricals_dict.keys()),
-    #                                     selected = "Compartment"),
-    #                 ),
-    #                 ui.card(ui.input_selectize("ridgeline_groupby",
-    #                                     "Group by:",
-    #                                     ["---"] + list(qsh.categoricals_dict.keys()),
-    #                                     selected="---")),
-    #                 ui.card(ui.input_selectize("ridgeline_transformation",
-    #                                     "TPM Transformation: ",
-    #                                     ["TPM", "Log2(TPM)"],
-    #                                     multiple= False,
-    #                                     selected= "Log2(TPM)")),
-    #                 ui.input_action_button("ridgeline_run", "RUN",icon=icon_svg("arrow-right")),
-    #                 bg=panel_color
+    #         # Plots describing cancer indications
+    #         ui.accordion_panel("Cancer Indications",
+    #             ui.layout_column_wrap(
+    #                 ui.card(ui.card_header("Cancer Indication Breakdown"),
+    #                         output_widget("plot_indication_breakdown"), 
+    #                         full_screen=False,
+    #                         ),
+    #                 ui.card(ui.card_header("Cancer Indication Nomenclature"),
+    #                     output_widget("cancer_glossary"),
+    #                     full_screen=False),
+    #                     width=.5, min_height=650
+    #             ),
     #         ),
-    #     ui.card(ui.output_ui("ridgeline"), full_screen=True),
-    #     bg=panel_color,
-    #     ),       
+    #         # Plots describing pancan archetypes
+    #         ui.accordion_panel("Cancer Archetypes",
+    #             ui.layout_column_wrap(
+    #                 ui.card(ui.card_header("PanCan Archetype UMAP"),
+    #                         ui.card_body(output_widget("pancan_archetypes_home")),
+    #                         ui.card_footer(
+    #                             ui.HTML(f'<a href="{"https://pubmed.ncbi.nlm.nih.gov/34963056/"}" target="_blank">Discovering dominant tumor immune archetypes in a pan-cancer census. Combes AJ, Samad B, Tsui J, et al. Cell. 2022</a>')
+    #                         ),
+    #                         full_screen=False,     
+    #                 ),
+    #                 ui.card(ui.card_header("PanCan Archetype Breakdown"),
+    #                         ui.card_body(output_widget("pancan_archetype_breakdown")),
+    #                 ),
+    #                 min_height=700
+    #             ),
+    #         ),
+    #         id="data_accordion",
+    #         open=False
+    #     ),
     # ),
 
-    # HEATMAP NAV
-    ui.nav_panel("Heatmap",  
-        ui.layout_sidebar(
-            ui.sidebar(
-                ui.h4("Heatmap"),
+    ui.nav_panel("Resources",
+        ui.card(
+            ui.h3("About The QuIPI Dataset"),
+            ui.accordion(
 
-                ui.accordion(
-                    ui.accordion_panel("Input Genes",
-                        ui.input_text_area(
-                        "gex_heatmap_text_genes",
-                        "",
-                        rows=8
-                        ),
-                    ),
-                    ui.accordion_panel("Choose X-Axis Category",
-                        ui.popover(
-                            ui.span(gear_fill,style="float: right;"),
-                            ui.input_selectize("gex_heatmap_groupby_subset", "Subset Categories:", [], multiple=True,remove_button=True,options={"plugins": ["clear_button"]}),
-                            placement="right",
-                        ),
-                        ui.input_selectize("gex_heatmap_groupby", "",list(qsh.categorical_choices.keys())),
-                    ),
-                    ui.accordion_panel("TPM Transformation",   
-                        ui.input_selectize("gex_heatmap_transform", "", ["Log2(TPM)", "TPM"], selected = "TPM")
+                # Plots describing cancer indications
+                ui.accordion_panel("Cancer Indications",
+                    ui.layout_column_wrap(
+                        ui.card(ui.card_header("Cancer Indication Breakdown"),
+                                output_widget("plot_indication_breakdown"), 
+                                full_screen=False,
+                                ),
+                        ui.card(ui.card_header("Cancer Indication Nomenclature"),
+                            output_widget("cancer_glossary"),
+                            full_screen=False),
+                            width=.5, min_height=650
                     ),
                 ),
-                ui.input_action_button("gex_heatmap_run", "RUN", icon=icon_svg("arrow-right")),
-                bg=panel_color
+                # Plots describing pancan archetypes
+                ui.accordion_panel("Cancer Archetypes",
+                    ui.layout_column_wrap(
+                        ui.card(ui.card_header("PanCan Archetype UMAP"),
+                                ui.card_body(output_widget("pancan_archetypes_home")),
+                                ui.card_footer(
+                                    ui.HTML(f'<a href="{"https://pubmed.ncbi.nlm.nih.gov/34963056/"}" target="_blank">Discovering dominant tumor immune archetypes in a pan-cancer census. Combes AJ, Samad B, Tsui J, et al. Cell. 2022</a>')
+                                ),
+                                full_screen=False,     
+                        ),
+                        ui.card(ui.card_header("PanCan Archetype Breakdown"),
+                                ui.card_body(output_widget("pancan_archetype_breakdown")),
+                        ),
+                        min_height=700
+                    ),
+                ),
+                id="data_accordion",
+                open=False
+            ),  
+        ),
+        ui.layout_column_wrap(
+
+            ui.card(ui.h3("QuIPI HuMu"),
+                    "The Human-to-Mouse Cancer Translator Project (HuMu) aims to immuno-profile a series of common and exceptional models of cancer in mice to benchmark them against the diversity of TMEs in Human cancer (i.e immune archetypes described in Combes, Samad, et al. Cell 2022).",
+                    ui.p("Find it here:",class_="mt-2"),
+                    ui.div(
+                        ui.a(ui.tags.img(src="humu_logo.png", style="height: 125px;"), href="https://quipi.org/app/quipi_humu",class_="nav-link",target="_blank"),
+                        #class_="text-center"
+                    )
             ),
-            ui.card(ui.output_ui("gex_heatmap"), full_screen=True),
-            bg=panel_color,
+
+            ui.card(ui.h3("Github"),
+                "Please submit any feedback, feature requests, bugs, or suggestions as issues on the github page for QuIPI.",
+                ui.br(),
+                ui.p("Find it here:", class_="mt-4"),
+                ui.div(ui.a(ui.tags.img(
+                        src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
+                        height="150px",
+                    ),href="https://github.com/hwismer/QuIPI", class_="nav-link",target="_blank"),
+                    
+                #class_="text-center"
+                )
+            ), # GITHUB LINK FOR ISSUES
         ),
     ),
 
@@ -318,6 +254,315 @@ app_ui = ui.page_navbar(
             bg=panel_color
         ),
     ),
+
+    ##### GENE EXPRESSION PLOTS
+
+    ui.nav_menu("Gene Expression",
+        # BOXPLOT NAV
+        ui.nav_panel("Boxplot",
+            ui.layout_sidebar(
+                ui.sidebar(
+                    ui.h3("Boxplot"),
+                    ui.accordion(
+                        ui.accordion_panel("Select Genes",
+                            ui.input_selectize("box_viol_gene_input",
+                                                "Select Genes:",
+                                                [],
+                                                multiple=True),
+                            ui.output_ui("box_viol_multiple_genes"),
+                        ),
+                        ui.accordion_panel("X-Axis Category",
+                            ui.popover(
+                                ui.span(gear_fill, style="float: right;"),
+                                ui.input_selectize("box_viol_x_cat_filter",
+                                        "Subset X-Axis Categories",
+                                        [],
+                                        multiple=True,
+                                        remove_button=True,options={"plugins": ["clear_button"]}),
+                                placement="right",
+                            ),
+                            ui.input_selectize("box_viol_x_category",
+                                            "",
+                                            list(qsh.categoricals_dict.keys()),
+                                            selected = "Compartment"),
+                        ),
+
+                        ui.accordion_panel("Groupby:",
+                            ui.input_selectize("box_viol_groupby",
+                                "",
+                                ["---"] + list(qsh.categoricals_dict.keys()),
+                                selected="---")),
+
+                        ui.accordion_panel("TPM Transformation",
+                            ui.input_selectize("box_viol_transformation",
+                                "",
+                                ["TPM", "Log2(TPM)"],
+                                multiple= False,
+                                selected= "Log2(TPM)")),
+                    ),
+                        ui.input_action_button("box_viol_run", "RUN", icon=icon_svg("arrow-right")),
+                        bg=panel_color
+                ),
+                ui.card((output_widget("expression_box_viol")),full_screen=True),
+                bg=panel_color
+            ),
+        ),
+
+
+        # # RIDGELINE PLOT NAV
+        # ui.nav_panel("Ridgeline",
+        #     ui.layout_sidebar(
+        #         ui.sidebar(
+        #             ui.h4("Ridgeline Plot"),
+        #             ui.card(
+        #                 ui.input_selectize("ridgeline_gene_input",
+        #                                     "Select Genes:",
+        #                                     [],
+        #                                     multiple=True)),
+        #                 ui.card(
+        #                     ui.popover(
+        #                         ui.span(gear_fill, style="position:absolute; top: 5px; right: 7px;"),
+        #                         ui.input_selectize("ridgeline_x_cat_filter",
+        #                                 "**Subset X-Axis Categories.**",
+        #                                 [],
+        #                                 multiple=True,
+        #                                 remove_button=True,options={"plugins": ["clear_button"]}),
+        #                         placement="right",
+        #                     ),
+        #                     ui.input_selectize("ridgeline_x_category",
+        #                                     "Select X-Axis Category:",
+        #                                     list(qsh.categoricals_dict.keys()),
+        #                                     selected = "Compartment"),
+        #                 ),
+        #                 ui.card(ui.input_selectize("ridgeline_groupby",
+        #                                     "Group by:",
+        #                                     ["---"] + list(qsh.categoricals_dict.keys()),
+        #                                     selected="---")),
+        #                 ui.card(ui.input_selectize("ridgeline_transformation",
+        #                                     "TPM Transformation: ",
+        #                                     ["TPM", "Log2(TPM)"],
+        #                                     multiple= False,
+        #                                     selected= "Log2(TPM)")),
+        #                 ui.input_action_button("ridgeline_run", "RUN",icon=icon_svg("arrow-right")),
+        #                 bg=panel_color
+        #         ),
+        #     ui.card(ui.output_ui("ridgeline"), full_screen=True),
+        #     bg=panel_color,
+        #     ),       
+        # ),
+
+        # HEATMAP NAV
+        ui.nav_panel("Heatmap",  
+            ui.layout_sidebar(
+                ui.sidebar(
+                    ui.h4("Heatmap"),
+
+                    ui.accordion(
+                        ui.accordion_panel("Input Genes",
+                            ui.input_text_area(
+                            "gex_heatmap_text_genes",
+                            "",
+                            rows=8
+                            ),
+                        ),
+                        ui.accordion_panel("Choose X-Axis Category",
+                            ui.popover(
+                                ui.span(gear_fill,style="float: right;"),
+                                ui.input_selectize("gex_heatmap_groupby_subset", "Subset Categories:", [], multiple=True,remove_button=True,options={"plugins": ["clear_button"]}),
+                                placement="right",
+                            ),
+                            ui.input_selectize("gex_heatmap_groupby", "",list(qsh.categorical_choices.keys())),
+                        ),
+                        ui.accordion_panel("TPM Transformation",   
+                            ui.input_selectize("gex_heatmap_transform", "", ["Log2(TPM)", "TPM"], selected = "TPM")
+                        ),
+                    ),
+                    ui.input_action_button("gex_heatmap_run", "RUN", icon=icon_svg("arrow-right")),
+                    bg=panel_color
+                ),
+                ui.card(ui.output_ui("gex_heatmap"), full_screen=True),
+                bg=panel_color,
+            ),
+        ),
+    ),
+
+    # BEGIN DGE MENU
+    ui.nav_menu("Differential Gene Expression",
+
+        # FEATURE SCORE RANKED DGE
+        ui.nav_panel("Feature Score Ranked DGE",
+            ui.layout_sidebar(
+                ui.sidebar(
+                    ui.h4("Feature Score Ranked DGE"),
+                    ui.accordion(
+                        ui.accordion_panel("Feature Score for ranking",
+                            ui.input_selectize("flow_score_to_rank",
+                                            "",
+                                            list(qsh.feature_scores.keys())
+                            ),
+                        ),
+                        ui.accordion_panel("Genes to highlight",
+                            ui.input_selectize("dge_highlight_genes",
+                                            "",
+                                            [],
+                                            multiple=True
+                            ),
+                        ),
+                        ui.accordion_panel("Quartile",
+                            ui.input_slider("dge_slider",
+                                            "Selects the top and bottom Quartile% of patients",
+                                            value = .2,
+                                            min = 0.05,
+                                            max = .5,
+                                            step = .05
+                            ),
+                        ),
+                        ui.accordion_panel("Compartment",
+                            ui.input_selectize("dge_compartment",
+                                                "DEGs calculated within this compartment",
+                                                qsh.compartments
+                            )
+                        ),
+                        ui.accordion_panel("Thresholds",
+                            ui.input_numeric("dge_fc_thresh",
+                                            "Fold Change Magnitude",
+                                            value=2
+                            ),
+                            ui.input_numeric("dge_p_thresh",
+                                            "-Log10(P-Value)",
+                                            value = 1
+                            ),
+                        )
+                    ),
+                    ui.input_action_button("dge_run", "RUN",icon=icon_svg("arrow-right")),
+                    bg=panel_color
+                ),
+                ui.card(
+                    ui.card(output_widget("compartment_featurescore_dge")),
+                    ui.layout_column_wrap(
+                        ui.card(
+                            ui.card_header("Negative DEGs"),
+                            ui.card_body(ui.output_data_frame("compartment_featurescore_dge_bot")),
+                        ),
+                        ui.card(
+                            ui.card_header("Positive DEGs"),
+                            ui.card_body(ui.output_data_frame("compartment_featurescore_dge_top"))
+                        ),
+                    ),
+                    ui.download_button("download_featurescore_dges", "Download DEGs", icon=icon_svg("download")),
+                ),
+                ui.card(
+                    ui.card_header("Expression Levels for genes of interest"),
+                    ui.card_body(output_widget("compartment_featurescore_dge_boxplot"))
+                ),
+                bg=panel_color
+            ),
+
+            # METHODS SECTION
+            ui.h4("Feature Scoring and DGE Group Formation"),
+            ui.p("""
+                Data is subset to include only patients assigned feature scores. Effectively, this means that
+                patients without an archetype designation are not considered. Patients are ranked based
+                on their feature score in the specified compartment and are split based on the specified
+                quartile. For the chose quartile, the resulting groups used for DGE are top quartile percent
+                of patients with the highest score and the bottom quartile percent of patients with the lowest score.
+            """),
+            ui.h4("Differential Gene Expression"),
+            ui.p("""The Wilcoxon Rank-sum test is used to calculate differentially expressed genes.
+                    P-values are corrected using Benjamini/Hochberg multiple testing correction.
+                    """),
+        ),
+
+        # DGE CALCULATION BASED ON TOP VS. BOTTOM QUARTILE OF PATIENTS BASED ON FEATURE SCORE CALCULATION
+        # FROM INPUT GENE LIST
+        ui.nav_panel("Gene-Signature Score Ranked DGE",
+            ui.layout_sidebar(
+                ui.sidebar(
+                    ui.h4("Gene-Signature Score Ranked DGE"),
+                    ui.accordion(
+
+                        ui.accordion_panel("Genes for signature score",
+                            ui.input_selectize("fs_dge_genes",
+                                            "",
+                                            [],
+                                            multiple=True
+                            ),
+                        ),
+                        ui.accordion_panel("Genes to highlight",
+                            ui.input_selectize("fs_dge_highlight_genes",
+                                            "",
+                                            [],
+                                            multiple=True
+                            ),
+                        ),
+                        ui.accordion_panel("Compartment for gene-signature score calculation",
+                            ui.input_selectize("fs_dge_compartment",
+                                            "",
+                                            qsh.compartments
+                            ),
+                        ),
+                        ui.accordion_panel("Quartile",
+                            ui.input_slider("fs_dge_slider",
+                                            "Selects the top and bottom Quartile% of patients",
+                                            value = .2,
+                                            min = 0.05, max = .5,
+                                            step = .05
+                            ),
+                        ),
+                        ui.accordion_panel("DGE Compartment",
+                            ui.input_selectize("fs_dge_compartment_for_dge",
+                                            "DEGs calculated within this compartment",
+                                            qsh.compartments
+                            ),
+                        ),
+                        ui.accordion_panel("Thresholds",
+                            ui.input_numeric("fs_dge_fc_thresh",
+                                            "Fold Change Magnitude",
+                                            value = 2
+                            ),
+                            ui.input_numeric("fs_dge_p_thresh",
+                                            "-Log10(P-Value)",
+                                            value=1),
+                        )
+                    ),
+                    ui.input_action_button("fs_dge_run","RUN",icon=icon_svg("arrow-right")),
+                    bg=panel_color
+                ),
+                ui.card(
+                    ui.card(output_widget("gfs_ranked_dge")),
+                    ui.layout_column_wrap(
+                        ui.card(ui.card_header("Negative DEGs"),
+                                ui.card_body(ui.output_data_frame("gfs_ranked_dge_bot")),
+                                max_height=500),
+                        ui.card(ui.card_header("Positive DEGs"),
+                                ui.card_body(ui.output_data_frame("gfs_ranked_dge_top")),
+                                max_height=500),
+                    ),
+                    ui.download_button("download_signaturecore_dges", "Download DEGs", icon=icon_svg("download")),
+                ),
+                ui.card(
+                    ui.card_header("Expression levels for genes of interest"),
+                    ui.card_body(output_widget('gfs_ranked_dge_highlighted_exprn_box'))
+                ),
+                bg=panel_color
+            ),
+
+            # METHODS
+            ui.h4("Differential Gene Expression"),
+            ui.p("""The Wilcoxon Rank-sum test is used to calculate differentially expressed genes.
+                    P-values are corrected using Benjamini/Hochberg multiple testing correction.
+                    """),
+            ui.h5("Gene-Signature Score Calculation"),
+            ui.p("""
+                Data is subset to include archetyped patients only within a given compartment.
+                Gene-signature scores are calculated by first calculating a per-gene Z-Score across patients
+                and subsequently averaging the Z-Scores within each patient resulting in each patient being
+                assigned a gene-signature score depending on their expression of the input gene set.
+
+                """)
+        ),
+    ), # END DGE MENU
+
 
     # CORRELATION MENU
     ui.nav_menu("Correlation", 
@@ -606,190 +851,8 @@ app_ui = ui.page_navbar(
         )
     ), # END PANCAN MENU
 
-    # BEGIN DGE MENU
-    ui.nav_menu("Differential Gene Expression",
-
-        # FEATURE SCORE RANKED DGE
-        ui.nav_panel("Feature Score Ranked DGE",
-            ui.layout_sidebar(
-                ui.sidebar(
-                    ui.h4("Feature Score Ranked DGE"),
-                    ui.accordion(
-                        ui.accordion_panel("Feature Score for ranking",
-                            ui.input_selectize("flow_score_to_rank",
-                                            "",
-                                            list(qsh.feature_scores.keys())
-                            ),
-                        ),
-                        ui.accordion_panel("Genes to highlight",
-                            ui.input_selectize("dge_highlight_genes",
-                                            "",
-                                            [],
-                                            multiple=True
-                            ),
-                        ),
-                        ui.accordion_panel("Quartile",
-                            ui.input_slider("dge_slider",
-                                            "Selects the top and bottom Quartile% of patients",
-                                            value = .2,
-                                            min = 0.05,
-                                            max = .5,
-                                            step = .05
-                            ),
-                        ),
-                        ui.accordion_panel("Compartment",
-                            ui.input_selectize("dge_compartment",
-                                                "DEGs calculated within this compartment",
-                                                qsh.compartments
-                            )
-                        ),
-                        ui.accordion_panel("Thresholds",
-                            ui.input_numeric("dge_fc_thresh",
-                                            "Fold Change Magnitude",
-                                            value=2
-                            ),
-                            ui.input_numeric("dge_p_thresh",
-                                            "-Log10(P-Value)",
-                                            value = 1
-                            ),
-                        )
-                    ),
-                    ui.input_action_button("dge_run", "RUN",icon=icon_svg("arrow-right")),
-                    bg=panel_color
-                ),
-                ui.card(
-                    ui.card(output_widget("compartment_featurescore_dge")),
-                    ui.layout_column_wrap(
-                        ui.card(
-                            ui.card_header("Negative DEGs"),
-                            ui.card_body(ui.output_data_frame("compartment_featurescore_dge_bot")),
-                        ),
-                        ui.card(
-                            ui.card_header("Positive DEGs"),
-                            ui.card_body(ui.output_data_frame("compartment_featurescore_dge_top"))
-                        ),
-                    ),
-                    ui.download_button("download_featurescore_dges", "Download DEGs", icon=icon_svg("download")),
-                ),
-                ui.card(
-                    ui.card_header("Expression Levels for genes of interest"),
-                    ui.card_body(output_widget("compartment_featurescore_dge_boxplot"))
-                ),
-                bg=panel_color
-            ),
-
-            # METHODS SECTION
-            ui.h4("Feature Scoring and DGE Group Formation"),
-            ui.p("""
-                Data is subset to include only patients assigned feature scores. Effectively, this means that
-                patients without an archetype designation are not considered. Patients are ranked based
-                on their feature score in the specified compartment and are split based on the specified
-                quartile. For the chose quartile, the resulting groups used for DGE are top quartile percent
-                of patients with the highest score and the bottom quartile percent of patients with the lowest score.
-            """),
-            ui.h4("Differential Gene Expression"),
-            ui.p("""The Wilcoxon Rank-sum test is used to calculate differentially expressed genes.
-                    P-values are corrected using Benjamini/Hochberg multiple testing correction.
-                    """),
-        ),
-
-        # DGE CALCULATION BASED ON TOP VS. BOTTOM QUARTILE OF PATIENTS BASED ON FEATURE SCORE CALCULATION
-        # FROM INPUT GENE LIST
-        ui.nav_panel("Gene-Signature Score Ranked DGE",
-            ui.layout_sidebar(
-                ui.sidebar(
-                    ui.h4("Gene-Signature Score Ranked DGE"),
-                    ui.accordion(
-
-                        ui.accordion_panel("Genes for signature score",
-                            ui.input_selectize("fs_dge_genes",
-                                            "",
-                                            [],
-                                            multiple=True
-                            ),
-                        ),
-                        ui.accordion_panel("Genes to highlight",
-                            ui.input_selectize("fs_dge_highlight_genes",
-                                            "",
-                                            [],
-                                            multiple=True
-                            ),
-                        ),
-                        ui.accordion_panel("Compartment for gene-signature score calculation",
-                            ui.input_selectize("fs_dge_compartment",
-                                            "",
-                                            qsh.compartments
-                            ),
-                        ),
-                        ui.accordion_panel("Quartile",
-                            ui.input_slider("fs_dge_slider",
-                                            "Selects the top and bottom Quartile% of patients",
-                                            value = .2,
-                                            min = 0.05, max = .5,
-                                            step = .05
-                            ),
-                        ),
-                        ui.accordion_panel("DGE Compartment",
-                            ui.input_selectize("fs_dge_compartment_for_dge",
-                                            "DEGs calculated within this compartment",
-                                            qsh.compartments
-                            ),
-                        ),
-                        ui.accordion_panel("Thresholds",
-                            ui.input_numeric("fs_dge_fc_thresh",
-                                            "Fold Change Magnitude",
-                                            value = 2
-                            ),
-                            ui.input_numeric("fs_dge_p_thresh",
-                                            "-Log10(P-Value)",
-                                            value=1),
-                        )
-                    ),
-                    ui.input_action_button("fs_dge_run","RUN",icon=icon_svg("arrow-right")),
-                    bg=panel_color
-                ),
-                ui.card(
-                    ui.card(output_widget("gfs_ranked_dge")),
-                    ui.layout_column_wrap(
-                        ui.card(ui.card_header("Negative DEGs"),
-                                ui.card_body(ui.output_data_frame("gfs_ranked_dge_bot")),
-                                max_height=500),
-                        ui.card(ui.card_header("Positive DEGs"),
-                                ui.card_body(ui.output_data_frame("gfs_ranked_dge_top")),
-                                max_height=500),
-                    ),
-                    ui.download_button("download_signaturecore_dges", "Download DEGs", icon=icon_svg("download")),
-                ),
-                ui.card(
-                    ui.card_header("Expression levels for genes of interest"),
-                    ui.card_body(output_widget('gfs_ranked_dge_highlighted_exprn_box'))
-                ),
-                bg=panel_color
-            ),
-
-            # METHODS
-            ui.h4("Differential Gene Expression"),
-            ui.p("""The Wilcoxon Rank-sum test is used to calculate differentially expressed genes.
-                    P-values are corrected using Benjamini/Hochberg multiple testing correction.
-                    """),
-            ui.h5("Gene-Signature Score Calculation"),
-            ui.p("""
-                Data is subset to include archetyped patients only within a given compartment.
-                Gene-signature scores are calculated by first calculating a per-gene Z-Score across patients
-                and subsequently averaging the Z-Scores within each patient resulting in each patient being
-                assigned a gene-signature score depending on their expression of the input gene set.
-
-                """)
-        ),
-    ), # END DGE MENU
     
-    ui.nav_spacer(),
-    ui.nav_control(ui.a(ui.tags.img(src="humu_logo.png", style="height: 70px;"), href="https://quipi.org/app/quipi_humu",class_="nav-link",target="_blank")),
-    ui.nav_control(ui.a(ui.tags.img(
-                src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
-                height="70px",
-                style="vertical-align: middle;"
-            ), href="https://github.com/hwismer/QuIPI", class_="nav-link",target="_blank")), # GITHUB LINK FOR ISSUES
+    #ui.nav_spacer(),
     #ui.nav_control(ui.a("QuIPI HuMu", href="https://quipi.org/app/quipi_humu",class_="nav-link",target="_blank")),
     
     id = "quipi_top_nav",
