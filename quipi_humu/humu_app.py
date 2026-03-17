@@ -38,73 +38,48 @@ panel_color = "#f0f0f0"
 # Define the UI
 app_ui = ui.page_navbar(
 
-    # ui.tags.style("""
-    #     body { background-color: #a1aace; }  /* Background color */
-    #     .nav-link { font-size: 20px;
-    #                 color: white;
-    #     }
-    #     .navbar-nav .nav-link.active {
-    #         color: white !important;  /* Keep text white when selected */
-    #     }
-                  
-    #     .sidebar { /* This is a common class name for Shiny sidebars */
-    #               background-color: white !important; /* !important ensures it overrides other rules */
-    #     }
-    #     .value-box-border {
-    #         border: 5px solid #FFFFFF; /* Example border: 2px solid blue-ish color */
-    #         padding: 0px; /* Add some padding inside the box */
-    #         border-radius: 5px; /* Slightly rounded corners */
-    #         margin: 2px; /* Add a small margin around the box for spacing */
-    #     }
-    #     .value-box-title {
-    #         font-size: 1.2e !important; /* Increase font size, e.g., 1.2 times the default */
-    #         font-weight: bold; /* Make it bold for emphasis */
-    #         color: #FFFFF; /* Optional: Change color slightly */
-    #     }          
-    # """),
-    # ui.head_content(
-    #     ui.tags.link(
-    #         rel="icon", type="image/png", sizes="64x64", href="favicon-32x32.png"
-    #     ),
-    # ),
-    # ui.tags.div(
-    #     ui.tags.div(
-    #         ui.tags.img(src="humu.png", style="width: 90px; margin-left: 10px; margin-top: 18px; margin-bottom: 8px; border: 3px solid; border-radius: 8px;",class_="my-image"),  # Left-aligned image
-    #         ui.tags.span("QuIPI" + "\n" + "HuMu", style="font-size: 35px; font-weight: bold;"),
-    #         style="display: flex; align-items: flex-end; gap: 10px;" # Flexbox for horizontal alignment
-    #     ),
-    #     style="padding-bottom: 5px;"
-    # ),
-
     ui.nav_panel(ui.tags.img(src="humu_logo.png", style="height: 75px;"),
         ui.layout_column_wrap(
             ui.card(
-                ui.card_header(ui.h2("What is HuMu?", style='color: white; font-weight: bold;')),
-                ui.h3("The Human-to-Mouse Cancer Translator Project (HuMu) aims to immuno-profile a series of \
-                                common and exceptional models of cancer in mice to benchmark them against the diversity of \
-                                TMEs in Human cancer (i.e immune archetypes described in Combes, Samad, et al. Cell 2022).",
-                                style='color: white; font-weight: bold; margin-bottom: 10px;'),
-                ui.card_footer(ui.HTML(f'<a href="{"https://pubmed.ncbi.nlm.nih.gov/34963056/"}" target="_blank">Discovering dominant tumor immune archetypes in a pan-cancer census. Combes AJ, Samad B, Tsui J, et al. Cell. 2022</a>')),
-                style="background-color: #9AC6B0; " #cca9a3
+                ui.card(
+                    ui.card_header(ui.h2("What is HuMu?", style='color: white; font-weight: bold;')),
+                    ui.h3("The Human-to-Mouse Cancer Translator Project (HuMu) aims to immuno-profile a series of \
+                                    common and exceptional models of cancer in mice to benchmark them against the diversity of \
+                                    TMEs in Human cancer (i.e immune archetypes described in Combes, Samad, et al. Cell 2022).",
+                                    style='color: white; font-weight: bold; margin-bottom: 10px;'),
+                    ui.card_footer(ui.HTML(f'<a href="{"https://pubmed.ncbi.nlm.nih.gov/34963056/"}" target="_blank">Discovering dominant tumor immune archetypes in a pan-cancer census. Combes AJ, Samad B, Tsui J, et al. Cell. 2022</a>')),
+                    style="background-color: #9AC6B0; " #cca9a3
+                ),
+                ui.card(ui.h3("Also try: QuIPI Human", style='color: white; font-weight: bold; margin-bottom: 10px;'),
+                    ui.div(
+                        ui.a(ui.tags.img(src="quipi.png", style="height: 125px;"), href="https://quipi.org/app/quipi",class_="nav-link",target="_blank")
+                        #class_="text-center"  
+                    ),
+                    ui.h6("QuIPI is a user interface designed to make it easy to visualize the UCSF Immunoprofiler dataset. QuIPI incorporates Bulk RNA-Seq and Flow Cytometry data from over 400 cancer samples across multiple indications. QuIPI also incorporates archetype calls, building off of the work of Combes, Samad et al. Cell 2022 in order to identify common immune states across cancer types. QuIPI provides quick and easy to use plotting functionality, allowing anyone to discover trends and insights from Immunoprofiler data. QuIPI modules are designed with the hope that they can be generalizable to different questions while still allowing for sufficient cusomization.",
+                          style='color: white; font-weight: bold; margin-bottom: 10px;'),
+                    style="background-color: #9AC6B0;" #c6cca3
+                ),
             ),
-
             ui.card(
-                ui.card_header(ui.h2("HuMu Data", style='color: white; font-weight: bold;')),
-                ui.tags.img(src="quipi_humu_reference.png",
-                            style="height: auto; border: 2px solid #ddd; border-radius: 10px; box-shadow: 5px 5px 15px rgba(0,0,0,0.3);"
-                            ),
-                        style="background-color: #9AC6B0;"
-            ),
-            ui.card(
-                ui.card_header(ui.h2("HuMu Dataset", style='color: white; font-weight: bold;')),
-                ui.h3("The HuMu dataset contains high-dimensional cytometry data (CyTOF) of 15 murine models that \
-                    we use to study high level tumor-immune composition, as well as single-cell sequencing data \
-                    from 9 of these models that we use to dissect more granular gene expression profiles across \
-                    populations and tumor models.",
-                    style='color: white; font-weight: bold; margin-bottom: 10px;'),
+                ui.card(
+                        ui.card_header(ui.h2("HuMu Dataset", style='color: white; font-weight: bold;')),
+                        ui.h3("The HuMu dataset contains high-dimensional cytometry data (CyTOF) of 15 murine models that \
+                            we use to study high level tumor-immune composition, as well as single-cell sequencing data \
+                            from 9 of these models that we use to dissect more granular gene expression profiles across \
+                            populations and tumor models.",
+                            style='color: white; font-weight: bold; margin-bottom: 10px;'),
 
-                style="background-color: #9AC6B0;" #c6cca3
-            ),
+                        style="background-color: #9AC6B0;" #c6cca3
+                ),
+                ui.card(
+                    ui.card_header(ui.h2("HuMu Data", style='color: white; font-weight: bold;')),
+                    ui.tags.img(src="quipi_humu_reference.png",
+                                style="height: auto; border: 2px solid #ddd; border-radius: 10px; box-shadow: 5px 5px 15px rgba(0,0,0,0.3);"
+                                ),
+                            style="background-color: #9AC6B0;"
+                ),
+
+            )
         ),
     ),
 
