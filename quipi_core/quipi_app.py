@@ -373,9 +373,48 @@ app_ui = ui.page_navbar(
                             ),
                             ui.input_selectize("gex_heatmap_groupby", "",list(qsh.categorical_choices.keys())),
                         ),
+
+                        ui.accordion_panel("Subset Categories:",
+                            ui.accordion(
+                                ui.accordion_panel("Compartments",
+                                    ui.input_selectize("gex_heatmap_compartment",
+                                    "",
+                                    choices=qsh.compartments,
+                                    selected=qsh.compartments,
+                                    multiple=True,
+                                    remove_button=True,options={"plugins": ["clear_button"]}
+                                    ),
+                                
+                                ),
+                                ui.accordion_panel("Archetypes",
+                                    ui.input_selectize("gex_heatmap_archetype",
+                                        "",
+                                        choices=qsh.archetypes,
+                                        multiple=True,
+                                        selected=qsh.archetypes,
+                                        remove_button=True,options={"plugins": ["clear_button"]}
+                                    )
+                                ),
+                                ui.accordion_panel("Indications",
+                                    ui.input_selectize("gex_heatmap_indication",
+                                        "",
+                                        choices=qsh.indications,
+                                        multiple=True,
+                                        selected=qsh.indications,
+                                        remove_button=True,options={"plugins": ["clear_button"]}
+                                    )
+                                                   
+                                )
+                            ),
+                        ),
                         ui.accordion_panel("TPM Transformation",   
                             ui.input_selectize("gex_heatmap_transform", "", ["Log2(TPM)", "TPM"], selected = "TPM")
                         ),
+                        ui.accordion_panel("Options",
+                            ui.input_selectize("gex_heatmap_metric", "Metric to plot:", ["Mean", "Median"], selected = "Median"),
+                            ui.input_switch("gex_heatmap_zscore", "Z-Score Across Genes", value=False),
+                            ui.h6("*Genes with 0 variance will be removed")
+                        )
                     ),
                     ui.input_action_button("gex_heatmap_run", "RUN", icon=icon_svg("arrow-right")),
                     bg=panel_color
@@ -1047,10 +1086,17 @@ def server(input, output, session):
         groupby = input.gex_heatmap_groupby()
         groups = input.gex_heatmap_groupby_subset()
         transform = input.gex_heatmap_transform()
+        metric = input.gex_heatmap_metric()
+        zscore = input.gex_heatmap_zscore()
+
+        archetypes = input.gex_heatmap_archetype()
+        compartments = input.gex_heatmap_compartment()
+        indications = input.gex_heatmap_indication()
+
         height_param = max(750,15 * len(qsh.process_gene_text_input(input.gex_heatmap_text_genes())) )
         height = f"{height_param}px"
 
-        return xp.plot_heatmap(genes, groupby, groups, transform), height
+        return xp.plot_heatmap(genes, groupby, compartments, indications, archetypes, transform, metric, zscore), height
 
     # Returns the plot itself from the helper function
     @output(id="gex_heatmap_plot")

@@ -138,28 +138,43 @@ def plot_dotplot(genes, groupby, groups, splitby, splits, transform, swap):
 
 
 # HEATMAP PLOT - SNS CLUSTERMAP CODE
-def plot_heatmap(genes, category, category_subset, transform):
+def plot_heatmap(genes, category, compartments, indications, archetypes, transform, metric, zscore):
 
     category = sh.categoricals_dict[category]
 
     genes = list(set(genes))
 
     if transform == "TPM":
-        df = pd.read_feather("./quipi_data/quipi_raw_tpm.feather", columns=[category] + list(genes))
+        df = pd.read_feather("./quipi_data/quipi_raw_tpm.feather", columns=sh.categoricals + list(genes))
     elif transform == "Log2(TPM)":
-        df = pd.read_feather("./quipi_data/quipi_log2_tpm.feather", columns=[category] + list(genes))
+        df = pd.read_feather("./quipi_data/quipi_log2_tpm.feather", columns=sh.categoricals + list(genes))
 
-    df = df[df[category].isin(category_subset)]
-    df = df.groupby(category)[genes].median().T
+    df = df[df["indication"].isin(indications)]
+    df = df[df["compartment"].isin(compartments)]
+    df = df[df["archetype"].isin(archetypes)]
 
-    df = df[df.std(axis=1) > 0]
+    #df = df[df[category].isin(category_subset)]
+    if metric == "Mean":
+        df = df.groupby(category)[genes].mean().T
+    elif metric == "Median":
+        df = df.groupby(category)[genes].median().T
 
+    if zscore:
+        df = df[df.std(axis=1) > 0]
 
-    fig = sns.clustermap(df, vmin=-2, vmax=2, cmap='coolwarm',
-                         z_score=0,
-                         xticklabels=True, yticklabels=True,
-                         #figsize=(10, max(20, 1.25 * len(genes))),
-                         dendrogram_ratio=(0.1, 0.05))
+        fig = sns.clustermap(df,
+                             z_score=0,
+                                #vmin=-2, vmax=2, 
+                                cmap='coolwarm',
+                                xticklabels=True, yticklabels=True,
+                                dendrogram_ratio=(0.1, 0.05))
+
+    else:
+        fig = sns.clustermap(df,
+                            #vmin=-2, vmax=2, 
+                            cmap='coolwarm',
+                            xticklabels=True, yticklabels=True,
+                            dendrogram_ratio=(0.1, 0.05))
 
     fig.ax_heatmap.set_xlabel('')
     fig.ax_heatmap.set_ylabel('')
@@ -168,16 +183,19 @@ def plot_heatmap(genes, category, category_subset, transform):
     plt.subplots_adjust(
         left=.01,
         right=.9,
-        top=1,
-        bottom=.05
+        top=0.9,
+        bottom=.2
     )
 
-    cbar_pos = [0.025, 0.95, 0.025, 0.025]  # [left, bottom, width, height]
+    cbar_pos = [0.04, 0.8, 0.025, 0.1]  # [left, bottom, width, height]
     fig.ax_cbar.set_position(cbar_pos)
-    fig.ax_cbar.set_title('Z-Score', fontdict={"fontsize":10})
-    fig.ax_heatmap.set_yticklabels(fig.ax_heatmap.get_yticklabels(), size = 8)
 
-    fig
+    if zscore:
+        fig.ax_cbar.set_title('Z-Score of ' + metric, fontdict={"fontsize":10})
+    else:
+        fig.ax_cbar.set_title(metric + " " + transform, fontdict={"fontsize":10})
+    
+    fig.ax_heatmap.set_yticklabels(fig.ax_heatmap.get_yticklabels(), size = 8)
 
     return fig
 
