@@ -32,54 +32,61 @@ humu_tabs_mapped_to_gene_inputs = {"Boxplots" : [["humu_gex_box_gene", "Mouse"]]
 
 #RUN_STYLE="background-color: #AFE1AF; color: black;"
 
-panel_color = "#f0f0f0"
+panel_color = "#ffffff"
 
 
 # Define the UI
 app_ui = ui.page_navbar(
 
-    ui.nav_panel(ui.tags.img(src="humu_logo.png", style="height: 75px;"),
-        ui.layout_column_wrap(
-            ui.card(
-                ui.card(
-                    ui.card_header(ui.h2("What is HuMu?", style='color: white; font-weight: bold;')),
-                    ui.h3("The Human-to-Mouse Cancer Translator Project (HuMu) aims to immuno-profile a series of \
-                                    common and exceptional models of cancer in mice to benchmark them against the diversity of \
-                                    TMEs in Human cancer (i.e immune archetypes described in Combes, Samad, et al. Cell 2022).",
-                                    style='color: white; font-weight: bold; margin-bottom: 10px;'),
-                    ui.card_footer(ui.HTML(f'<a href="{"https://pubmed.ncbi.nlm.nih.gov/34963056/"}" target="_blank">Discovering dominant tumor immune archetypes in a pan-cancer census. Combes AJ, Samad B, Tsui J, et al. Cell. 2022</a>')),
-                    style="background-color: #9AC6B0; " #cca9a3
-                ),
-                ui.card(ui.h3("Also try: QuIPI Human", style='color: white; font-weight: bold; margin-bottom: 10px;'),
-                    ui.div(
-                        ui.a(ui.tags.img(src="quipi.png", style="height: 125px;"), href="https://quipi.org/app/quipi",class_="nav-link",target="_blank")
-                        #class_="text-center"  
-                    ),
-                    ui.h6("QuIPI is a user interface designed to make it easy to visualize the UCSF Immunoprofiler dataset. QuIPI incorporates Bulk RNA-Seq and Flow Cytometry data from over 400 cancer samples across multiple indications. QuIPI also incorporates archetype calls, building off of the work of Combes, Samad et al. Cell 2022 in order to identify common immune states across cancer types. QuIPI provides quick and easy to use plotting functionality, allowing anyone to discover trends and insights from Immunoprofiler data. QuIPI modules are designed with the hope that they can be generalizable to different questions while still allowing for sufficient cusomization.",
-                          style='color: white; font-weight: bold; margin-bottom: 10px;'),
-                    style="background-color: #9AC6B0;" #c6cca3
-                ),
+    ## HOME PAGE
+    ui.nav_panel(ui.tags.img(src="humu_logo_transparent.png", style="height: 40px;"),
+
+        # What is HuMu?
+        ui.card(
+            ui.tags.img(src="humu_logo_transparent.png"),
+            ui.h2("QuIPI HuMu - Human-to-Mouse Cancer Translator"),
+            ui.p("Benchmark mouse models of cancer against the diversity of human tumor microenvironments.", class_="lead"),
+            ui.p(
+                """
+                The Human-to-Mouse Cancer Translator Project (HuMu) aims to immuno-profile a series of common and
+                exceptional models of cancer in mice to benchmark them against the diversity of TMEs in human cancer
+                (i.e. immune archetypes described in Combes, Samad, et al. Cell 2022).
+                """
             ),
+            ui.HTML('<a href="https://pubmed.ncbi.nlm.nih.gov/34963056/" target="_blank">Discovering dominant tumor immune archetypes in a pan-cancer census. Combes AJ, Samad B, Tsui J, et al. Cell. 2022</a>'),
+            class_="home-hero"
+        ),
+
+        ui.layout_column_wrap(
+            # HuMu dataset description and overview figure
             ui.card(
-                ui.card(
-                        ui.card_header(ui.h2("HuMu Dataset", style='color: white; font-weight: bold;')),
-                        ui.h3("The HuMu dataset contains high-dimensional cytometry data (CyTOF) of 15 murine models that \
-                            we use to study high level tumor-immune composition, as well as single-cell sequencing data \
-                            from 9 of these models that we use to dissect more granular gene expression profiles across \
-                            populations and tumor models.",
-                            style='color: white; font-weight: bold; margin-bottom: 10px;'),
-
-                        style="background-color: #9AC6B0;" #c6cca3
+                ui.card_header("HuMu Dataset"),
+                ui.p(
+                    """
+                    The HuMu dataset contains high-dimensional cytometry data (CyTOF) of 15 murine models that
+                    we use to study high level tumor-immune composition, as well as single-cell sequencing data
+                    from 9 of these models that we use to dissect more granular gene expression profiles across
+                    populations and tumor models.
+                    """
                 ),
-                ui.card(
-                    ui.card_header(ui.h2("HuMu Data", style='color: white; font-weight: bold;')),
-                    ui.tags.img(src="quipi_humu_reference.png",
-                                style="height: auto; border: 2px solid #ddd; border-radius: 10px; box-shadow: 5px 5px 15px rgba(0,0,0,0.3);"
-                                ),
-                            style="background-color: #9AC6B0;"
-                ),
+                ui.tags.img(src="quipi_humu_reference.png", style="width: 100%; height: auto; border-radius: 8px;"),
+            ),
 
-            )
+            # Link to the human QuIPI app
+            ui.card(
+                ui.card_header("Also try: QuIPI Human"),
+                ui.a(ui.tags.img(src="quipi.png", style="height: 70px;"), href="https://quipi.org/app/quipi", target="_blank"),
+                ui.p(
+                    """
+                    QuIPI is a user interface designed to make it easy to visualize the UCSF Immunoprofiler dataset.
+                    QuIPI incorporates Bulk RNA-Seq and Flow Cytometry data from over 400 cancer samples across multiple
+                    indications, along with archetype calls building off of the work of Combes, Samad et al. Cell 2022
+                    to identify common immune states across cancer types.
+                    """
+                ),
+                ui.HTML('<a href="https://quipi.org/app/quipi" target="_blank">Open QuIPI</a>'),
+            ),
+            width=1/2,
         ),
     ),
 
@@ -88,50 +95,43 @@ app_ui = ui.page_navbar(
             ui.accordion(
                 ui.accordion_panel("Mouse",
                         ui.layout_column_wrap(
-                            ui.card(ui.h3("Tumor Line",style='font-weight: bold;'),
-                                    ui.h5("Mouse tumor models used in the study"),
-                                    style="background-color: #BDD0D5; color: #333;"
+                            ui.card(ui.h5("Tumor Line"),
+                                    ui.p("Mouse tumor models used in the study")
                             ),
-                            ui.card(ui.h3("Compartment",style='font-weight: bold;'),
-                                    ui.h5("TME compartments as defined in Combes, Samad et al. Cell 2022. \
+                            ui.card(ui.h5("Compartment"),
+                                    ui.p("TME compartments as defined in Combes, Samad et al. Cell 2022. \
                                     These describe either pooled effector T cells (T cell), Tregs, pooled myeloid cells \
                                     (Myeloid, containing monocytes, macrophages and dendritic cells), Stroma (fibroblasts \
                                     sorted as CD45-CD44+CD90+ in human and defined in mouse as fibroblasts matching the human \
                                     Stroma gene signature) or Tumor (sorted in human as CD45- non-Stroma and identified in mouse \
-                                    scRNAseq as bieng tumor cells according to their DEGs)"),
-                                style="background-color: #BDD0D5; color: #333;"
+                                    scRNAseq as bieng tumor cells according to their DEGs)")
                                 
                             ),
-                            ui.card(ui.h3("Coarse Annotation",style='font-weight: bold;'),
-                                ui.h5("Coarse level of annotations made on the mouse scRNAseq data. Describes high level populations."),
-                                style="background-color: #BDD0D5; color: #333;"
+                            ui.card(ui.h5("Coarse Annotation"),
+                                ui.p("Coarse level of annotations made on the mouse scRNAseq data. Describes high level populations.")
                             ),
-                            ui.card(ui.h3("Fine Annotation",style='font-weight: bold;'),
-                                ui.h5("Fine level of annotations made on the mouse scRNAseq data. Describes individual subsets of cells as shown in Figure S2."),
-                                style="background-color: #BDD0D5; color: #333;"
+                            ui.card(ui.h5("Fine Annotation"),
+                                ui.p("Fine level of annotations made on the mouse scRNAseq data. Describes individual subsets of cells as shown in Figure S2.")
                             ),
                             width=.5
                         ),
                 ),
                 ui.accordion_panel("Human",
                         ui.layout_column_wrap(
-                            ui.card(ui.h3("Indication",style='font-weight: bold;'),
-                                    ui.h5("Tumor indication of ImmunoProfiler patients"),
-                                    style="background-color: #BDD0D5; color: #333;"
+                            ui.card(ui.h5("Indication"),
+                                    ui.p("Tumor indication of ImmunoProfiler patients")
                             ),
-                            ui.card(ui.h3("Archetype",style='font-weight: bold;'),
-                                    ui.h5("Tumor-immune archetypes as defined in Combes, Samad et al. Cell 2022"),
-                                    ui.HTML(f'<a href="{"https://pubmed.ncbi.nlm.nih.gov/34963056/"}" target="_blank">Discovering dominant tumor immune archetypes in a pan-cancer census. Combes AJ, Samad B, Tsui J, et al. Cell. 2022</a>'),
-                                    style="background-color: #BDD0D5; color: #333;"
+                            ui.card(ui.h5("Archetype"),
+                                    ui.p("Tumor-immune archetypes as defined in Combes, Samad et al. Cell 2022"),
+                                    ui.HTML(f'<a href="{"https://pubmed.ncbi.nlm.nih.gov/34963056/"}" target="_blank">Discovering dominant tumor immune archetypes in a pan-cancer census. Combes AJ, Samad B, Tsui J, et al. Cell. 2022</a>')
                             ),
-                            ui.card(ui.h3("Compartment",style='font-weight: bold;'),
-                                ui.h5("TME compartments as defined in Combes, Samad et al. Cell 2022. \
+                            ui.card(ui.h5("Compartment"),
+                                ui.p("TME compartments as defined in Combes, Samad et al. Cell 2022. \
                                 These describe either pooled effector T cells (T cell), Tregs, pooled myeloid cells \
                                 (Myeloid, containing monocytes, macrophages and dendritic cells), Stroma (fibroblasts \
                                 sorted as CD45-CD44+CD90+ in human and defined in mouse as fibroblasts matching the human \
                                 Stroma gene signature) or Tumor (sorted in human as CD45- non-Stroma and identified in mouse \
-                                scRNAseq as bieng tumor cells according to their DEGs)"),
-                                style="background-color: #BDD0D5; color: #333;"
+                                scRNAseq as bieng tumor cells according to their DEGs)")
                             ),
                             width=.5
                         )
@@ -169,7 +169,7 @@ app_ui = ui.page_navbar(
     ui.nav_panel("Data Query",
         ui.layout_sidebar(
             ui.sidebar(
-                ui.h4("Data Query"),
+                ui.h5("Data Query"),
                 ui.accordion(
                     ui.accordion_panel("Input Genes",
                         ui.input_text_area(
@@ -229,6 +229,7 @@ app_ui = ui.page_navbar(
     ui.nav_panel("HuMu Expression Comparison",
         ui.layout_sidebar(
             ui.sidebar(
+                ui.h5("HuMu Expression Comparison"),
                 ui.accordion(
                     ui.accordion_panel("Human Options",
                         ui.input_selectize("humu_box_comp_human_genes", "Gene", [], multiple=False),
@@ -243,12 +244,12 @@ app_ui = ui.page_navbar(
                                             ["TPM", "Log2(TPM)"],
                                             multiple= False,
                                             selected= "Log2(TPM)"),
-                        ui.input_selectize("humu_box_comp_human_groupby", "Groupby", ["---"] + hsh.quipi_cats_opts, selected="---"),
+                        ui.input_selectize("humu_box_comp_human_groupby", "Group By", ["---"] + hsh.quipi_cats_opts, selected="---"),
                     ),
                     ui.accordion_panel("Mouse Options",
                         ui.input_selectize("humu_box_comp_mu_genes", "Gene", []),
                         ui.input_selectize("humu_box_comp_cat_mouse_subset", "Compartments",hsh.humu_compartments, selected=hsh.humu_compartments, multiple=True, remove_button=True,options={"plugins": ["clear_button"]}),
-                        ui.input_selectize("humu_box_comp_mouse_groupby", "Groupby", ["---"] + hsh.categoricals_opts),
+                        ui.input_selectize("humu_box_comp_mouse_groupby", "Group By", ["---"] + hsh.categoricals_opts),
                         ui.input_switch("humu_box_comp_sample_aggr", "Average Counts by Sample")
                     ),
                     open=False
@@ -271,6 +272,7 @@ app_ui = ui.page_navbar(
         ui.nav_panel("Boxplots",
             ui.layout_sidebar(
                 ui.sidebar(
+                    ui.h5("Mouse Gene Expression Boxplot"),
                     ui.accordion(
                         ui.accordion_panel("Gene",
                             ui.input_selectize("humu_gex_box_gene", "", []),
@@ -281,14 +283,14 @@ app_ui = ui.page_navbar(
                                     gear_fill,
                                     style="float: right;",
                                 ),
-                                ui.input_selectize("humu_gex_box_cat_subset", "Subset Categories:", [], multiple=True, remove_button=True,options={"plugins": ["clear_button"]}),
+                                ui.input_selectize("humu_gex_box_cat_subset", "Subset Categories", [], multiple=True, remove_button=True,options={"plugins": ["clear_button"]}),
                                 placement="right",
                             ),
                             ui.input_selectize("humu_gex_box_x_cat", "", hsh.categoricals_opts),
                         ),
                         ui.accordion_panel("Parameters",
-                            ui.input_selectize("humu_gex_box_groupby", "Groupby", ["---"] + hsh.categoricals_opts, selected="---"),
-                            ui.input_selectize("humu_gex_box_splitby", "Splitby", ["---"] + hsh.categoricals_opts, selected="---"),
+                            ui.input_selectize("humu_gex_box_groupby", "Group By", ["---"] + hsh.categoricals_opts, selected="---"),
+                            ui.input_selectize("humu_gex_box_splitby", "Split By", ["---"] + hsh.categoricals_opts, selected="---"),
                             ui.input_switch("humu_gex_box_sample_aggr", "Average Counts by Sample"),
                         )
                     ),
@@ -303,28 +305,29 @@ app_ui = ui.page_navbar(
         ui.nav_panel("Dotplots",
             ui.layout_sidebar(
                 ui.sidebar(
+                    ui.h5("Mouse Gene Expression Dotplot"),
                     ui.accordion(
                         ui.accordion_panel("Select Genes",
                             ui.input_selectize("humu_gex_dot_gene", "", [], multiple=True),
                         ),
-                        ui.accordion_panel("Groupby",
+                        ui.accordion_panel("Group By",
                             ui.popover(
                                 ui.span(
                                     gear_fill,
                                     style="",
                                 ),
-                                ui.input_selectize("humu_gex_dot_groups", "Subset Groupby Categories:", [], multiple=True),
+                                ui.input_selectize("humu_gex_dot_groups", "Subset Group By Categories", [], multiple=True),
                                 placement="right",
                             ),
                             ui.input_selectize("humu_gex_dot_groupby", "", hsh.categoricals_opts, selected="---"),
                         ),
-                        ui.accordion_panel("Splitby",
+                        ui.accordion_panel("Split By",
                             ui.popover(
                                 ui.span(
                                     gear_fill,
                                     style="",
                                 ),
-                                ui.input_selectize('humu_gex_dot_splits', "Subset Splitby Categories:", [], multiple=True),
+                                ui.input_selectize('humu_gex_dot_splits', "Subset Split By Categories", [], multiple=True),
                                 placement="right",
                             ),
                             ui.input_selectize("humu_gex_dot_splitby", "", ["---"] + hsh.categoricals_opts, selected="---"),
@@ -347,6 +350,7 @@ app_ui = ui.page_navbar(
     ui.nav_panel("Composition Comparison",
         ui.layout_sidebar(
             ui.sidebar(
+                ui.h5("Composition Comparison"),
                 ui.accordion(
                     ui.accordion_panel("Parameters",
                         ui.input_selectize("humu_box_score_1", "Parameter A", hsh.flow_scores),
@@ -360,11 +364,11 @@ app_ui = ui.page_navbar(
                                     gear_fill,
                                     style="position:absolute; top: 5px; right: 7px;",
                                 ),
-                                ui.input_selectize("humu_box_x_cat_filter", "Subset X-Axis Categories.", [], multiple=True),
+                                ui.input_selectize("humu_box_x_cat_filter", "Subset X-Axis Categories", [], multiple=True),
                                 placement="right",
                             ),
                     ),
-                    ui.accordion_panel("Groupby",
+                    ui.accordion_panel("Group By",
                         ui.input_selectize("humu_box_group", "",  ["---"] + hsh.flow_cats, selected="---"),
                     ),
                 ),
@@ -409,6 +413,7 @@ app_ui = ui.page_navbar(
         ui.nav_panel("HuMu Expression Comparison", # EXAMPLE
             ui.layout_sidebar(
                 ui.sidebar(
+                    ui.h5("Example: HuMu Expression Comparison"),
                     ui.input_action_button("humu_box_comp_run_example", "RUN",icon=icon_svg("arrow-right")),
                     ui.accordion(
                         ui.accordion_panel("Human",
@@ -424,12 +429,12 @@ app_ui = ui.page_navbar(
                                                 ["TPM", "Log2(TPM)"],
                                                 multiple= False,
                                                 selected= "Log2(TPM)"),
-                            ui.input_selectize("humu_box_comp_human_groupby_example", "Groupby", ["---"] + hsh.quipi_cats_opts, selected="---")
+                            ui.input_selectize("humu_box_comp_human_groupby_example", "Group By", ["---"] + hsh.quipi_cats_opts, selected="---")
                         ),
                         ui.accordion_panel("Mouse",
                             ui.input_selectize("humu_box_comp_mu_genes_example", "Gene", ["Ctla4", "Ccr5"], selected="Ctla4"),
                             ui.input_selectize("humu_box_comp_cat_mouse_subset_example", "Categories",hsh.humu_compartments, selected=hsh.humu_compartments, multiple=True, remove_button=True,options={"plugins": ["clear_button"]}),
-                            ui.input_selectize("humu_box_comp_mouse_groupby_example", "Groupby", ["---"] + hsh.categoricals_opts),
+                            ui.input_selectize("humu_box_comp_mouse_groupby_example", "Group By", ["---"] + hsh.categoricals_opts),
                             ui.input_switch("humu_box_comp_sample_aggr_example", "Average by Sample")
                         ),
                         open=False
@@ -449,6 +454,7 @@ app_ui = ui.page_navbar(
         ui.nav_panel("Mouse Boxplot", # EXAMPLE
             ui.layout_sidebar(
                 ui.sidebar(
+                    ui.h5("Example: Mouse Boxplot"),
                     ui.input_action_button("humu_gene_box_run_example", "RUN",icon=icon_svg("arrow-right")),
                     ui.accordion(
                         ui.accordion_panel("Gene",
@@ -460,14 +466,14 @@ app_ui = ui.page_navbar(
                                         gear_fill,
                                         style="",
                                     ),
-                                    ui.input_selectize("humu_gex_box_cat_subset_example", "Subset Categories:", [], multiple=True, remove_button=True,options={"plugins": ["clear_button"]}),
+                                    ui.input_selectize("humu_gex_box_cat_subset_example", "Subset Categories", [], multiple=True, remove_button=True,options={"plugins": ["clear_button"]}),
                                     placement="right",
                             ),
                             ui.input_selectize("humu_gex_box_x_cat_example", "", hsh.categoricals_opts, selected = "Tumor Line"),
                         ),
                         ui.accordion_panel("Parameters",
-                            ui.input_selectize("humu_gex_box_groupby_example", "Groupby", ["---"] + hsh.categoricals_opts, selected="Coarse Annotation"),
-                            ui.input_selectize("humu_gex_box_splitby_example", "Splitby", ["---"] + hsh.categoricals_opts, selected="---"),
+                            ui.input_selectize("humu_gex_box_groupby_example", "Group By", ["---"] + hsh.categoricals_opts, selected="Coarse Annotation"),
+                            ui.input_selectize("humu_gex_box_splitby_example", "Split By", ["---"] + hsh.categoricals_opts, selected="---"),
                             ui.input_switch("humu_gex_box_sample_aggr_example", "Average by Sample"),
                         ),
                     ),
@@ -480,6 +486,7 @@ app_ui = ui.page_navbar(
         ui.nav_panel("Mouse Dotplot", # EXAMPLE
             ui.layout_sidebar(
                 ui.sidebar(
+                    ui.h5("Example: Mouse Dotplot"),
                     ui.input_action_button("humu_gex_dot_run_example", "RUN",icon=icon_svg("arrow-right")),
 
                     ui.accordion(
@@ -488,25 +495,25 @@ app_ui = ui.page_navbar(
                                                 ["Itgam", "C1qc", "Cd3e", "Ctla4", "Pdcd1", "Lag3", "Havcr2", "Tox"], 
                                                 selected=["Itgam", "C1qc", "Cd3e", "Ctla4", "Pdcd1", "Lag3", "Havcr2", "Tox"],multiple=True)
                             ),
-                        ui.accordion_panel("Groupby",
+                        ui.accordion_panel("Group By",
                             ui.popover(
                                 ui.span(
                                     gear_fill,
                                     style="",
                                 ),
-                                ui.input_selectize("humu_gex_dot_groups_example", "Subset Groupby Categories:", [], multiple=True),
+                                ui.input_selectize("humu_gex_dot_groups_example", "Subset Group By Categories", [], multiple=True),
                                 placement="right",
                             ),
                             ui.input_selectize("humu_gex_dot_groupby_example", "Group By:", hsh.categoricals_opts, selected="Compartment"),
                         ),
 
-                        ui.accordion_panel("Splitby",
+                        ui.accordion_panel("Split By",
                             ui.popover(
                                 ui.span(
                                     gear_fill,
                                     style="",
                                 ),
-                                ui.input_selectize('humu_gex_dot_splits_example', "Subset Splitby Categories:", [], multiple=True),
+                                ui.input_selectize('humu_gex_dot_splits_example', "Subset Split By Categories", [], multiple=True),
                                 placement="right",
                             ),
                             ui.input_selectize("humu_gex_dot_splitby_example", "Split By:", ["---"] + hsh.categoricals_opts, selected="Tumor Line"),
@@ -527,6 +534,7 @@ app_ui = ui.page_navbar(
         ui.nav_panel("Composition Comparison", # EXAMPLE
             ui.layout_sidebar(
                 ui.sidebar(
+                    ui.h5("Example: Composition Comparison"),
                     ui.input_action_button("humu_box_run_example", "RUN",icon=icon_svg("arrow-right")),
 
                     ui.accordion(
@@ -541,12 +549,12 @@ app_ui = ui.page_navbar(
                                         gear_fill,
                                         style="position:absolute; top: 5px; right: 7px;",
                                     ),
-                                    ui.input_selectize("humu_box_x_cat_filter_example", "Subset X-Axis Categories.", [], multiple=True),
+                                    ui.input_selectize("humu_box_x_cat_filter_example", "Subset X-Axis Categories", [], multiple=True),
                                     placement="right",
                                 ),
                             ui.input_switch("humu_box_switch_example", "Sort X-Category On Value", True),
                         ),
-                        ui.accordion_panel("Groupby",
+                        ui.accordion_panel("Group By",
                             ui.input_selectize("humu_box_group_example", "",  ["---"] + hsh.flow_cats, selected="Species"),
                         )
                     ),
@@ -562,23 +570,9 @@ app_ui = ui.page_navbar(
     
     id = "humu_top_nav",
     
-    header=ui.tags.div(
-        ui.tags.style(
-            """
-            body {
-              background-color: #BDD0D5; /* Your desired navbar background color */
-            }
-            .nav-link { font-size: 16px;
-                    color: black;
-                
-            }
-            .navbar .navbar-nav, .navbar .nav {
-                display: flex;
-                align-items: center;
-            }
-            """
-        ),
-    ),
+    # Site-wide styles live in www/humu.css
+    header=ui.tags.link(rel="stylesheet", href="humu.css"),
+    window_title="QuIPI HuMu",
 )
 
 def server(input, output, session):

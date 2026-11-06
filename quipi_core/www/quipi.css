@@ -1,0 +1,184 @@
+/* QuIPI site-wide styles */
+
+:root {
+  --quipi-primary: #2f6f7e;
+  --quipi-primary-dark: #24565f;
+  --quipi-accent: #8dc8af;
+  --quipi-bg: #eef3f5;
+  --quipi-border: #d8e2e6;
+  --quipi-text: #1f2d33;
+  --quipi-muted: #5b6b72;
+  --quipi-tint: #e3eef0;
+  --quipi-header-bg: #f6f9fa;
+}
+
+body {
+  background-color: var(--quipi-bg);
+  color: var(--quipi-text);
+}
+
+/* ---------- Navbar ---------- */
+
+.navbar {
+  background-color: #ffffff !important;
+  border-bottom: 1px solid var(--quipi-border);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.navbar-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.navbar .nav-link {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--quipi-text);
+  padding: 8px 12px !important;
+  border-radius: 6px;
+}
+
+/* Space between the logo (home tab) and the other tabs, outside its highlight */
+.navbar .nav-item:first-child {
+  margin-right: 12px;
+}
+
+.navbar .nav-link:hover {
+  background-color: var(--quipi-bg);
+}
+
+.navbar .nav-link.active,
+.navbar .nav-item.show > .nav-link {
+  color: var(--quipi-primary);
+  background-color: var(--quipi-tint);
+}
+
+.dropdown-item.active,
+.dropdown-item:active {
+  background-color: var(--quipi-primary);
+}
+
+/* ---------- Cards ---------- */
+
+.card {
+  border: 1px solid var(--quipi-border);
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.card-header {
+  background-color: var(--quipi-header-bg);
+  font-weight: 600;
+  color: var(--quipi-text);
+}
+
+/* ---------- Sidebar ---------- */
+
+.bslib-sidebar-layout > .sidebar {
+  border-right: 1px solid var(--quipi-border);
+}
+
+.sidebar h3,
+.sidebar h4,
+.sidebar h5 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--quipi-primary-dark);
+  margin-bottom: 0.75rem;
+}
+
+.sidebar .accordion-button {
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0.6rem 0.9rem;
+}
+
+.sidebar .accordion-button:not(.collapsed) {
+  color: var(--quipi-primary-dark);
+  background-color: var(--quipi-tint);
+  box-shadow: none;
+}
+
+/* RUN buttons */
+.sidebar .action-button {
+  width: 100%;
+  margin-top: 0.75rem;
+  background-color: var(--quipi-primary);
+  border-color: var(--quipi-primary);
+  color: #ffffff;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.sidebar .action-button:hover,
+.sidebar .action-button:focus {
+  background-color: var(--quipi-primary-dark);
+  border-color: var(--quipi-primary-dark);
+  color: #ffffff;
+}
+
+/* Download buttons */
+.shiny-download-link {
+  border: 1px solid var(--quipi-primary);
+  color: var(--quipi-primary);
+  background-color: #ffffff;
+}
+
+.sidebar .shiny-download-link {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.shiny-download-link:hover {
+  background-color: var(--quipi-primary);
+  color: #ffffff;
+}
+
+/* ---------- Methods notes under each tool ---------- */
+
+.methods-card {
+  margin-top: 1rem;
+}
+
+.methods-card h5 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+
+.methods-card p {
+  color: var(--quipi-muted);
+  margin-bottom: 0.5rem;
+}
+
+/* ---------- Home page ---------- */
+
+.home-hero {
+  background: linear-gradient(135deg, #ffffff 0%, var(--quipi-tint) 100%);
+}
+
+.home-hero img {
+  height: 90px;
+  width: auto;
+  align-self: flex-start;
+}
+
+.home-hero .lead {
+  font-size: 1.15rem;
+  color: var(--quipi-muted);
+}
+
+.home-hero p {
+  max-width: 900px;
+}
+
+.module-card h5 {
+  font-weight: 600;
+  color: var(--quipi-primary-dark);
+}
+
+.module-card p {
+  color: var(--quipi-muted);
+  margin-bottom: 0;
+}

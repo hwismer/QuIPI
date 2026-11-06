@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 import scipy
+import gene_factor as gf
 
 
 # Main correlation visualization function
@@ -225,3 +226,65 @@ def cross_compartment_correlation_table(genes, compartment1, compartment2, range
 
     return df .sort_values([method + " R"], ascending=False)
         
+
+
+
+# Correlates two values with the chosen method, returning (R, p-value)
+def correlate(x, y, method):
+    if method == "Spearman":
+        return scipy.stats.spearmanr(x, y)
+    elif method == "Pearson":
+        return scipy.stats.pearsonr(x, y)
+
+
+# Correlates a gene-signature score in compartment A with a gene-signature score in compartment B.
+# Signature scores use all samples in each compartment: per-gene Z-Score within the compartment,
+# averaged per sample.
+# Returns a scatter plot of the two scores and a table of the signature and per-gene correlations.
+def signature_cross_compartment_correlation(genes_a, compartment_a, genes_b, compartment_b, method, color_by):
+
+    genes_a, genes_b = list(genes_a), list(genes_b)
+    scores_a = gf.calculate_gene_factor_score_all_patients(genes_a, [compartment_a])
+    scores_b = gf.calculate_gene_factor_score_all_patients(genes_b, [compartment_b])
+
+    # Keep one row per sample in each compartment, then pair samples present in both
+    scores_a = scores_a.drop_duplicates(subset="sample_name", keep="last").set_index("sample_name")
+    scores_b = scores_b.drop_duplicates(subset="sample_name", keep="last").set_index("sample_name")
+    shared_samples = scores_a.index.intersection(scores_b.index)
+    scores_a = scores_a.loc[shared_samples]
+    scores_b = scores_b.loc[shared_samples]
+
+    # Table: the signature correlation first, then every gene in A against every gene in B
+    pairs = [("Signature A", "factor_score", "Signature B", "factor_score")]
+    pairs += [(gene_a, gene_a, gene_b, gene_b) for gene_a in genes_a for gene_b in genes_b]
+
+    rows = []
+    for name_a, col_a, name_b, col_b in pairs:
+        r, p_value = correlate(scores_a[col_a], scores_b[col_b], method)
+        rows.append([name_a, compartment_a, name_b, compartment_b, round(r, 3), p_value])
+
+    table = pd.DataFrame(rows, columns=["Feature1", "Compartment1", "Feature2", "Compartment2",
+                                        method + " R", "P-Value"])
+    r, p_value = rows[0][4], rows[0][5]
+
+    # Scatter plot of the two signature scores
+    plot_df = scores_a[["indication", "archetype"]].copy()
+    plot_df["score_a"] = scores_a["factor_score"]
+    plot_df["score_b"] = scores_b["factor_score"]
+    plot_df = plot_df.reset_index()
+
+    color_col = sh.categoricals_dict[color_by]
+
+    fig = px.scatter(plot_df, x="score_a", y="score_b",
+                     color=color_col, color_discrete_map=sh.color_dict[color_col],
+                     category_orders=sh.quipi_orders,
+                     hover_data=["sample_name", "indication", "archetype"],
+                     labels={"score_a": f"{compartment_a} Signature Score",
+                             "score_b": f"{compartment_b} Signature Score",
+                             color_col: color_by},
+                     title=f"{method} R = {r:.3f}, p = {p_value:.2e}, n = {len(plot_df)}")
+
+    fig.update_traces(marker=dict(size=10))
+    fig.update_layout(template="simple_white", autosize=True)
+
+    return fig, table

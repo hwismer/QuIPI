@@ -35,12 +35,24 @@ quipi_tabs_mapped_to_gene_inputs = {"Boxplot" : ["box_viol_gene_input"],
                               "Gene-Signature Score Ranked DGE" : ["fs_dge_genes","fs_dge_highlight_genes"],
                               "Query Data" : ["gene_expr_query_genes"],
                               "Cross-Compartment Correlation": ["cross_comp_corr_cat_gene_input"],
+                              "Cross-Compartment Signature Correlation": ["sig_corr_genes_a", "sig_corr_genes_b"],
                               "Ridgeline" : ["ridgeline_gene_input"]
 
 }
 
-panel_color = "#f0f0f0"
+panel_color = "#ffffff"
 input_min_height = 200
+
+
+# Card holding the methods description shown under a tool
+def methods_card(*content):
+    return ui.card(ui.card_header("Methods"), *content, class_="methods-card")
+
+
+# Small card describing one QuIPI module on the home page
+def module_card(title, description):
+    return ui.card(ui.h5(title), ui.p(description), class_="module-card")
+
 
 
 # Define the UI
@@ -48,49 +60,63 @@ app_ui = ui.page_navbar(
         
     ## HOME PAGE
     ui.nav_panel( # QUIPI HOME PAGE
-        ui.tags.img(src="quipi.png", style="height: 55px; display: inline-block; vertical-align: middle;"),
+        ui.tags.img(src="quipi.png", style="height: 40px; display: inline-block; vertical-align: middle;"),
+
+        # QuIPI Description
         ui.card(
-
-            # QuIPI Description
-            ui.card(
-                    ui.tags.div(
-                    ui.tags.img(src="quipi.png", style="height: 100px; margin-left: 10px; padding-top: 0px"),  # Left-aligned image
-                ),
-                ui.h2("QuIPI - Querying Immunoprofiler"),
-                ui.h4(
-                    """
-                    QuIPI is a user interface designed to make it easy to visualize the UCSF Immunoprofiler dataset. 
-                    QuIPI incorporates Bulk RNA-Seq and Flow Cytometry data from over 400 cancer samples across multiple
-                    indications. QuIPI also incorporates archetype calls, building off of the work of Combes, Samad et al. Cell 2022 
-                    in order to identify common immune states across cancer types.
-
-                    QuIPI provides quick and easy to use plotting functionality, allowing anyone to discover trends and insights from
-                    Immunoprofiler data. QuIPI modules are designed with the hope that they can be generalizable to different questions
-                    while still allowing for sufficient cusomization.
-                    """
-                ),
-                ui.HTML(f'<a href="{"https://pubmed.ncbi.nlm.nih.gov/34963056/"}" target="_blank">Discovering dominant tumor immune archetypes in a pan-cancer census. Combes AJ, Samad B, Tsui J, et al. Cell. 2022</a>'),
-                style="background-color: #BDD0D5"
+            ui.tags.img(src="quipi.png"),
+            ui.h2("QuIPI - Querying Immunoprofiler"),
+            ui.p("Visualize and explore the UCSF Immunoprofiler dataset.", class_="lead"),
+            ui.p(
+                """
+                QuIPI incorporates Bulk RNA-Seq and Flow Cytometry data from over 400 cancer samples across multiple
+                indications, along with archetype calls building off of the work of Combes, Samad et al. Cell 2022
+                to identify common immune states across cancer types. QuIPI modules are designed to be quick to use
+                and generalizable to different questions while still allowing for customization.
+                """
             ),
-            # Immunoprofiler Description
+            ui.HTML('<a href="https://pubmed.ncbi.nlm.nih.gov/34963056/" target="_blank">Discovering dominant tumor immune archetypes in a pan-cancer census. Combes AJ, Samad B, Tsui J, et al. Cell. 2022</a>'),
+            class_="home-hero"
+        ),
+
+        # What each menu does
+        ui.layout_column_wrap(
+            module_card("Gene Expression", "Boxplots and heatmaps of gene expression across compartments, indications and archetypes."),
+            module_card("Differential Gene Expression", "Rank patients by a feature or gene-signature score and compare the top and bottom groups."),
+            module_card("Correlation", "Correlate genes and gene signatures within and across compartments."),
+            module_card("PanCan Archetypes", "Overlay gene expression and gene-signature scores on the PanCan archetype UMAP."),
+            width=1/4,
+        ),
+
+        # Immunoprofiler and QuIPI HuMu descriptions
+        ui.layout_column_wrap(
             ui.card(
-                ui.tags.div(
-                    ui.tags.img(src="immunoprofiler_image.png", style="height: 100px; margin-left: 10px; padding-top: 10px"),  # Left-aligned image
-                    ui.tags.span("", style="font-size: 50px; font-weight: bold;"),
-                    style="display: flex; align-items: flex-end; gap: 10px;" # Flexbox for horizontal alignment
-                ),
-                ui.h2("Immunoprofiler"),
-                ui.h4(
+                ui.tags.img(src="immunoprofiler_image.png", style="height: 70px; width: fit-content;"),
+                ui.h3("Immunoprofiler"),
+                ui.p(
                     """
                     The Immunoprofiler (IPI) effort coordinates the processing of valuable samples from cancer patients
                     in order to perform various tests to learn more about immune composition, immune cell gene expression, and immune interaction biology.
-                    By viewing cancers as a discrete forms of immunopathology, better understanding the immune response is a critical piece for
+                    By viewing cancers as discrete forms of immunopathology, better understanding the immune response is a critical piece for
                     how to treat cancers and provide new targets for the new forms of immunotherapies.
                     """
                 ),
-                ui.HTML(f'<a href="{"https://immunoprofiler.org/cancer"}" target="_blank">UCSF Immunoprofiler</a>'),
-                style="background-color: #8DC8AF"
+                ui.HTML('<a href="https://immunoprofiler.org/cancer" target="_blank">UCSF Immunoprofiler</a>'),
             ),
+            ui.card(
+                ui.tags.img(src="humu_logo_transparent.png", style="height: 70px; width: fit-content;"),
+                ui.h3("QuIPI HuMu"),
+                ui.p(
+                    """
+                    The Human-to-Mouse Cancer Translator Project (HuMu) immuno-profiles a series of common and exceptional
+                    mouse models of cancer to benchmark them against the diversity of tumor microenvironments in human cancer,
+                    including the immune archetypes described in Combes, Samad et al. Cell 2022.
+                    QuIPI HuMu brings QuIPI-style plotting to the HuMu mouse data.
+                    """
+                ),
+                ui.HTML('<a href="https://quipi.org/app/quipi_humu" target="_blank">Open QuIPI HuMu</a>'),
+            ),
+            width=1/2,
         ),
     ),
     
@@ -178,7 +204,7 @@ app_ui = ui.page_navbar(
                     "The Human-to-Mouse Cancer Translator Project (HuMu) aims to immuno-profile a series of common and exceptional models of cancer in mice to benchmark them against the diversity of TMEs in Human cancer (i.e immune archetypes described in Combes, Samad, et al. Cell 2022).",
                     ui.p("Find it here:",class_="mt-2"),
                     ui.div(
-                        ui.a(ui.tags.img(src="humu_logo.png", style="height: 125px;"), href="https://quipi.org/app/quipi_humu",class_="nav-link",target="_blank"),
+                        ui.a(ui.tags.img(src="humu_logo_transparent.png", style="height: 125px;"), href="https://quipi.org/app/quipi_humu",class_="nav-link",target="_blank"),
                         #class_="text-center"
                     )
             ),
@@ -202,7 +228,7 @@ app_ui = ui.page_navbar(
     ui.nav_panel("Data Query",
         ui.layout_sidebar(
             ui.sidebar(
-                ui.h4("Data Query"),
+                ui.h5("Data Query"),
                 ui.accordion(
                     ui.accordion_panel("Input Genes",
                         ui.input_text_area(
@@ -262,11 +288,11 @@ app_ui = ui.page_navbar(
         ui.nav_panel("Boxplot",
             ui.layout_sidebar(
                 ui.sidebar(
-                    ui.h3("Boxplot"),
+                    ui.h5("Boxplot"),
                     ui.accordion(
                         ui.accordion_panel("Select Genes",
                             ui.input_selectize("box_viol_gene_input",
-                                                "Select Genes:",
+                                                "",
                                                 [],
                                                 multiple=True),
                             ui.output_ui("box_viol_multiple_genes"),
@@ -287,7 +313,7 @@ app_ui = ui.page_navbar(
                                             selected = "Compartment"),
                         ),
 
-                        ui.accordion_panel("Groupby:",
+                        ui.accordion_panel("Group By",
                             ui.input_selectize("box_viol_groupby",
                                 "",
                                 ["---"] + list(qsh.categoricals_dict.keys()),
@@ -355,7 +381,7 @@ app_ui = ui.page_navbar(
         ui.nav_panel("Heatmap",  
             ui.layout_sidebar(
                 ui.sidebar(
-                    ui.h4("Heatmap"),
+                    ui.h5("Heatmap"),
 
                     ui.accordion(
                         ui.accordion_panel("Input Genes",
@@ -374,7 +400,7 @@ app_ui = ui.page_navbar(
                             ui.input_selectize("gex_heatmap_groupby", "",list(qsh.categorical_choices.keys())),
                         ),
 
-                        ui.accordion_panel("Subset Categories:",
+                        ui.accordion_panel("Subset Categories",
                             ui.accordion(
                                 ui.accordion_panel("Compartments",
                                     ui.input_selectize("gex_heatmap_compartment",
@@ -432,7 +458,7 @@ app_ui = ui.page_navbar(
         ui.nav_panel("Feature Score Ranked DGE",
             ui.layout_sidebar(
                 ui.sidebar(
-                    ui.h4("Feature Score Ranked DGE"),
+                    ui.h5("Feature Score Ranked DGE"),
                     ui.accordion(
                         ui.accordion_panel("Feature Score for ranking",
                             ui.input_selectize("flow_score_to_rank",
@@ -498,18 +524,20 @@ app_ui = ui.page_navbar(
             ),
 
             # METHODS SECTION
-            ui.h4("Feature Scoring and DGE Group Formation"),
-            ui.p("""
-                Data is subset to include only patients assigned feature scores. Effectively, this means that
-                patients without an archetype designation are not considered. Patients are ranked based
-                on their feature score in the specified compartment and are split based on the specified
-                quartile. For the chose quartile, the resulting groups used for DGE are top quartile percent
-                of patients with the highest score and the bottom quartile percent of patients with the lowest score.
-            """),
-            ui.h4("Differential Gene Expression"),
-            ui.p("""The Wilcoxon Rank-sum test is used to calculate differentially expressed genes.
-                    P-values are corrected using Benjamini/Hochberg multiple testing correction.
-                    """),
+            methods_card(
+                ui.h5("Feature Scoring and DGE Group Formation"),
+                ui.p("""
+                    Data is subset to include only patients assigned feature scores. Effectively, this means that
+                    patients without an archetype designation are not considered. Patients are ranked based
+                    on their feature score in the specified compartment and are split based on the specified
+                    quartile. For the chose quartile, the resulting groups used for DGE are top quartile percent
+                    of patients with the highest score and the bottom quartile percent of patients with the lowest score.
+                """),
+                ui.h5("Differential Gene Expression"),
+                ui.p("""The Wilcoxon Rank-sum test is used to calculate differentially expressed genes.
+                        P-values are corrected using Benjamini/Hochberg multiple testing correction.
+                        """),
+            ),
         ),
 
         # DGE CALCULATION BASED ON TOP VS. BOTTOM QUARTILE OF PATIENTS BASED ON FEATURE SCORE CALCULATION
@@ -517,7 +545,7 @@ app_ui = ui.page_navbar(
         ui.nav_panel("Gene-Signature Score Ranked DGE",
             ui.layout_sidebar(
                 ui.sidebar(
-                    ui.h4("Gene-Signature Score Ranked DGE"),
+                    ui.h5("Gene-Signature Score Ranked DGE"),
                     ui.accordion(
 
                         ui.accordion_panel("Genes for signature score",
@@ -587,18 +615,19 @@ app_ui = ui.page_navbar(
             ),
 
             # METHODS
-            ui.h4("Differential Gene Expression"),
-            ui.p("""The Wilcoxon Rank-sum test is used to calculate differentially expressed genes.
-                    P-values are corrected using Benjamini/Hochberg multiple testing correction.
+            methods_card(
+                ui.h5("Differential Gene Expression"),
+                ui.p("""The Wilcoxon Rank-sum test is used to calculate differentially expressed genes.
+                        P-values are corrected using Benjamini/Hochberg multiple testing correction.
+                        """),
+                ui.h5("Gene-Signature Score Calculation"),
+                ui.p("""
+                    Data is subset to include archetyped patients only within a given compartment.
+                    Gene-signature scores are calculated by first calculating a per-gene Z-Score across patients
+                    and subsequently averaging the Z-Scores within each patient resulting in each patient being
+                    assigned a gene-signature score depending on their expression of the input gene set.
                     """),
-            ui.h5("Gene-Signature Score Calculation"),
-            ui.p("""
-                Data is subset to include archetyped patients only within a given compartment.
-                Gene-signature scores are calculated by first calculating a per-gene Z-Score across patients
-                and subsequently averaging the Z-Scores within each patient resulting in each patient being
-                assigned a gene-signature score depending on their expression of the input gene set.
-
-                """)
+            ),
         ),
     ), # END DGE MENU
 
@@ -608,9 +637,9 @@ app_ui = ui.page_navbar(
         
         # BASIC CORRELATION MATRIX
         ui.nav_panel("Correlation Matrix",
-            ui.h4("Explore the correlation of genes across the entire IPI dataset."),
             ui.layout_sidebar(
                 ui.sidebar(
+                    ui.h5("Correlation Matrix"),
                     ui.accordion(
                         ui.accordion_panel("Select Genes",
                             ui.input_selectize("corr_gene_input",
@@ -760,7 +789,7 @@ app_ui = ui.page_navbar(
                 ui.sidebar(
                     ui.h5("Cross-Compartment Correlation"),
                     ui.accordion(
-                        ui.accordion_panel("Gene",
+                        ui.accordion_panel("Genes",
                             ui.input_selectize("cross_comp_corr_cat_gene_input",
                                                 "",
                                                 [],
@@ -785,7 +814,7 @@ app_ui = ui.page_navbar(
                                             min=-1,max=1, value = (.5,1), step=.1
                             )
                         ),
-                        ui.accordion_panel("Correlation Methods",
+                        ui.accordion_panel("Correlation Method",
                             ui.input_selectize("cross_comp_corr_mat_method",
                                         "",
                                         choices = ["Pearson", "Spearman"],
@@ -806,6 +835,65 @@ app_ui = ui.page_navbar(
                 ui.card(ui.output_data_frame("cross_comp_corr_cat_gene_correlations")),
                 bg=panel_color
             )
+        ),
+
+        # CORRELATION OF A GENE-SIGNATURE SCORE IN COMPARTMENT A WITH A GENE-SIGNATURE SCORE IN COMPARTMENT B
+        ui.nav_panel("Cross-Compartment Signature Correlation",
+            ui.layout_sidebar(
+                ui.sidebar(
+                    ui.h5("Cross-Compartment Signature Correlation"),
+                    ui.accordion(
+                        ui.accordion_panel("Signature A Genes",
+                            ui.input_selectize("sig_corr_genes_a", "", [], multiple=True),
+                        ),
+                        ui.accordion_panel("Signature A Compartment",
+                            ui.input_selectize("sig_corr_compartment_a", "", qsh.compartments),
+                        ),
+                        ui.accordion_panel("Signature B Genes",
+                            # The CSS greys out the gene box when the switch is on
+                            ui.div(
+                                ui.tags.style("""
+                                    .sig-b-genes:has(#sig_corr_same_genes:checked) .selectize-control {
+                                        opacity: 0.4;
+                                        pointer-events: none;
+                                    }
+                                """),
+                                ui.input_switch("sig_corr_same_genes", "Use Signature A genes", value=False),
+                                ui.input_selectize("sig_corr_genes_b", "", [], multiple=True),
+                                class_="sig-b-genes"
+                            ),
+                        ),
+                        ui.accordion_panel("Signature B Compartment",
+                            ui.input_selectize("sig_corr_compartment_b", "", qsh.compartments),
+                        ),
+                        ui.accordion_panel("Correlation Method",
+                            ui.input_selectize("sig_corr_method", "",
+                                            choices=["Pearson", "Spearman"],
+                                            selected="Spearman"
+                            ),
+                        ),
+                        ui.accordion_panel("Color By",
+                            ui.input_selectize("sig_corr_color_by", "",
+                                            choices=["Archetype", "Indication"],
+                                            selected="Archetype"
+                            ),
+                        )
+                    ),
+                    ui.input_action_button("sig_corr_run", "RUN",icon=icon_svg("arrow-right")),
+                    bg=panel_color
+                ),
+                ui.card(ui.card_body(output_widget("sig_cross_comp_corr")),full_screen=True),
+                ui.card(ui.output_data_frame("sig_cross_comp_corr_table"),full_screen=True),
+                bg=panel_color
+            ),
+            methods_card(
+                ui.h5("Gene-Signature Score Calculation"),
+                ui.p("""
+                    Within each compartment, a per-gene Z-Score is calculated across all samples and the Z-Scores
+                    are averaged within each sample to give a gene-signature score. Samples with data in both
+                    compartments are then correlated.
+                    """),
+            ),
         )
     ), # END CORRELATION MENU
 
@@ -879,14 +967,15 @@ app_ui = ui.page_navbar(
                 ),
                 bg=panel_color
             ),
-            ui.h3("Gene-Signature Score Calculation"),
-            ui.p("""
-                Data is subset to include archetyped patients only within a given compartment.
-                Gene-signature scores are calculated by first calculating a per-gene Z-Score across patients
-                and subsequently averaging the Z-Scores within each patient resulting in each patient being
-                assigned a gene-signature score depending on their expression of the input gene set.
-
-                """)
+            methods_card(
+                ui.h5("Gene-Signature Score Calculation"),
+                ui.p("""
+                    Data is subset to include archetyped patients only within a given compartment.
+                    Gene-signature scores are calculated by first calculating a per-gene Z-Score across patients
+                    and subsequently averaging the Z-Scores within each patient resulting in each patient being
+                    assigned a gene-signature score depending on their expression of the input gene set.
+                    """),
+            ),
         )
     ), # END PANCAN MENU
 
@@ -896,31 +985,9 @@ app_ui = ui.page_navbar(
     
     id = "quipi_top_nav",
 
-    # CSS code controlling navbar display, background color etc.
-    header=ui.tags.div(
-        ui.tags.style(
-             """
-            .navbar-nav {
-              display: flex;
-              align-items: center; /* This is the key line for vertical centering */
-              width: auto;
-              list-style: none;
-              padding: 0;
-            }
-            .nav-item {
-              margin: 0 15px;
-            }
-            body {
-              background-color: #BDD0D5; /* Your desired navbar background color */
-            }
-            .nav-link { font-size: 16px;
-                    color: black;
-
-                
-            }
-            """
-        ),
-    ),
+    # Site-wide styles live in www/quipi.css
+    header=ui.tags.link(rel="stylesheet", href="quipi.css"),
+    window_title="QuIPI",
 )
 
 def server(input, output, session):
@@ -1237,6 +1304,32 @@ def server(input, output, session):
 
             return df
     
+
+
+    ##### CROSS-COMPARTMENT SIGNATURE CORRELATION
+
+    # Correlates a gene-signature score in compartment A with a gene-signature score in compartment B.
+    # Returns the scatter plot and the correlation table.
+    @reactive.calc
+    @reactive.event(input.sig_corr_run)
+    def sig_cross_comp_corr_reactive():
+        genes_a = input.sig_corr_genes_a()
+        genes_b = genes_a if input.sig_corr_same_genes() else input.sig_corr_genes_b()
+
+        return corr.signature_cross_compartment_correlation(genes_a,
+                                                            input.sig_corr_compartment_a(),
+                                                            genes_b,
+                                                            input.sig_corr_compartment_b(),
+                                                            input.sig_corr_method(),
+                                                            input.sig_corr_color_by())
+
+    @render_widget
+    def sig_cross_comp_corr():
+        return sig_cross_comp_corr_reactive()[0]
+
+    @render.data_frame
+    def sig_cross_comp_corr_table():
+        return sig_cross_comp_corr_reactive()[1]
 
 
     ##### PANCAN GENE-SIGNATURE OVERLAY
