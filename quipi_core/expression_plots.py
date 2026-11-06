@@ -1,6 +1,5 @@
 import plotly.express as px
 import pandas as pd
-import scanpy as sc
 import matplotlib.pyplot as plt
 import numpy as np
 

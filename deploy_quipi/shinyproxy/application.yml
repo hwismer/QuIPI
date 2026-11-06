@@ -1,34 +1,35 @@
 proxy:
-  #title: Open Analytics Shiny Proxy
-  #logo-url: https://www.openanalytics.eu/shinyproxy/logo.png
   favicon-path: /home/ubuntu/run_quipi/icons/quipi.ico
-    #default-max-instances: 2
-  proxy.default-webSocket-reconnection-mode: Confirm
-
+  default-webSocket-reconnection-mode: Confirm
   landing-page: /app/quipi
   heartbeat-rate: 10000
   heartbeat-timeout: 60000
+  # Apps start in about 10 seconds; give up on a container that hasn't answered after 2 minutes
+  container-wait-time: 120000
   port: 8080
-  bind-address: 127.0.0.1 # Added the bind-address directive
-  #container-log-path: /var/log/shinyproxy
+  bind-address: 127.0.0.1
   hide-navbar: true
 
   docker:
     port-range-start: 20000
+
   specs:
     - id: quipi
       display-name: QuIPI
       container-image: quipi
       port: 3838
-      minimum-seats-available: 4
-      seats-per-container: 4
+      # Data lives on the server and is mounted read-only instead of being copied into the image
+      container-volumes: ["/home/ubuntu/deploy_quipi/quipi_core/quipi_data:/quipi_core/quipi_data:ro"]
+      minimum-seats-available: 2
+      seats-per-container: 2
 
     - id: quipi_humu
       display-name: HuMu
       container-image: quipi_humu
       port: 8081
+      container-volumes: ["/home/ubuntu/deploy_quipi/quipi_humu/quipi_humu_data:/quipi_humu/quipi_humu_data:ro"]
       minimum-seats-available: 2
-      seats-per-container: 4
+      seats-per-container: 2
 
 server:
   forward-headers-strategy: native

@@ -1,0 +1,7 @@
+# Conda environment shared by the QuIPI and HuMu images.
+# Docker reuses the cached build unless quipi_env.yml changes, so app updates don't reinstall packages.
+FROM mambaorg/micromamba:2.0.5
+
+COPY --chown=$MAMBA_USER:$MAMBA_USER quipi_env.yml /tmp/quipi_env.yml
+RUN micromamba install -y -n base -f /tmp/quipi_env.yml && \
+    micromamba clean --all --yes

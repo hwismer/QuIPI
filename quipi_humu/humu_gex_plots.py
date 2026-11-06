@@ -1,7 +1,6 @@
 import pandas as pd
 import plotly.express as px
 from plotly.subplots import make_subplots
-import scanpy as sc
 import matplotlib.pyplot as plt
 import matplotlib
 import humu_shared as hsh
@@ -191,12 +190,8 @@ from plotly.subplots import make_subplots
 import plotly.express as px
 import plotly.graph_objects as go
 
+# Debug logs go to the standard logging output (no file is written, the app folder may be read-only)
 logger = logging.getLogger("humu_umap_debug")
-if not logger.handlers:
-    h = logging.FileHandler("humu_umap_debug.log")
-    h.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
-    logger.addHandler(h)
-    logger.setLevel(logging.DEBUG)
 
 def plot_humu_umap(genes, categories, max_points=30000, per_category_max=8000):
     """

@@ -32,7 +32,7 @@ def gene_correlation_heatmap(genes, indications, method, compartments, archetype
     corr_lower_tri = corr_lower_tri.dropna(axis=0, how = "all")
     corr_lower_tri = corr_lower_tri.dropna(axis=1, how = "all")
 
-    fig = px.imshow(corr_lower_tri.fillna(""),
+    fig = px.imshow(corr_lower_tri.astype(object).fillna(""),
                     zmin = -1, zmax =1,
                     color_continuous_scale = "RdBu_r",
                     text_auto=True)
@@ -103,7 +103,7 @@ def compartment_correlation_heatmap(genes, compartment1, compartment2, transform
         corr_df = corr_df.dropna(axis=0, how = "all")
         corr_df = corr_df.dropna(axis=1, how = "all")
         
-        fig = px.imshow(corr_df.fillna(""),
+        fig = px.imshow(corr_df.astype(object).fillna(""),
                 zmin = -1, zmax =1,
                 color_continuous_scale = "RdBu_r",
                 text_auto=True,

@@ -1,5 +1,4 @@
 from shiny import App, render, ui, reactive
-from shinyswatch import theme
 import plotly.express as px
 
 px.defaults.template = "simple_white"

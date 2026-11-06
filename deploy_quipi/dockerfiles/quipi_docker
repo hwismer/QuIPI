@@ -1,15 +1,10 @@
-FROM continuumio/miniconda3
-ADD quipi_env.yml /tmp/quipi_env.yml
-RUN conda env create -f /tmp/quipi_env.yml
-RUN echo "source activate quipi" > ~/.bashrc
-ENV PATH /opt/conda/envs/quipi/bin:$PATH
-
-RUN pip install gunicorn shinyswatch pyarrow
+# QuIPI app. The data folder is not copied in: ShinyProxy mounts it at /quipi_core/quipi_data.
+FROM quipi_base
 
 WORKDIR /quipi_core
+COPY --chown=$MAMBA_USER:$MAMBA_USER quipi_core .
 
 EXPOSE 3838
 
-COPY quipi_core .
-
-CMD ["gunicorn", "quipi_app:app", "--bind", "0.0.0.0:3838", "--timeout", "600","-k", "uvicorn.workers.UvicornWorker", "--workers", "2"]
+# A single process, since a Shiny session must always reach the same process
+CMD ["uvicorn", "quipi_app:app", "--host", "0.0.0.0", "--port", "3838"]

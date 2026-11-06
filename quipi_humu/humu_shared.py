@@ -1,7 +1,6 @@
 import pandas as pd
 import pyarrow.feather as feather
 import csv
-import scanpy as sc
 
 
 ## HUMU

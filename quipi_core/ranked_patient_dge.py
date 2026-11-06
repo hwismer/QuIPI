@@ -134,10 +134,10 @@ def plot_dge(fc_df, fc_threshold,p_val_thresh,highlight_genes):
       color="sig_call",
       color_discrete_map={"positive_sig":"red", "nonsig":"black","negative_sig":"blue"})
    
-   for i, label in enumerate(fc_df['label_display']):
-    if label in highlight_genes:
-        x=fc_df["Log2(FC)"][i]
-        y=fc_df["log10_p_val"][i]
+   for _, row in fc_df[fc_df["Gene"].isin(highlight_genes)].iterrows():
+        label = row["Gene"]
+        x = row["Log2(FC)"]
+        y = row["log10_p_val"]
 
         if x < 0:
             ax = -1

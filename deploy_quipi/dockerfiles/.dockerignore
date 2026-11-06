@@ -1,0 +1,6 @@
+# Keep data and build leftovers out of the images (data is mounted by ShinyProxy instead)
+QuIPI
+**/__pycache__
+**/*.log
+quipi_core/quipi_data
+quipi_humu/quipi_humu_data
