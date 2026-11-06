@@ -20,8 +20,11 @@ proxy:
       port: 3838
       # Data lives on the server and is mounted read-only instead of being copied into the image
       container-volumes: ["/home/ubuntu/deploy_quipi/quipi_core/quipi_data:/quipi_core/quipi_data:ro"]
+      # One visitor per container: each container is a single Python process, so a slow
+      # calculation (e.g. DGE) would freeze the app for anyone sharing it.
+      # Two containers per app are kept running so new visitors don't wait for one to start.
       minimum-seats-available: 2
-      seats-per-container: 2
+      seats-per-container: 1
 
     - id: quipi_humu
       display-name: HuMu
@@ -29,7 +32,7 @@ proxy:
       port: 8081
       container-volumes: ["/home/ubuntu/deploy_quipi/quipi_humu/quipi_humu_data:/quipi_humu/quipi_humu_data:ro"]
       minimum-seats-available: 2
-      seats-per-container: 2
+      seats-per-container: 1
 
 server:
   forward-headers-strategy: native
