@@ -14,7 +14,8 @@ Requires=docker.service
 [Service]
 User=ubuntu
 WorkingDirectory=/home/ubuntu/run_quipi
-ExecStart=/usr/bin/java -jar /home/ubuntu/run_quipi/shinyproxy-3.2.3.jar
+# shinyproxy.jar links to the version update_quipi.sh downloaded (SHINYPROXY_VERSION)
+ExecStart=/usr/bin/java -jar /home/ubuntu/run_quipi/shinyproxy.jar
 Restart=on-failure
 RestartSec=10
 

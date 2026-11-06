@@ -6,7 +6,8 @@
 #   ~/deploy_quipi/   app code, quipi_env.yml, Dockerfiles, .dockerignore and this script
 #   ~/run_quipi/      application.yml (the previous one is kept as application.yml.bak)
 #   Docker images     quipi_base, quipi and quipi_humu
-#   ShinyProxy        runs as the quipi-shinyproxy system service and is restarted at the end
+#   ShinyProxy        downloads SHINYPROXY_VERSION if needed, runs it as the quipi-shinyproxy
+#                     system service and restarts it at the end
 #
 # The data folders are not touched and are not part of the images. ShinyProxy mounts them
 # into the containers (container-volumes in application.yml):
@@ -17,6 +18,9 @@
 # That way the script can safely replace itself with the newest version from GitHub.
 main() {
     set -e
+
+    # To upgrade ShinyProxy, change this version (see https://www.shinyproxy.io/downloads/)
+    SHINYPROXY_VERSION=3.2.4
 
     DEPLOY=~/deploy_quipi
     RUN=~/run_quipi
@@ -47,6 +51,17 @@ main() {
     cp $REPO/quipi_core/www/quipi.ico $RUN/icons/quipi.ico
 
     rm -rf $REPO
+
+    # Download the ShinyProxy jar if this version isn't there yet, check it, and point
+    # shinyproxy.jar (which the service runs) at it
+    JAR=shinyproxy-$SHINYPROXY_VERSION.jar
+    if [ ! -f $RUN/$JAR ]; then
+        curl -fL -o $RUN/$JAR https://shinyproxy.io/downloads/$JAR
+        curl -fsSL -o $RUN/$JAR.sha256 https://shinyproxy.io/downloads/$JAR.sha256
+        (cd $RUN && echo "$(cut -d' ' -f1 $JAR.sha256)  $JAR" | sha256sum -c -)
+        rm $RUN/$JAR.sha256
+    fi
+    ln -sfn $JAR $RUN/shinyproxy.jar
 
     # Build the images. The base image is reused from Docker's cache unless quipi_env.yml
     # changed, so a code-only update takes seconds.
