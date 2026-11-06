@@ -25,6 +25,11 @@ proxy:
       # Two containers per app are kept running so new visitors don't wait for one to start.
       minimum-seats-available: 2
       seats-per-container: 1
+      # Server has 15 GB RAM. DGE and the cross-compartment table peak at ~1.8 GB, so cap each
+      # container at 3 GB and run at most 6 at once; a runaway container is stopped on its own
+      # instead of taking the whole server down (there is no swap).
+      container-memory-limit: 3g
+      max-total-instances: 6
 
     - id: quipi_humu
       display-name: HuMu
@@ -33,6 +38,9 @@ proxy:
       container-volumes: ["/home/ubuntu/deploy_quipi/quipi_humu/quipi_humu_data:/quipi_humu/quipi_humu_data:ro"]
       minimum-seats-available: 2
       seats-per-container: 1
+      # HuMu tools peaked around 0.3 GB with a few genes; 2 GB leaves room for long gene lists
+      container-memory-limit: 2g
+      max-total-instances: 3
 
 server:
   forward-headers-strategy: native
