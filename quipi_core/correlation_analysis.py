@@ -285,6 +285,14 @@ def signature_cross_compartment_correlation(genes_a, compartment_a, genes_b, com
                      title=f"{method} R = {r:.3f}, p = {p_value:.2e}, n = {len(plot_df)}")
 
     fig.update_traces(marker=dict(size=10))
-    fig.update_layout(template="simple_white", autosize=True)
+    fig.update_layout(template="simple_white", autosize=True, height=650)
+
+    # Square plot: both axes share the same range and scale
+    low = min(plot_df["score_a"].min(), plot_df["score_b"].min())
+    high = max(plot_df["score_a"].max(), plot_df["score_b"].max())
+    padding = (high - low) * 0.05
+    axis_range = [low - padding, high + padding]
+    fig.update_xaxes(range=axis_range, constrain="domain")
+    fig.update_yaxes(range=axis_range, scaleanchor="x", scaleratio=1, constrain="domain")
 
     return fig, table
