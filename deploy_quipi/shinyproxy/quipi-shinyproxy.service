@@ -1,0 +1,22 @@
+# Runs ShinyProxy in the background, starts it on boot and restarts it if it crashes.
+# update_quipi.sh installs this file to /etc/systemd/system/ and restarts the service.
+#
+# Useful commands on the server:
+#   sudo systemctl status quipi-shinyproxy      is it running?
+#   sudo systemctl restart quipi-shinyproxy     restart it
+#   journalctl -u quipi-shinyproxy -f           follow its output
+
+[Unit]
+Description=ShinyProxy for QuIPI and QuIPI HuMu
+After=docker.service network-online.target
+Requires=docker.service
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/run_quipi
+ExecStart=/usr/bin/java -jar /home/ubuntu/run_quipi/shinyproxy-3.2.3.jar
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

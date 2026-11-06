@@ -6,6 +6,7 @@
 #   ~/deploy_quipi/   app code, quipi_env.yml, Dockerfiles, .dockerignore and this script
 #   ~/run_quipi/      application.yml (the previous one is kept as application.yml.bak)
 #   Docker images     quipi_base, quipi and quipi_humu
+#   ShinyProxy        runs as the quipi-shinyproxy system service and is restarted at the end
 #
 # The data folders are not touched and are not part of the images. ShinyProxy mounts them
 # into the containers (container-volumes in application.yml):
@@ -34,6 +35,7 @@ main() {
        $REPO/deploy_quipi/dockerfiles/humu_docker \
        $REPO/deploy_quipi/dockerfiles/.dockerignore \
        $REPO/deploy_quipi/update_quipi.sh \
+       $REPO/deploy_quipi/shinyproxy/quipi-shinyproxy.service \
        $DEPLOY/
 
     # ShinyProxy config and favicon
@@ -56,13 +58,17 @@ main() {
     # Remove the previous, now untagged, images
     sudo docker image prune -f
 
-    # Restart ShinyProxy if it runs as a system service; otherwise ask for a manual restart
-    if systemctl is-active --quiet shinyproxy; then
-        sudo systemctl restart shinyproxy
-        echo "Update complete. ShinyProxy restarted."
-    else
-        echo "Update complete. Restart ShinyProxy so it uses the new images and application.yml."
-    fi
+    # Install the ShinyProxy service (runs in the background, starts on boot)
+    sudo cp $DEPLOY/quipi-shinyproxy.service /etc/systemd/system/
+    sudo systemctl daemon-reload
+    sudo systemctl enable quipi-shinyproxy
+
+    # Stop a ShinyProxy started by hand with run_quipi.sh, so the service can use its port
+    pkill -f "java -jar shinyproxy" || true
+
+    # Restart ShinyProxy so it uses the new images and application.yml
+    sudo systemctl restart quipi-shinyproxy
+    echo "Update complete. ShinyProxy restarted; check it with: sudo systemctl status quipi-shinyproxy"
 }
 
 main "$@"
