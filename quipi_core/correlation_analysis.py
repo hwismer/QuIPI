@@ -238,14 +238,16 @@ def correlate(x, y, method):
 
 
 # Correlates a gene-signature score in compartment A with a gene-signature score in compartment B.
-# Signature scores use all samples in each compartment: per-gene Z-Score within the compartment,
+# Samples are first limited to the chosen indications, archetypes and tissues (sample_type_cat
+# values, e.g. "T", "N"). Signature scores are then a per-gene Z-Score within the compartment,
 # averaged per sample.
 # Returns a scatter plot of the two scores and a table of the signature and per-gene correlations.
-def signature_cross_compartment_correlation(genes_a, compartment_a, genes_b, compartment_b, method, color_by):
+def signature_cross_compartment_correlation(genes_a, compartment_a, genes_b, compartment_b, method, color_by,
+                                            indications, archetypes, tissues):
 
     genes_a, genes_b = list(genes_a), list(genes_b)
-    scores_a = gf.calculate_gene_factor_score_all_patients(genes_a, [compartment_a])
-    scores_b = gf.calculate_gene_factor_score_all_patients(genes_b, [compartment_b])
+    scores_a = gf.calculate_gene_factor_score_subset(genes_a, compartment_a, indications, archetypes, tissues)
+    scores_b = gf.calculate_gene_factor_score_subset(genes_b, compartment_b, indications, archetypes, tissues)
 
     # Keep one row per sample in each compartment, then pair samples present in both
     scores_a = scores_a.drop_duplicates(subset="sample_name", keep="last").set_index("sample_name")
@@ -253,6 +255,10 @@ def signature_cross_compartment_correlation(genes_a, compartment_a, genes_b, com
     shared_samples = scores_a.index.intersection(scores_b.index)
     scores_a = scores_a.loc[shared_samples]
     scores_b = scores_b.loc[shared_samples]
+
+    if len(shared_samples) < 3:
+        raise ValueError(f"Only {len(shared_samples)} samples match the selected filters in both compartments; "
+                         "at least 3 are needed to calculate a correlation.")
 
     # Table: the signature correlation first, then every gene in A against every gene in B
     pairs = [("Signature A", "factor_score", "Signature B", "factor_score")]

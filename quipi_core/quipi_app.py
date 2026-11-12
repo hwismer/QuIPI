@@ -7,6 +7,7 @@ from shinywidgets import output_widget, render_widget
 import quipi_shared as qsh
 import pandas as pd
 from io import StringIO
+import json
 
 import ranked_patient_dge as rpd
 import gene_factor as gf
@@ -33,13 +34,22 @@ quipi_tabs_mapped_to_gene_inputs = {"Boxplot" : ["box_viol_gene_input"],
                               "Feature Score Ranked DGE" : ["dge_highlight_genes"],
                               "Gene-Signature Score Ranked DGE" : ["fs_dge_genes","fs_dge_highlight_genes"],
                               "Query Data" : ["gene_expr_query_genes"],
-                              "Cross-Compartment Correlation": ["cross_comp_corr_cat_gene_input"],
+                              "Cross-Compartment Gene Correlation": ["cross_comp_corr_cat_gene_input"],
                               "Cross-Compartment Signature Correlation": ["sig_corr_genes_a", "sig_corr_genes_b"],
                               "Ridgeline" : ["ridgeline_gene_input"]
 
 }
 
 panel_color = "#ffffff"
+
+# Gene boxes search in the browser instead of asking the server on every keystroke.
+# The gene names are sent once with the page (gene_list_script) and each gene box is
+# given these selectize options when its tab is first opened (populate_gene_selections).
+gene_list_script = ui.tags.script(f"window.QUIPI_GENES = {json.dumps(sorted(qsh.genes))};")
+gene_search_options = {
+    "options": ui.js_eval("window.QUIPI_GENES.map(g => ({value: g, label: g}))"),
+    "maxOptions": 100,
+}
 input_min_height = 200
 
 
@@ -783,10 +793,10 @@ app_ui = ui.page_navbar(
         # ),
         
         # CORRELATION OF GENES IN COMPARTMENT A WITH ALL GENES IN COMPARTMENT B
-        ui.nav_panel("Cross-Compartment Correlation",
+        ui.nav_panel("Cross-Compartment Gene Correlation",
             ui.layout_sidebar(
                 ui.sidebar(
-                    ui.h5("Cross-Compartment Correlation"),
+                    ui.h5("Cross-Compartment Gene Correlation"),
                     ui.accordion(
                         ui.accordion_panel("Genes",
                             ui.input_selectize("cross_comp_corr_cat_gene_input",
@@ -865,6 +875,26 @@ app_ui = ui.page_navbar(
                         ui.accordion_panel("Signature B Compartment",
                             ui.input_selectize("sig_corr_compartment_b", "", qsh.compartments),
                         ),
+                        ui.accordion_panel("Subset Samples",
+                            ui.input_selectize("sig_corr_tissue", "Tissues",
+                                            choices=["Tumor", "Normal"],
+                                            selected=["Tumor", "Normal"],
+                                            multiple=True,
+                                            remove_button=True,options={"plugins": ["clear_button"]}
+                            ),
+                            ui.input_selectize("sig_corr_archetype", "Archetypes",
+                                            choices=qsh.archetypes,
+                                            selected=qsh.archetypes,
+                                            multiple=True,
+                                            remove_button=True,options={"plugins": ["clear_button"]}
+                            ),
+                            ui.input_selectize("sig_corr_indication", "Indications",
+                                            choices=qsh.indications,
+                                            selected=qsh.indications,
+                                            multiple=True,
+                                            remove_button=True,options={"plugins": ["clear_button"]}
+                            ),
+                        ),
                         ui.accordion_panel("Correlation Method",
                             ui.input_selectize("sig_corr_method", "",
                                             choices=["Pearson", "Spearman"],
@@ -888,7 +918,8 @@ app_ui = ui.page_navbar(
             methods_card(
                 ui.h5("Gene-Signature Score Calculation"),
                 ui.p("""
-                    Within each compartment, a per-gene Z-Score is calculated across all samples and the Z-Scores
+                    Samples are first limited to the selected tissues, archetypes and indications. Within each
+                    compartment, a per-gene Z-Score is then calculated across those samples and the Z-Scores
                     are averaged within each sample to give a gene-signature score. Samples with data in both
                     compartments are then correlated.
                     """),
@@ -985,7 +1016,7 @@ app_ui = ui.page_navbar(
     id = "quipi_top_nav",
 
     # Site-wide styles live in www/quipi.css
-    header=ui.tags.link(rel="stylesheet", href="quipi.css"),
+    header=ui.TagList(ui.tags.link(rel="stylesheet", href="quipi.css"), gene_list_script),
     window_title="QuIPI",
 )
 
@@ -1320,7 +1351,10 @@ def server(input, output, session):
                                                             genes_b,
                                                             input.sig_corr_compartment_b(),
                                                             input.sig_corr_method(),
-                                                            input.sig_corr_color_by())
+                                                            input.sig_corr_color_by(),
+                                                            input.sig_corr_indication(),
+                                                            input.sig_corr_archetype(),
+                                                            [qsh.tissue_dict[t] for t in input.sig_corr_tissue()])
 
     @render_widget
     def sig_cross_comp_corr():
@@ -1488,12 +1522,7 @@ def server(input, output, session):
             quipi_tabs_visited.append(current_tab)
             if current_tab in quipi_tabs_mapped_to_gene_inputs:
                 for id in quipi_tabs_mapped_to_gene_inputs[current_tab]:
-                    ui.update_selectize(
-                        id,
-                        choices=qsh.genes,
-                        selected=[],
-                        server=True,
-                    )
+                    ui.update_selectize(id, options=gene_search_options)
 
 
 # Create the Shiny app

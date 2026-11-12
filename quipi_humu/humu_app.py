@@ -17,6 +17,7 @@ import matplotlib.pyplot as plt
 from faicons import icon_svg
 
 from io import StringIO
+import json
 
 gear_fill = ui.HTML(
     '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-gear-fill" viewBox="0 0 16 16"><path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/></svg>'
@@ -32,6 +33,20 @@ humu_tabs_mapped_to_gene_inputs = {"Boxplots" : [["humu_gex_box_gene", "Mouse"]]
 #RUN_STYLE="background-color: #AFE1AF; color: black;"
 
 panel_color = "#ffffff"
+
+# Gene boxes search in the browser instead of asking the server on every keystroke.
+# Both gene lists are sent once with the page (gene_list_script) and each gene box is
+# given the matching selectize options when its tab is first opened (populate_gene_selections).
+gene_list_script = ui.tags.script(
+    f"window.HUMU_MOUSE_GENES = {json.dumps(sorted(hsh.genes))};"
+    f"window.HUMU_HUMAN_GENES = {json.dumps(sorted(hsh.quipi_genes))};"
+)
+
+def gene_search_options(gene_list_name):
+    return {
+        "options": ui.js_eval(f"window.{gene_list_name}.map(g => ({{value: g, label: g}}))"),
+        "maxOptions": 100,
+    }
 
 
 # Define the UI
@@ -570,7 +585,7 @@ app_ui = ui.page_navbar(
     id = "humu_top_nav",
     
     # Site-wide styles live in www/humu.css
-    header=ui.tags.link(rel="stylesheet", href="humu.css"),
+    header=ui.TagList(ui.tags.link(rel="stylesheet", href="humu.css"), gene_list_script),
     window_title="QuIPI HuMu",
 )
 
@@ -856,19 +871,9 @@ def server(input, output, session):
             if current_tab in humu_tabs_mapped_to_gene_inputs:
                 for id, category in humu_tabs_mapped_to_gene_inputs[current_tab]:
                     if category == "Mouse":
-                        ui.update_selectize(
-                            id,
-                            choices=hsh.genes,
-                            selected=[],
-                            server=True,
-                        )
+                        ui.update_selectize(id, options=gene_search_options("HUMU_MOUSE_GENES"))
                     else:
-                        ui.update_selectize(
-                            id,
-                            choices=hsh.quipi_genes,
-                            selected=[],
-                            server=True,
-                        )
+                        ui.update_selectize(id, options=gene_search_options("HUMU_HUMAN_GENES"))
 
 # Create the Shiny app
 app_dir = Path(__file__).parent
